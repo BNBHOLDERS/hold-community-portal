@@ -426,6 +426,9 @@
                     <a href="#submit" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="submit">投稿</a>
                     <a href="#share" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="share">分享</a>
                     <a href="#ai" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="ai">AI工具</a>
+                    <a href="#binance" class="nav-link px-4 py-4 text-sm font-medium text-[#F3BA2F]" data-page="binance">
+                        <i class="fa fa-bolt mr-1"></i>Binance
+                    </a>
                     <a href="#docs" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="docs">文档</a>
                 </div>
 
@@ -443,6 +446,9 @@
             <a href="#submit" class="block py-3 text-gray-700 border-b border-gray-100" data-page="submit" onclick="navigateTo('submit');toggleMobileMenu()">投稿</a>
             <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
             <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
+            <a href="#binance" class="block py-3 text-[#F3BA2F] font-medium border-b border-gray-100" data-page="binance" onclick="navigateTo('binance');toggleMobileMenu()">
+                <i class="fa fa-bolt mr-1"></i>Binance
+            </a>
             <a href="#docs" class="block py-3 text-gray-700" data-page="docs" onclick="navigateTo('docs');toggleMobileMenu()">文档</a>
         </div>
     </nav>
@@ -802,6 +808,118 @@
                             <div class="skeleton h-4 w-full mb-2"></div>
                             <div class="skeleton h-4 w-3/4 mb-2"></div>
                             <div class="skeleton h-4 w-5/6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Binance Skills 页面 -->
+        <section id="page-binance" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <!-- 页头 -->
+                <div class="text-center mb-10">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-100 text-[#F3BA2F] text-sm font-medium mb-4">
+                        <i class="fa fa-bolt"></i>
+                        Powered by Binance Web3
+                    </div>
+                    <h1 class="text-3xl font-bold mb-2">Binance 官方技能</h1>
+                    <p class="text-gray-500">集成 Binance Web3 API，获取专业级链上数据</p>
+                </div>
+
+                <!-- 技能卡片网格 -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+                    <!-- 代币搜索 -->
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="openBinanceSkill('search')">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-4">
+                            <span class="text-2xl">🔍</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">代币搜索</h3>
+                        <p class="text-sm text-gray-500 mb-4">搜索任意代币，获取价格、市值、流动性等实时数据</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="px-2 py-1 rounded-md bg-gray-100">BSC</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">Base</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">Solana</span>
+                        </div>
+                    </div>
+
+                    <!-- 安全审计 -->
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="openBinanceSkill('audit')">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-4">
+                            <span class="text-2xl">🛡️</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">安全审计</h3>
+                        <p class="text-sm text-gray-500 mb-4">检测蜜罐、假币、恶意合约，评估交易风险等级</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="px-2 py-1 rounded-md bg-gray-100">BSC</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">Base</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">ETH</span>
+                        </div>
+                    </div>
+
+                    <!-- 钱包查询 -->
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="openBinanceSkill('wallet')">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-4">
+                            <span class="text-2xl">👛</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">钱包查询</h3>
+                        <p class="text-sm text-gray-500 mb-4">查询任意地址的代币持仓和资产分布情况</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="px-2 py-1 rounded-md bg-gray-100">BSC</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">Base</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">Solana</span>
+                        </div>
+                    </div>
+
+                    <!-- 聪明钱信号 -->
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="openBinanceSkill('signals')">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-4">
+                            <span class="text-2xl">📈</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">聪明钱信号</h3>
+                        <p class="text-sm text-gray-500 mb-4">跟踪聪明钱交易信号，发现潜在投资机会</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="px-2 py-1 rounded-md bg-gray-100">Solana</span>
+                            <span class="px-2 py-1 rounded-md bg-gray-100">BSC</span>
+                        </div>
+                    </div>
+
+                    <!-- 市场排行 -->
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="openBinanceSkill('rank')">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-4">
+                            <span class="text-2xl">🏆</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">市场排行</h3>
+                        <p class="text-sm text-gray-500 mb-4">查看各链代币排行，按交易量/市值排序</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="px-2 py-1 rounded-md bg-gray-100">全链</span>
+                        </div>
+                    </div>
+
+                    <!-- 代币详情 -->
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="openBinanceSkill('detail')">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center mb-4">
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">代币详情</h3>
+                        <p class="text-sm text-gray-500 mb-4">获取代币完整信息：元数据、动态数据、安全审计</p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="px-2 py-1 rounded-md bg-gray-100">全链</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Binance Skills 弹窗 -->
+                <div id="binanceSkillModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                    <div class="glass-card rounded-2xl p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <div class="flex justify-between items-center mb-5">
+                            <h3 class="font-semibold text-lg" id="binanceSkillTitle">技能</h3>
+                            <button onclick="closeBinanceSkillModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                                <i class="fa fa-times text-gray-400"></i>
+                            </button>
+                        </div>
+                        <div id="binanceSkillContent">
+                            <!-- 动态内容 -->
                         </div>
                     </div>
                 </div>
@@ -1600,6 +1718,439 @@
 
         function closeToolModal() {
             document.getElementById('toolModal').classList.add('hidden');
+        }
+
+        // ========== Binance Skills 函数 ==========
+        async function openBinanceSkill(skill) {
+            const modal = document.getElementById('binanceSkillModal');
+            const title = document.getElementById('binanceSkillTitle');
+            const content = document.getElementById('binanceSkillContent');
+
+            modal.classList.remove('hidden');
+
+            switch(skill) {
+                case 'search':
+                    title.textContent = '🔍 代币搜索';
+                    content.innerHTML = `
+                        <p class="text-gray-600 mb-4">搜索代币名称、符号或合约地址</p>
+                        <div class="flex gap-2 mb-4">
+                            <select id="searchChain" class="input-base">
+                                <option value="56,8453,CT_501">全部链</option>
+                                <option value="56">BSC</option>
+                                <option value="8453">Base</option>
+                                <option value="CT_501">Solana</option>
+                            </select>
+                            <input type="text" id="searchKeyword" placeholder="输入代币名称..." class="input-base flex-1">
+                            <button onclick="doBinanceSearch()" class="btn-primary px-4 py-2 rounded-xl text-sm">搜索</button>
+                        </div>
+                        <div id="searchResults" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                    `;
+                    break;
+
+                case 'audit':
+                    title.textContent = '🛡️ 安全审计';
+                    content.innerHTML = `
+                        <p class="text-gray-600 mb-4">检��蜜罐、假币、恶意合约</p>
+                        <div class="space-y-3 mb-4">
+                            <select id="auditChain" class="input-base w-full">
+                                <option value="56">BSC (56)</option>
+                                <option value="8453">Base (8453)</option>
+                                <option value="CT_501">Solana (CT_501)</option>
+                                <option value="1">Ethereum (1)</option>
+                            </select>
+                            <input type="text" id="auditAddress" placeholder="0x..." class="input-base w-full">
+                            <button onclick="doBinanceAudit()" class="btn-primary w-full py-2.5 rounded-xl text-sm">开始检测</button>
+                        </div>
+                        <div id="auditResult"></div>
+                    `;
+                    break;
+
+                case 'wallet':
+                    title.textContent = '👛 钱包查询';
+                    content.innerHTML = `
+                        <p class="text-gray-600 mb-4">查询任意地址的代币持仓</p>
+                        <div class="space-y-3 mb-4">
+                            <select id="walletChain" class="input-base w-full">
+                                <option value="56">BSC (56)</option>
+                                <option value="8453">Base (8453)</option>
+                                <option value="CT_501">Solana (CT_501)</option>
+                            </select>
+                            <input type="text" id="walletAddress" placeholder="钱包地址 0x..." class="input-base w-full">
+                            <button onclick="doBinanceWallet()" class="btn-primary w-full py-2.5 rounded-xl text-sm">查询持仓</button>
+                        </div>
+                        <div id="walletResult"></div>
+                    `;
+                    break;
+
+                case 'signals':
+                    title.textContent = '📈 聪明钱信号';
+                    content.innerHTML = `
+                        <p class="text-gray-600 mb-4">跟踪聪明钱交易信号</p>
+                        <div class="flex gap-2 mb-4">
+                            <select id="signalChain" class="input-base" onchange="loadBinanceSignals()">
+                                <option value="CT_501">Solana</option>
+                                <option value="56">BSC</option>
+                            </select>
+                            <button onclick="loadBinanceSignals()" class="btn-primary px-4 py-2 rounded-xl text-sm">刷新</button>
+                        </div>
+                        <div id="signalsResult" class="space-y-2 max-h-80 overflow-y-auto">
+                            <div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>
+                        </div>
+                    `;
+                    loadBinanceSignals();
+                    break;
+
+                case 'rank':
+                    title.textContent = '🏆 市场排行';
+                    content.innerHTML = `
+                        <p class="text-gray-600 mb-4">各链代币按交易量排行</p>
+                        <div class="flex gap-2 mb-4">
+                            <select id="rankChain" class="input-base" onchange="loadBinanceRank()">
+                                <option value="56">BSC</option>
+                                <option value="8453">Base</option>
+                                <option value="CT_501">Solana</option>
+                            </select>
+                            <select id="rankSort" class="input-base" onchange="loadBinanceRank()">
+                                <option value="volume24h">24H 交易量</option>
+                                <option value="marketCap">市值</option>
+                                <option value="holders">持有人数</option>
+                            </select>
+                        </div>
+                        <div id="rankResult" class="space-y-2 max-h-80 overflow-y-auto">
+                            <div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>
+                        </div>
+                    `;
+                    loadBinanceRank();
+                    break;
+
+                case 'detail':
+                    title.textContent = '📊 代币详情';
+                    content.innerHTML = `
+                        <p class="text-gray-600 mb-4">获取代币完整信息（元数据+动态+审计）</p>
+                        <div class="space-y-3 mb-4">
+                            <select id="detailChain" class="input-base w-full">
+                                <option value="56">BSC (56)</option>
+                                <option value="8453">Base (8453)</option>
+                                <option value="CT_501">Solana (CT_501)</option>
+                            </select>
+                            <input type="text" id="detailAddress" placeholder="代币合约地址 0x..." class="input-base w-full">
+                            <button onclick="doBinanceDetail()" class="btn-primary w-full py-2.5 rounded-xl text-sm">获取详情</button>
+                        </div>
+                        <div id="detailResult"></div>
+                    `;
+                    break;
+            }
+        }
+
+        function closeBinanceSkillModal() {
+            document.getElementById('binanceSkillModal').classList.add('hidden');
+        }
+
+        async function doBinanceSearch() {
+            const keyword = document.getElementById('searchKeyword').value.trim();
+            const chains = document.getElementById('searchChain').value;
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (!keyword) return showToast('请输入搜索关键词', 'error');
+
+            resultsDiv.innerHTML = '<div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>';
+
+            try {
+                const res = await fetch(`/api/binance/token/search?keyword=${encodeURIComponent(keyword)}&chains=${chains}`);
+                const data = await res.json();
+
+                if (data.success && data.data?.length > 0) {
+                    resultsDiv.innerHTML = data.data.slice(0, 10).map(token => `
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-xl hover:bg-yellow-50 transition cursor-pointer" onclick="viewTokenDetail('${token.chainId}', '${token.contractAddress}')">
+                            <img src="https://bin.bnbstatic.com${token.icon}" class="w-10 h-10 rounded-full" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>'">
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium truncate">${token.symbol}</div>
+                                <div class="text-xs text-gray-500 truncate">${token.name}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-medium">$${parseFloat(token.price || 0).toFixed(6)}</div>
+                                <div class="text-xs ${parseFloat(token.percentChange24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}">${token.percentChange24h || 0}%</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<div class="text-center text-gray-400 py-4">未找到匹配的代币</div>';
+                }
+            } catch {
+                resultsDiv.innerHTML = '<div class="text-center text-red-500 py-4">搜索失败</div>';
+            }
+        }
+
+        async function doBinanceAudit() {
+            const chainId = document.getElementById('auditChain').value;
+            const address = document.getElementById('auditAddress').value.trim();
+            const resultDiv = document.getElementById('auditResult');
+
+            if (!address) return showToast('请输入代币地址', 'error');
+
+            resultDiv.innerHTML = '<div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>';
+
+            try {
+                const res = await fetch(`/api/binance/token/audit?chainId=${chainId}&address=${address}`);
+                const data = await res.json();
+
+                if (data.success && data.data) {
+                    const audit = data.data;
+                    const riskColors = { 'LOW': 'green', 'MEDIUM': 'yellow', 'HIGH': 'red' };
+                    const riskTexts = { 'LOW': '低风险', 'MEDIUM': '中风险', 'HIGH': '高风险' };
+                    const riskLevel = audit.riskLevelEnum || 'LOW';
+                    const color = riskColors[riskLevel] || 'gray';
+
+                    let riskItems = '';
+                    if (audit.riskItems && audit.riskItems.length > 0) {
+                        riskItems = audit.riskItems.map(category => `
+                            <div class="mt-2">
+                                <div class="text-sm font-medium mb-1">${category.name}</div>
+                                ${category.details.map(detail => `
+                                    <div class="flex items-start gap-2 text-sm p-2 rounded ${detail.isHit ? 'bg-red-50' : 'bg-green-50'}">
+                                        <span>${detail.isHit ? '⚠️' : '✅'}</span>
+                                        <div>
+                                            <div class="font-medium">${detail.title}</div>
+                                            <div class="text-xs text-gray-500">${detail.description}</div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `).join('');
+                    }
+
+                    resultDiv.innerHTML = `
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 rounded-xl bg-${color}-50">
+                                <span class="font-medium">风险等级</span>
+                                <span class="text-lg font-bold text-${color}-500">${riskTexts[riskLevel]} (${audit.riskLevel || 1}/5)</span>
+                            </div>
+                            ${audit.extraInfo ? `
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <div class="p-2 bg-white rounded-lg"><span class="text-gray-500">买税:</span> ${audit.extraInfo.buyTax || 0}%</div>
+                                <div class="p-2 bg-white rounded-lg"><span class="text-gray-500">卖税:</span> ${audit.extraInfo.sellTax || 0}%</div>
+                                <div class="p-2 bg-white rounded-lg"><span class="text-gray-500">已验证:</span> ${audit.extraInfo.isVerified ? '✅' : '❌'}</div>
+                            </div>
+                            ` : ''}
+                            ${riskItems}
+                            <p class="text-xs text-gray-400 text-center">⚠️ 审结果仅供参考，不构成投资建议</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-center text-yellow-500 py-4">暂无审计数据或代币不支持</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-center text-red-500 py-4">审计失败</div>';
+            }
+        }
+
+        async function doBinanceWallet() {
+            const chainId = document.getElementById('walletChain').value;
+            const address = document.getElementById('walletAddress').value.trim();
+            const resultDiv = document.getElementById('walletResult');
+
+            if (!address) return showToast('请输入钱包地址', 'error');
+
+            resultDiv.innerHTML = '<div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>';
+
+            try {
+                const res = await fetch(`/api/binance/wallet/tokens?chainId=${chainId}&address=${address}`);
+                const data = await res.json();
+
+                if (data.success && data.data?.list?.length > 0) {
+                    resultDiv.innerHTML = `
+                        <div class="text-sm text-gray-500 mb-2">共 ${data.data.list.length} 个代币</div>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            ${data.data.list.map(token => `
+                                <div class="flex items-center gap-3 p-2 bg-white rounded-xl">
+                                    <img src="https://bin.bnbstatic.com${token.icon}" class="w-8 h-8 rounded-full">
+                                    <div class="flex-1">
+                                        <div class="font-medium text-sm">${token.symbol}</div>
+                                        <div class="text-xs text-gray-500">${token.remainQty}</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm font-medium">$${parseFloat(token.price || 0).toFixed(6)}</div>
+                                        <div class="text-xs ${parseFloat(token.percentChange24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}">${token.percentChange24h || 0}%</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-center text-gray-400 py-4">该地址暂无持仓或查询失败</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-center text-red-500 py-4">查询失败</div>';
+            }
+        }
+
+        async function loadBinanceSignals() {
+            const chainId = document.getElementById('signalChain')?.value || 'CT_501';
+            const resultsDiv = document.getElementById('signalsResult');
+
+            if (!resultsDiv) return;
+
+            try {
+                const res = await fetch(`/api/binance/signals/smart-money?chainId=${chainId}&pageSize=20`);
+                const data = await res.json();
+
+                if (data.success && data.data?.length > 0) {
+                    resultsDiv.innerHTML = data.data.map(signal => `
+                        <div class="p-3 bg-white rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <img src="https://bin.bnbstatic.com${signal.logoUrl}" class="w-6 h-6 rounded-full">
+                                    <span class="font-medium">${signal.ticker}</span>
+                                    <span class="text-xs px-2 py-0.5 rounded ${signal.direction === 'buy' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${signal.direction === 'buy' ? '买入' : '卖出'}</span>
+                                </div>
+                                <span class="text-xs text-gray-500">${new Date(signal.signalTriggerTime).toLocaleTimeString()}</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 text-xs">
+                                <div><span class="text-gray-500">信号价:</span> $${parseFloat(signal.alertPrice || 0).toFixed(6)}</div>
+                                <div><span class="text-gray-500">现价:</span> $${parseFloat(signal.currentPrice || 0).toFixed(6)}</div>
+                                <div><span class="text-gray-500">最高:</span> $${parseFloat(signal.highestPrice || 0).toFixed(6)}</div>
+                            </div>
+                            <div class="flex items-center gap-2 mt-2 text-xs">
+                                <span class="px-2 py-1 rounded bg-gray-100">聪明钱: ${signal.smartMoneyCount}</span>
+                                <span class="px-2 py-1 rounded ${parseFloat(signal.maxGain || 0) > 0 ? 'bg-green-100 text-green-600' : 'bg-gray-100'}">最大收益: ${signal.maxGain || 0}%</span>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<div class="text-center text-gray-400 py-4">暂无信号数据</div>';
+                }
+            } catch {
+                resultsDiv.innerHTML = '<div class="text-center text-red-500 py-4">加载失败</div>';
+            }
+        }
+
+        async function loadBinanceRank() {
+            const chainId = document.getElementById('rankChain')?.value || '56';
+            const sortField = document.getElementById('rankSort')?.value || 'volume24h';
+            const resultsDiv = document.getElementById('rankResult');
+
+            if (!resultsDiv) return;
+
+            try {
+                const res = await fetch(`/api/binance/market/rank?chainId=${chainId}&sortField=${sortField}&pageSize=20`);
+                const data = await res.json();
+
+                if (data.success && data.data?.length > 0) {
+                    resultsDiv.innerHTML = data.data.map((token, index) => `
+                        <div class="flex items-center gap-3 p-2 bg-white rounded-xl hover:bg-yellow-50 transition cursor-pointer" onclick="viewTokenDetail('${token.chainId}', '${token.contractAddress}')">
+                            <span class="w-6 text-center text-sm font-medium ${index < 3 ? 'text-[#F3BA2F]' : 'text-gray-400'}">#${index + 1}</span>
+                            <img src="https://bin.bnbstatic.com${token.icon}" class="w-8 h-8 rounded-full">
+                            <div class="flex-1 min-w-0">
+                                <div class="font-medium text-sm truncate">${token.symbol}</div>
+                                <div class="text-xs text-gray-500 truncate">$${formatNumber(token.marketCap || 0)}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium">$${parseFloat(token.price || 0).toFixed(6)}</div>
+                                <div class="text-xs ${parseFloat(token.percentChange24h || 0) >= 0 ? 'text-green-500' : 'text-red-500'}">${token.percentChange24h || 0}%</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    resultsDiv.innerHTML = '<div class="text-center text-gray-400 py-4">暂无排行数据</div>';
+                }
+            } catch {
+                resultsDiv.innerHTML = '<div class="text-center text-red-500 py-4">加载失败</div>';
+            }
+        }
+
+        async function doBinanceDetail() {
+            const chainId = document.getElementById('detailChain').value;
+            const address = document.getElementById('detailAddress').value.trim();
+            const resultDiv = document.getElementById('detailResult');
+
+            if (!address) return showToast('请输入代币地址', 'error');
+
+            resultDiv.innerHTML = '<div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>';
+
+            try {
+                const res = await fetch(`/api/binance/token/detail?chainId=${chainId}&address=${address}`);
+                const data = await res.json();
+
+                if (data.success && data.data) {
+                    const { metadata, dynamic, audit } = data.data;
+
+                    let html = '<div class="space-y-4">';
+
+                    // 元数据
+                    if (metadata) {
+                        html += `
+                            <div class="p-3 bg-yellow-50 rounded-xl">
+                                <div class="font-medium mb-2">📋 基本信息</div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div><span class="text-gray-500">名称:</span> ${metadata.name}</div>
+                                    <div><span class="text-gray-500">符号:</span> ${metadata.symbol}</div>
+                                    <div><span class="text-gray-500">链:</span> ${metadata.chainName}</div>
+                                    <div><span class="text-gray-500">创建者:</span> ${metadata.creatorAddress?.slice(0, 8)}...</div>
+                                </div>
+                                ${metadata.links?.length ? `
+                                <div class="mt-2 flex gap-2">
+                                    ${metadata.links.map(link => `<a href="${link.link}" target="_blank" class="text-xs px-2 py-1 rounded bg-white hover:bg-gray-100">${link.label}</a>`).join('')}
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    }
+
+                    // 动态数据
+                    if (dynamic) {
+                        html += `
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-medium mb-2">📊 市场数据</div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div><span class="text-gray-500">价格:</span> $${parseFloat(dynamic.price || 0).toFixed(6)}</div>
+                                    <div><span class="text-gray-500">24H:</span> ${dynamic.percentChange24h || 0}%</div>
+                                    <div><span class="text-gray-500">市值:</span> $${formatNumber(dynamic.marketCap || 0)}</div>
+                                    <div><span class="text-gray-500">流动性:</span> $${formatNumber(dynamic.liquidity || 0)}</div>
+                                    <div><span class="text-gray-500">持有人:</span> ${formatNumber(dynamic.holders || 0)}</div>
+                                    <div><span class="text-gray-500">Top10:</span> ${dynamic.top10HoldersPercentage || 0}%</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // 安全审计
+                    if (audit) {
+                        const riskLevel = audit.riskLevelEnum || 'LOW';
+                        const riskText = { 'LOW': '低', 'MEDIUM': '中', 'HIGH': '高' }[riskLevel] || '低';
+                        html += `
+                            <div class="p-3 bg-${riskLevel === 'HIGH' ? 'red' : riskLevel === 'MEDIUM' ? 'yellow' : 'green'}-50 rounded-xl">
+                                <div class="font-medium mb-2">🛡️ 安全审计</div>
+                                <div class="text-sm">风险等级: <span class="font-bold">${riskText}</span> (${audit.riskLevel || 1}/5)</div>
+                                ${audit.extraInfo ? `<div class="mt-1 text-xs">买税: ${audit.extraInfo.buyTax || 0}% | 卖税: ${audit.extraInfo.sellTax || 0}%</div>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    html += '</div>';
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-center text-gray-400 py-4">未找到代币信息</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-center text-red-500 py-4">查询失败</div>';
+            }
+        }
+
+        function viewTokenDetail(chainId, address) {
+            closeBinanceSkillModal();
+            document.getElementById('detailChain').value = chainId;
+            document.getElementById('detailAddress').value = address;
+            openBinanceSkill('detail');
+            setTimeout(() => doBinanceDetail(), 300);
+        }
+
+        function formatNumber(num) {
+            if (!num) return '0';
+            const n = parseFloat(num);
+            if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B';
+            if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+            if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K';
+            return n.toFixed(2);
         }
 
         async function doRugCheck() {

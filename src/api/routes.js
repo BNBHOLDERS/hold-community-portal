@@ -48,4 +48,22 @@ router.get('/wallet/holdings', walletController.getWalletHoldings);
 router.get('/wallet/activity', walletController.getWalletActivity);
 router.get('/wallet/stats', walletController.getWalletStats);
 
+// ========== Binance Web3 Skills（官方）==========
+const binanceWeb3Controller = require('./controllers/binanceWeb3Controller');
+
+// 技能概览
+router.get('/binance/skills', binanceWeb3Controller.getSkillsOverview);
+
+// 代币相关
+router.get('/binance/token/search', binanceWeb3Controller.searchToken);
+router.get('/binance/token/detail', binanceWeb3Controller.getTokenDetail);
+router.get('/binance/token/audit', binanceWeb3Controller.auditToken);
+
+// 钱包相关
+router.get('/binance/wallet/tokens', binanceWeb3Controller.getWalletTokens);
+
+// 市场相关
+router.get('/binance/signals/smart-money', binanceWeb3Controller.getSmartMoney);
+router.get('/binance/market/rank', binanceWeb3Controller.getMarketRank);
+
 module.exports = router;
