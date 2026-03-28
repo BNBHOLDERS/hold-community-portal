@@ -8,34 +8,95 @@
  * 防止代码注入攻击
  */
 class SafeExpressionParser {
+    // 允许的运算符和符号
+    static ALLOWED_CHARS = /^[0-9+\-*/().\s]+$/;
+
+    // 最大表达式长度（防止复杂攻击）
+    static MAX_EXPRESSION_LENGTH = 100;
+
+    // 最大嵌套深度
+    static MAX_NESTING_DEPTH = 5;
+
     /**
      * 安全计算数学表达式
      * 仅允许: 数字, 四则运算符, 括号, 空格
      */
     static evaluate(expression, variables = {}) {
-        // 白名单验证：只允许数字、运算符、括号、空格和小数点
-        if (!/^[0-9+\-*/().\s]+$/.test(expression)) {
+        // 1. 验证表达式长度
+        if (expression.length > this.MAX_EXPRESSION_LENGTH) {
+            throw new Error('表达式过长');
+        }
+
+        // 2. 白名单验证：只允许数字、运算符、括号、空格和小数点
+        if (!this.ALLOWED_CHARS.test(expression)) {
             throw new Error('非法表达式：包含不允许的字符');
         }
 
-        // 替换变量值
-        let evalExpression = expression;
-        for (const [key, value] of Object.entries(variables)) {
-            const regex = new RegExp(`\\b${key}\\b`, 'g');
-            evalExpression = evalExpression.replace(regex, value);
+        // 3. 验证括号匹配
+        const openParens = (expression.match(/\(/g) || []).length;
+        const closeParens = (expression.match(/\)/g) || []).length;
+        if (openParens !== closeParens) {
+            throw new Error('括号不匹配');
         }
 
-        // 再次验证替换后的表达式
-        if (!/^[0-9+\-*/().\s]+$/.test(evalExpression)) {
+        // 4. 验证嵌套深度
+        let depth = 0;
+        let maxDepth = 0;
+        for (const char of expression) {
+            if (char === '(') {
+                depth++;
+                if (depth > maxDepth) maxDepth = depth;
+            } else if (char === ')') {
+                depth--;
+            }
+        }
+        if (maxDepth > this.MAX_NESTING_DEPTH) {
+            throw new Error('表达式嵌套过深');
+        }
+
+        // 5. 验证和替换变量
+        let evalExpression = expression;
+        for (const [key, value] of Object.entries(variables)) {
+            // 验证变量名
+            if (!/^[a-z][a-z0-9]*$/i.test(key)) {
+                throw new Error(`非法变量名: ${key}`);
+            }
+
+            // 验证变量值是数字
+            const numValue = parseFloat(value);
+            if (isNaN(numValue) || !isFinite(numValue)) {
+                throw new Error(`变量 ${key} 的值必须为数字`);
+            }
+
+            // 替换变量
+            const regex = new RegExp(`\\b${key}\\b`, 'g');
+            evalExpression = evalExpression.replace(regex, numValue.toString());
+        }
+
+        // 6. 再次验证替换后的表达式
+        if (!this.ALLOWED_CHARS.test(evalExpression)) {
             throw new Error('非法表达式：变量值包含非法字符');
         }
 
-        // 使用 Function 构造器代替 eval，更安全
-        // 仍然需要上面的白名单验证来防止注入
+        // 7. 防止空表达式
+        if (!evalExpression.trim()) {
+            throw new Error('表达式不能为空');
+        }
+
+        // 8. 安全计算
         try {
-            return new Function('return ' + evalExpression)();
+            // 使用 Function 构造器（比 eval 稍安全，配合上面的验证）
+            // 使用 'use strict' 模式
+            const result = new Function('"use strict"; return (' + evalExpression + ')')();
+
+            // 9. 验证结果
+            if (typeof result !== 'number' || isNaN(result) || !isFinite(result)) {
+                throw new Error('表达式计算结果无效');
+            }
+
+            return result;
         } catch (error) {
-            throw new Error('表达式计算失败');
+            throw new Error('表达式计算失败: ' + error.message);
         }
     }
 }

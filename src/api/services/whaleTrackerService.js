@@ -185,7 +185,7 @@ class WhaleTrackerService {
         const defaultWhales = [
             { address: '0x8894E0a0c962CB723c1976a4421c95949bE2D4E3', label: 'Binance Hot Wallet', balance: 1000000 },
             { address: '0x0eD1439dd78D029C65F54E4Ae6EA4f24B832af7c', label: 'Binance Cold Wallet', balance: 5000000 },
-            { address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb', label: 'Whale Alert', balance: 2000000 }
+            { address: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0', label: 'Whale Alert', balance: 2000000 }
         ];
 
         for (const whale of defaultWhales) {

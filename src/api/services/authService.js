@@ -145,13 +145,24 @@ class AuthService {
     }
 
     if (record.expiresAt < Date.now()) {
+      // 验证码过期，删除记录
       verificationCodes.delete(email);
       throw new Error('验证码已过期');
     }
 
     if (record.code !== code) {
+      // 验证码错误，立即删除验证码防止暴力破解
+      verificationCodes.delete(email);
+
       // 记录失败尝试
-      if (attempts) attempts.count++;
+      if (attempts) {
+        attempts.count++;
+        // 如果超过尝试次数，删除记录重新计时
+        if (attempts.count >= 5) {
+          codeAttempts.delete(email);
+          throw new Error('验证码错误次数过多，请重新获取');
+        }
+      }
       throw new Error('验证码错误');
     }
 

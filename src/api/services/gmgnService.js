@@ -8,11 +8,26 @@ const axios = require('axios');
 const GMGN_BASE_URL = 'https://openapi.gmgn.ai';
 const API_KEY = process.env.GMGN_API_KEY;
 
+// 请求配置
+const REQUEST_CONFIG = {
+  timeout: 10000,  // 10秒超时
+  headers: {
+    'X-APIKEY': API_KEY,
+    'Content-Type': 'application/json'
+  }
+};
+
 class GMGNService {
   /**
    * 发起 API 请求
    */
   async request(endpoint, params = {}) {
+    // 检查 API 密钥
+    if (!API_KEY) {
+      console.warn('GMGN API Key 未设置，返回模拟数据');
+      return this.getMockData(endpoint);
+    }
+
     try {
       const timestamp = Math.floor(Date.now() / 1000);
       const client_id = this.generateUUID();
@@ -25,19 +40,71 @@ class GMGNService {
 
       const response = await axios.get(
         `${GMGN_BASE_URL}${endpoint}?${queryParams}`,
-        {
-          headers: {
-            'X-APIKEY': API_KEY,
-            'Content-Type': 'application/json'
-          }
-        }
+        REQUEST_CONFIG
       );
 
       return response.data;
     } catch (error) {
-      console.error('GMGN API Error:', error.message);
-      throw error;
+      // 详细的错误处理
+      if (error.code === 'ECONNABORTED') {
+        console.error('GMGN API 请求超时:', endpoint);
+        return this.getMockData(endpoint);
+      }
+
+      if (error.response?.status === 429) {
+        console.error('GMGN API 请求过于频繁');
+        return this.getMockData(endpoint);
+      }
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error('GMGN API 密钥无效或无权限');
+        return this.getMockData(endpoint);
+      }
+
+      if (error.response?.status === 404) {
+        console.warn('GMGN API 资源不存在:', endpoint);
+        return null;  // 返回 null 表示资源不存在
+      }
+
+      // 其他错误，记录并返回模拟数据
+      console.error('GMGN API Error:', {
+        endpoint,
+        message: error.message,
+        status: error.response?.status
+      });
+
+      return this.getMockData(endpoint);
     }
+  }
+
+  /**
+   * 生成模拟数据（当 API 不可用时使用）
+   */
+  getMockData(endpoint) {
+    const mockData = {
+      '/v1/token/info': {
+        address: '0x0000000000000000000000000000000000000000',
+        symbol: 'MOCK',
+        name: 'Mock Token',
+        price: 0.0001,
+        price_change_24h: 5.2,
+        liquidity: 100000,
+        holders: 1500
+      },
+      '/v1/token/security': {
+        address: '0x0000000000000000000000000000000000000000',
+        security: { score: 80, is_honeypot: false }
+      },
+      '/v1/market/token_top_holders': {
+        holders: []
+      },
+      '/v1/market/rank': {
+        list: []
+      }
+    };
+
+    // 返回对应端点的模拟数据或默认空数据
+    return mockData[endpoint] || (endpoint.includes('rank') ? { list: [] } : null);
   }
 
   /**

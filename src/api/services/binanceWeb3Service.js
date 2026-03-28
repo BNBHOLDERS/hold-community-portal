@@ -8,6 +8,15 @@ const axios = require('axios');
 const BASE_URL = 'https://web3.binance.com/bapi/defi';
 const USER_AGENT = 'binance-web3/1.1 (Skill)';
 
+// 通用请求配置
+const REQUEST_CONFIG = {
+  timeout: 15000,  // 15秒超时
+  headers: {
+    'Accept-Encoding': 'identity',
+    'User-Agent': USER_AGENT
+  }
+};
+
 class BinanceWeb3Service {
   /**
    * 代币搜索
@@ -17,11 +26,8 @@ class BinanceWeb3Service {
       const response = await axios.get(
         `${BASE_URL}/v5/public/wallet-direct/buw/wallet/market/token/search/ai`,
         {
-          params: { keyword, chainIds, orderBy: 'volume24h' },
-          headers: {
-            'Accept-Encoding': 'identity',
-            'User-Agent': USER_AGENT
-          }
+          ...REQUEST_CONFIG,
+          params: { keyword, chainIds, orderBy: 'volume24h' }
         }
       );
       return this.formatResponse(response.data);
@@ -39,11 +45,8 @@ class BinanceWeb3Service {
       const response = await axios.get(
         `${BASE_URL}/v1/public/wallet-direct/buw/wallet/dex/market/token/meta/info/ai`,
         {
-          params: { chainId, contractAddress },
-          headers: {
-            'Accept-Encoding': 'identity',
-            'User-Agent': USER_AGENT
-          }
+          ...REQUEST_CONFIG,
+          params: { chainId, contractAddress }
         }
       );
       return this.formatResponse(response.data);
@@ -61,11 +64,8 @@ class BinanceWeb3Service {
       const response = await axios.get(
         `${BASE_URL}/v4/public/wallet-direct/buw/wallet/market/token/dynamic/info/ai`,
         {
-          params: { chainId, contractAddress },
-          headers: {
-            'Accept-Encoding': 'identity',
-            'User-Agent': USER_AGENT
-          }
+          ...REQUEST_CONFIG,
+          params: { chainId, contractAddress }
         }
       );
       return this.formatResponse(response.data);
@@ -88,6 +88,7 @@ class BinanceWeb3Service {
           requestId: this.generateUUID()
         },
         {
+          timeout: 20000,  // 审计可能需要更长时间
           headers: {
             'Content-Type': 'application/json',
             'source': 'agent',
@@ -111,12 +112,11 @@ class BinanceWeb3Service {
       const response = await axios.get(
         `${BASE_URL}/v3/public/wallet-direct/buw/wallet/address/pnl/active-position-list/ai`,
         {
+          ...REQUEST_CONFIG,
           params: { address, chainId, offset },
           headers: {
             'clienttype': 'web',
-            'clientversion': '1.2.0',
-            'Accept-Encoding': 'identity',
-            'User-Agent': USER_AGENT
+            'clientversion': '1.2.0'
           }
         }
       );
@@ -140,13 +140,7 @@ class BinanceWeb3Service {
           pageSize,
           chainId
         },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept-Encoding': 'identity',
-            'User-Agent': USER_AGENT
-          }
-        }
+        REQUEST_CONFIG
       );
       return this.formatResponse(response.data);
     } catch (error) {
@@ -163,11 +157,8 @@ class BinanceWeb3Service {
       const response = await axios.get(
         `${BASE_URL}/v1/public/wallet-direct/buw/wallet/market/token/rank/ai`,
         {
-          params: { chainId, sortField, page, pageSize },
-          headers: {
-            'Accept-Encoding': 'identity',
-            'User-Agent': USER_AGENT
-          }
+          ...REQUEST_CONFIG,
+          params: { chainId, sortField, page, pageSize }
         }
       );
       return this.formatResponse(response.data);
