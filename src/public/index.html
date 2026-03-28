@@ -464,6 +464,9 @@
                     <a href="#monitor" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="monitor">
                         <i class="fa fa-eye text-[#F3BA2F] mr-1"></i>监控
                     </a>
+                    <a href="#whale" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="whale">
+                        <i class="fa fa-flag text-[#F3BA2F] mr-1"></i>巨鲸
+                    </a>
                     <a href="#features" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="features">建议</a>
                     <a href="#ai" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="ai">AI工具</a>
                     <a href="#binance" class="nav-link px-4 py-4 text-sm font-medium text-[#F3BA2F]" data-page="binance">
@@ -524,6 +527,9 @@
             </a>
             <a href="#monitor" class="block py-3 text-gray-700 border-b border-gray-100" data-page="monitor" onclick="navigateTo('monitor');toggleMobileMenu()">
                 <i class="fa fa-eye text-[#F3BA2F] mr-1"></i>监控
+            </a>
+            <a href="#whale" class="block py-3 text-gray-700 border-b border-gray-100" data-page="whale" onclick="navigateTo('whale');toggleMobileMenu()">
+                <i class="fa fa-flag text-[#F3BA2F] mr-1"></i>巨鲸
             </a>
             <a href="#features" class="block py-3 text-gray-700 border-b border-gray-100" data-page="features" onclick="navigateTo('features');toggleMobileMenu()">建议</a>
             <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
@@ -1191,6 +1197,45 @@
             </div>
         </section>
 
+        <!-- 巨鲸追踪页 -->
+        <section id="page-whale" class="page">
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <!-- 页头 -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">
+                            <i class="fa fa-flag text-[#F3BA2F] mr-2"></i>巨鲸追踪
+                        </h1>
+                        <p class="text-gray-500 text-sm">追踪大户地址的交易动向</p>
+                    </div>
+                    <button onclick="openWhaleModal()" class="btn-primary px-5 py-2.5 rounded-full text-sm font-medium">
+                        <i class="fa fa-plus mr-2"></i>添加巨鲸
+                    </button>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-[#F3BA2F]" id="whaleTotal">0</div>
+                        <div class="text-xs text-gray-500">追踪巨鲸</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-green-500" id="whaleAlerts">0</div>
+                        <div class="text-xs text-gray-500">活跃提醒</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-500" id="whaleTxs">0</div>
+                        <div class="text-xs text-gray-500">交易记录</div>
+                    </div>
+                </div>
+
+                <!-- 巨鲸列表 -->
+                <div id="whaleList" class="space-y-3">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+        </section>
+
         <!-- 功能建议页 -->
         <section id="page-features" class="page">
             <div class="max-w-6xl mx-auto px-4 py-8">
@@ -1434,6 +1479,38 @@
         </div>
     </div>
 
+    <!-- 巨鲸添加模态框 -->
+    <div id="whaleModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeWhaleModal()">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md transform transition-all shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-lg">
+                    <i class="fa fa-flag text-[#F3BA2F] mr-2"></i>添加巨鲸
+                </h3>
+                <button onclick="closeWhaleModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fa fa-times text-gray-400"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">地址</label>
+                    <input type="text" id="whaleAddress" placeholder="0x..." class="input-base w-full">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">标签</label>
+                    <input type="text" id="whaleLabel" placeholder="如: 交易所钱包" class="input-base w-full">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">余额 (BNB)</label>
+                    <input type="number" id="whaleBalance" placeholder="预估余额" class="input-base w-full">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeWhaleModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
+                    <button onclick="submitWhale()" class="btn-primary px-5 py-2.5 rounded-xl text-sm">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI 助手悬浮球 -->
     <div id="aiFab" class="ai-fab flex items-center justify-center" onclick="toggleAIChat()">
         <i class="fa fa-robot text-white text-2xl"></i>
@@ -1633,6 +1710,7 @@
                 case 'share': renderShares(); break;
                 case 'trending': renderTrending(); break;
                 case 'monitor': renderMonitor(); break;
+                case 'whale': renderWhale(); break;
                 case 'features': renderFeatures(); break;
                 case 'profile': renderProfile(); break;
                 case 'admin-docs': renderAdminDocs(); break;
@@ -2590,6 +2668,113 @@
                 if (data.success) {
                     showToast('监控已删除', 'success');
                     renderMonitor();
+                } else {
+                    showToast(data.error || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('删除失败', 'error');
+            }
+        }
+
+        // ========== 巨鲸追踪 ==========
+        async function renderWhale() {
+            const container = document.getElementById('whaleList');
+            const res = await fetch('/api/whale/whales');
+            const data = await res.json();
+
+            // 更新统计
+            if (data.stats) {
+                document.getElementById('whaleTotal').textContent = data.stats.totalWhales || 0;
+                document.getElementById('whaleAlerts').textContent = data.stats.activeAlerts || 0;
+                document.getElementById('whaleTxs').textContent = data.stats.totalTransactions || 0;
+            }
+
+            const whales = data.data || [];
+
+            if (whales.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-flag text-4xl mb-3 opacity-50"></i><p>暂无追踪巨鲸</p></div>';
+                return;
+            }
+
+            container.innerHTML = whales.map((w, i) => `
+                <div class="glass-card rounded-xl p-4 card-enter" style="animation-delay: ${i * 0.05}s">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white font-bold">
+                                ${w.label.charAt(0)}
+                            </div>
+                            <div>
+                                <div class="font-medium">${w.label}</div>
+                                <code class="text-xs text-gray-400">${w.address.slice(0, 8)}...${w.address.slice(-6)}</code>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-[#F3BA2F]">${w.balance ? w.balance.toLocaleString() : 'N/A'}</div>
+                            <div class="text-xs text-gray-500">BNB</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fa fa-exchange mr-1"></i>${w.transactionCount || 0} 笔交易</span>
+                        <button onclick="removeWhale('${w.address}')" class="text-red-400 hover:text-red-500">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openWhaleModal() {
+            document.getElementById('whaleModal').classList.remove('hidden');
+        }
+
+        function closeWhaleModal() {
+            document.getElementById('whaleModal').classList.add('hidden');
+            document.getElementById('whaleAddress').value = '';
+            document.getElementById('whaleLabel').value = '';
+            document.getElementById('whaleBalance').value = '';
+        }
+
+        async function submitWhale() {
+            const address = document.getElementById('whaleAddress').value.trim();
+            const label = document.getElementById('whaleLabel').value.trim();
+            const balance = document.getElementById('whaleBalance').value;
+
+            if (!address) {
+                return showToast('请输入地址', 'error');
+            }
+
+            if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+                return showToast('请输入有效的地址格式', 'error');
+            }
+
+            try {
+                const res = await fetch('/api/whale/whales', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ address, label, balance })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('巨鲸添加成功', 'success');
+                    closeWhaleModal();
+                    renderWhale();
+                } else {
+                    showToast(data.error || '添加失败', 'error');
+                }
+            } catch (error) {
+                showToast('添加失败', 'error');
+            }
+        }
+
+        async function removeWhale(address) {
+            if (!confirm('确定要删除这个巨鲸吗？')) return;
+
+            try {
+                const res = await fetch(`/api/whale/whales/${address}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('巨鲸已删除', 'success');
+                    renderWhale();
                 } else {
                     showToast(data.error || '删除失败', 'error');
                 }

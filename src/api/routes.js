@@ -122,6 +122,19 @@ router.get('/monitor/monitors/:id/activities', activityMonitorController.getMoni
 router.post('/monitor/check', activityMonitorController.triggerCheck);
 router.get('/monitor/stats', activityMonitorController.getStats);
 
+// ========== 巨鲸追踪 ==========
+const whaleTrackerController = require('./controllers/whaleTrackerController');
+
+router.get('/whale/whales', whaleTrackerController.getWhales);
+router.post('/whale/whales', whaleTrackerController.addWhale);
+router.delete('/whale/whales/:address', whaleTrackerController.removeWhale);
+router.get('/whale/whales/:address', whaleTrackerController.getWhale);
+router.get('/whale/transactions', whaleTrackerController.getTransactions);
+router.post('/whale/alerts', whaleTrackerController.createAlert);
+router.get('/whale/alerts', whaleTrackerController.getUserAlerts);
+router.delete('/whale/alerts/:id', whaleTrackerController.deleteAlert);
+router.post('/whale/simulate', whaleTrackerController.simulateTransaction);
+
 // ========== 系统状态 ==========
 router.get('/system/status', (req, res) => {
   const aiService = require('./services/aiService');
