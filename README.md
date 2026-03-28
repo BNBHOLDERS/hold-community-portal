@@ -103,6 +103,12 @@ hold-community-portal/
 - 🏆 **市场排行** - Market rankings
 - 📊 **代币详情** - Complete token info
 
+### 💡 功能建议 | Feature Requests
+- 🗳️ **投票机制** - 社区投票决定开发优先级
+- 📝 **建议提交** - 提交功能需求
+- 🏷️ **分类管理** - AI工具/数据功能/社区功能等
+- 📊 **状态追踪** - 待评估/开发中/已发布
+
 ### 📚 内容板块 | Content Sections
 - 💬 **讨论区** - Community discussions
 - 📝 **投稿区** - Article submission
@@ -136,6 +142,7 @@ hold-community-portal/
 ### Phase 2: 数据增强 🚧 (进行中)
 - [x] WebSocket 实时价格
 - [x] 价格提醒服务 (API + Email)
+- [x] **功能建议投票系统**
 - [ ] 用户注册/登录系统
 - [ ] 身份标识（徽章、等级）
 - [ ] 积分奖励机制

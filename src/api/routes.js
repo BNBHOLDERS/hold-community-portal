@@ -76,6 +76,17 @@ router.delete('/alerts/:id', alertsController.deleteAlert);
 router.post('/alerts/:id/test', alertsController.testAlert);
 router.get('/alerts/popular', alertsController.getPopularSymbols);
 
+// ========== 功能建议 ==========
+const featureController = require('./controllers/featureController');
+
+router.get('/features/requests', featureController.getRequests);
+router.post('/features/requests', featureController.createRequest);
+router.get('/features/requests/:id', featureController.getRequest);
+router.post('/features/requests/:id/vote', featureController.voteRequest);
+router.post('/features/requests/:id/status', featureController.updateStatus);
+router.post('/features/requests/:id/comment', featureController.addComment);
+router.get('/features/stats', featureController.getStats);
+
 // ========== 系统状态 ==========
 router.get('/system/status', (req, res) => {
   const aiService = require('./services/aiService');

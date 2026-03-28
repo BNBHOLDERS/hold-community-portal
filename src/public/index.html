@@ -457,6 +457,7 @@
                     <a href="#discuss" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="discuss">讨论</a>
                     <a href="#submit" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="submit">投稿</a>
                     <a href="#share" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="share">分享</a>
+                    <a href="#features" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="features">建议</a>
                     <a href="#ai" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="ai">AI工具</a>
                     <a href="#binance" class="nav-link px-4 py-4 text-sm font-medium text-[#F3BA2F]" data-page="binance">
                         <i class="fa fa-bolt mr-1"></i>Binance
@@ -477,6 +478,7 @@
             <a href="#discuss" class="block py-3 text-gray-700 border-b border-gray-100" data-page="discuss" onclick="navigateTo('discuss');toggleMobileMenu()">讨论</a>
             <a href="#submit" class="block py-3 text-gray-700 border-b border-gray-100" data-page="submit" onclick="navigateTo('submit');toggleMobileMenu()">投稿</a>
             <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
+            <a href="#features" class="block py-3 text-gray-700 border-b border-gray-100" data-page="features" onclick="navigateTo('features');toggleMobileMenu()">建议</a>
             <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
             <a href="#binance" class="block py-3 text-[#F3BA2F] font-medium border-b border-gray-100" data-page="binance" onclick="navigateTo('binance');toggleMobileMenu()">
                 <i class="fa fa-bolt mr-1"></i>Binance
@@ -964,6 +966,57 @@
                 </div>
             </div>
         </section>
+
+        <!-- 功能建议页 -->
+        <section id="page-features" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <!-- 页头 -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">
+                            <i class="fa fa-lightbulb-o text-[#F3BA2F] mr-2"></i>功能建议
+                        </h1>
+                        <p class="text-gray-500 text-sm">提交你的功能建议，投票决定开发优先级</p>
+                    </div>
+                    <button onclick="openFeatureModal()" class="btn-primary px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap">
+                        <i class="fa fa-plus mr-2"></i>发起建议
+                    </button>
+                </div>
+
+                <!-- 筛选栏 -->
+                <div class="glass-card rounded-2xl p-4 mb-6">
+                    <div class="flex flex-wrap gap-2">
+                        <button class="feature-filter px-4 py-2 rounded-full text-sm font-medium bg-[#F3BA2F] text-white" data-filter="all">全部</button>
+                        <button class="feature-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition" data-filter="pending">待评估</button>
+                        <button class="feature-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition" data-filter="developing">开发中</button>
+                        <button class="feature-filter px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition" data-filter="released">已发布</button>
+                        <div class="flex-1"></div>
+                        <select id="featureSort" class="px-4 py-2 rounded-full text-sm bg-gray-100 text-gray-600 border-0">
+                            <option value="hot">热门优先</option>
+                            <option value="new">最新发布</option>
+                            <option value="votes">投票最多</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 建议列表 -->
+                <div id="features-list" class="space-y-4">
+                    <!-- 骨架屏 -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="skeleton h-6 w-3/4 mb-3"></div>
+                        <div class="skeleton h-4 w-full mb-2"></div>
+                        <div class="skeleton h-4 w-2/3 mb-4"></div>
+                        <div class="skeleton h-8 w-24"></div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="skeleton h-6 w-3/4 mb-3"></div>
+                        <div class="skeleton h-4 w-full mb-2"></div>
+                        <div class="skeleton h-4 w-2/3 mb-4"></div>
+                        <div class="skeleton h-8 w-24"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- 发帖弹窗 -->
@@ -984,6 +1037,36 @@
                 <div class="flex justify-end gap-3">
                     <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
                     <button onclick="submitPost(this)" class="btn-primary px-5 py-2.5 rounded-xl text-sm">发布</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 功能建议弹窗 -->
+    <div id="featureModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeFeatureModal()">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-lg transform transition-all shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-lg">
+                    <i class="fa fa-lightbulb-o text-[#F3BA2F] mr-2"></i>发起功能建议
+                </h3>
+                <button onclick="closeFeatureModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fa fa-times text-gray-400"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="featureTitle" placeholder="建议标题（简短描述）" class="input-base w-full">
+                <textarea id="featureDescription" placeholder="详细描述你的建议..." rows="4" class="input-base w-full resize-none"></textarea>
+                <select id="featureCategory" class="input-base w-full">
+                    <option value="ai_tools">AI工具</option>
+                    <option value="data">数据功能</option>
+                    <option value="community">社区功能</option>
+                    <option value="ui_ux">界面体验</option>
+                    <option value="integration">第三方集成</option>
+                    <option value="other">其他</option>
+                </select>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeFeatureModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
+                    <button onclick="submitFeature()" class="btn-primary px-5 py-2.5 rounded-xl text-sm">发布建议</button>
                 </div>
             </div>
         </div>
@@ -1120,6 +1203,26 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
+        // ========== 功能建议筛选 ==========
+        document.querySelectorAll('.feature-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.feature-filter').forEach(b => {
+                    b.classList.remove('bg-[#F3BA2F]', 'text-white');
+                    b.classList.add('bg-gray-100', 'text-gray-600');
+                });
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+                btn.classList.add('bg-[#F3BA2F]', 'text-white');
+                currentFeatureFilter = btn.dataset.filter;
+                renderFeatures();
+            });
+        });
+
+        // ========== 功能建议排序 ==========
+        document.getElementById('featureSort')?.addEventListener('change', (e) => {
+            currentFeatureSort = e.target.value;
+            renderFeatures();
+        });
+
         // ========== 弹窗 ==========
         let currentModalType = '';
         function openModal(type) {
@@ -1156,6 +1259,7 @@
                 case 'submit': renderArticles(); break;
                 case 'article': renderArticleDetail(params.id); break;
                 case 'share': renderShares(); break;
+                case 'features': renderFeatures(); break;
                 case 'docs': loadDoc(params.slug || 'quickstart'); break;
             }
         }
@@ -1294,6 +1398,166 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ========== 功能建议相关 ==========
+        let currentFeatureFilter = 'all';
+        let currentFeatureSort = 'hot';
+
+        async function renderFeatures() {
+            const container = document.getElementById('features-list');
+            const params = {
+                status: currentFeatureFilter !== 'all' ? currentFeatureFilter : undefined,
+                sort: currentFeatureSort
+            };
+
+            try {
+                const queryString = new URLSearchParams(params).toString();
+                const res = await fetch(`/api/features/requests${queryString ? '?' + queryString : ''}`);
+                const data = await res.json();
+                const list = data.data || [];
+
+                if (list.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-lightbulb-o text-4xl mb-3 opacity-50"></i><p>暂无建议</p></div>';
+                    return;
+                }
+
+                container.innerHTML = list.map((item, i) => `
+                    <div class="glass-card rounded-2xl p-5 card-enter" style="animation-delay: ${i * 0.05}s">
+                        <div class="flex items-start gap-4">
+                            <!-- 投票区 -->
+                            <div class="flex flex-col items-center">
+                                <button onclick="voteFeature('${item.id}', this)" class="vote-btn w-12 h-12 rounded-xl bg-gray-100 hover:bg-[#F3BA2F] hover:text-white transition flex items-center justify-center text-lg font-bold text-gray-600">
+                                    ${item.votes || 0}
+                                </button>
+                                <span class="text-xs text-gray-400 mt-1">票</span>
+                            </div>
+
+                            <!-- 内容区 -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-3 mb-2">
+                                    <h4 class="font-semibold text-base">${escapeHtml(item.title)}</h4>
+                                    <span class="status-badge px-2 py-1 rounded-full text-xs flex-shrink-0 ${getStatusClass(item.status)}">
+                                        ${getStatusText(item.status)}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-500 mb-3 line-clamp-2">${escapeHtml(item.description)}</p>
+                                <div class="flex items-center gap-4 text-xs text-gray-400">
+                                    <span><i class="fa fa-user mr-1"></i>${item.author || '匿名'}</span>
+                                    <span>·</span>
+                                    <span>${timeAgo(item.createdAt)}</span>
+                                    <span>·</span>
+                                    <span><i class="fa fa-tag mr-1"></i>${getCategoryText(item.category)}</span>
+                                    ${item.comments?.length > 0 ? `<span>·</span><span><i class="fa fa-comment-o mr-1"></i>${item.comments.length} 评论</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Load features error:', error);
+                container.innerHTML = '<div class="text-center text-red-400 py-12">加载失败</div>';
+            }
+        }
+
+        function getStatusClass(status) {
+            const classes = {
+                'pending': 'bg-gray-100 text-gray-600',
+                'accepted': 'bg-blue-100 text-blue-600',
+                'developing': 'bg-yellow-100 text-yellow-600',
+                'released': 'bg-green-100 text-green-600',
+                'rejected': 'bg-red-100 text-red-600'
+            };
+            return classes[status] || classes.pending;
+        }
+
+        function getStatusText(status) {
+            const texts = {
+                'pending': '待评估',
+                'accepted': '已接受',
+                'developing': '开发中',
+                'released': '已发布',
+                'rejected': '已拒绝'
+            };
+            return texts[status] || '未知';
+        }
+
+        function getCategoryText(category) {
+            const texts = {
+                'ai_tools': 'AI工具',
+                'data': '数据功能',
+                'community': '社区功能',
+                'ui_ux': '界面体验',
+                'integration': '第三方集成',
+                'other': '其他'
+            };
+            return texts[category] || '其他';
+        }
+
+        async function voteFeature(id, btn) {
+            try {
+                const res = await fetch(`/api/features/requests/${id}/vote`, { method: 'POST' });
+                const data = await res.json();
+
+                if (data.success) {
+                    btn.textContent = data.votes;
+                    btn.classList.add('bg-[#F3BA2F]', 'text-white');
+                    showToast('投票成功！', 'success');
+                } else {
+                    showToast(data.message || '投票失败', 'error');
+                }
+            } catch (error) {
+                console.error('Vote error:', error);
+                showToast('投票失败', 'error');
+            }
+        }
+
+        function openFeatureModal() {
+            document.getElementById('featureModal').classList.remove('hidden');
+        }
+
+        function closeFeatureModal() {
+            document.getElementById('featureModal').classList.add('hidden');
+            document.getElementById('featureTitle').value = '';
+            document.getElementById('featureDescription').value = '';
+            document.getElementById('featureCategory').value = 'other';
+        }
+
+        async function submitFeature() {
+            const title = document.getElementById('featureTitle').value.trim();
+            const description = document.getElementById('featureDescription').value.trim();
+            const category = document.getElementById('featureCategory').value;
+
+            if (!title || !description) {
+                showToast('请填写标题和描述', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/features/requests', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description, category })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('建议发布成功！', 'success');
+                    closeFeatureModal();
+                    renderFeatures();
+                } else {
+                    showToast(data.error || '发布失败', 'error');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                showToast('发布失败', 'error');
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         // ========== 渲染首页最新 ==========
