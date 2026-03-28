@@ -87,7 +87,7 @@ hold-community-portal/
 | 工具 | Tool | 描述 |
 |:---|:---|:---|
 | 代币分析 | Token Analysis | AI 驱动的代币分析 |
-| 钱包诊断 | Wallet Diagnosis | 钱包���为分析 |
+| 钱包诊断 | Wallet Diagnosis | 钱包行为分析 |
 | RUG 检测 | Honeypot Detection | 蜜罐与骗局识别 |
 | 持仓分析 | Holder Analysis | 持仓分布分析 |
 | 交易助手 | Trading Assistant | 买卖时机建议 |
