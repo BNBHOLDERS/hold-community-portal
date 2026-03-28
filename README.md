@@ -181,7 +181,7 @@ npm run build
 
 ## 📄 许可证 | License
 
-MIT © 2024 HOLD Community
+MIT © 2026 HOLD Community
 
 <div align="center">
 
