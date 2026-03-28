@@ -20,6 +20,7 @@ router.get('/ai/token-analyze', aiController.tokenAnalyze);
 router.get('/ai/wallet-diagnose', aiController.walletDiagnose);
 router.post('/ai/analyze', aiController.analyze);
 router.get('/ai/stats', aiController.getQuestionStats);
+router.get('/ai/popular', aiController.getPopularQueries);
 
 // ========== 内容管理 ==========
 const contentController = require('./controllers/contentController');
@@ -38,6 +39,9 @@ router.post('/content/shares', contentController.createShare);
 
 // 最新动态（首页）
 router.get('/content/latest', contentController.getLatest);
+
+// 热门排行榜
+router.get('/content/trending', contentController.getTrending);
 
 // 点赞
 router.post('/content/:type(articles|shares|discussions)/:id/like', contentController.like);

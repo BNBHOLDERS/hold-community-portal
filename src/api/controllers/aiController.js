@@ -6,6 +6,7 @@
 const aiService = require('../services/aiService');
 const gmgnService = require('../services/gmgnService');
 const questionAnalytics = require('../services/questionAnalytics');
+const queryStats = require('../services/queryStatsService');
 
 // 示例 AI 回复（当 API 不可用时使用）
 const sampleResponses = {
@@ -90,6 +91,8 @@ async function tokenAnalyze(req, res) {
     const hasApiKey = process.env.GMGN_API_KEY && process.env.GMGN_API_KEY !== 'your_gmgn_api_key_here';
 
     if (!hasApiKey) {
+      // 记录查询统计
+      queryStats.record('token', address);
       // 返回示例数据
       return res.json({
         success: true,
@@ -121,6 +124,9 @@ async function tokenAnalyze(req, res) {
       creatorHoldRate: info?.data?.stat?.creator_hold_rate || 0
     };
 
+    // 记录查询统计
+    queryStats.record('token', address, { symbol: tokenData.symbol });
+
     // 尝试 AI 分析
     try {
       const aiAnalysis = await aiService.analyzeToken(tokenData);
@@ -149,6 +155,8 @@ async function walletDiagnose(req, res) {
     const hasApiKey = process.env.GMGN_API_KEY && process.env.GMGN_API_KEY !== 'your_gmgn_api_key_here';
 
     if (!hasApiKey) {
+      // 记录查询统计
+      queryStats.record('wallet', address);
       return res.json({
         success: true,
         data: {
@@ -175,6 +183,9 @@ async function walletDiagnose(req, res) {
       winRate: 0,
       totalPnL: 0
     };
+
+    // 记录查询统计
+    queryStats.record('wallet', address);
 
     // 尝试 AI 诊断
     try {
@@ -254,10 +265,37 @@ async function getQuestionStats(req, res) {
   }
 }
 
+/**
+ * 获取热门查询
+ */
+async function getPopularQueries(req, res) {
+  try {
+    const { limit = 20, type } = req.query;
+
+    let data;
+    if (type === 'token') {
+      data = queryStats.getPopularTokens(parseInt(limit));
+    } else if (type === 'wallet') {
+      data = queryStats.getPopularWallets(parseInt(limit));
+    } else {
+      data = queryStats.getPopular(parseInt(limit));
+    }
+
+    res.json({
+      success: true,
+      data,
+      stats: queryStats.getStats()
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   chat,
   tokenAnalyze,
   walletDiagnose,
   analyze,
-  getQuestionStats
+  getQuestionStats,
+  getPopularQueries
 };

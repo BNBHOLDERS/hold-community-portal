@@ -6,6 +6,7 @@
     <title>HOLD - 社区门户</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -457,6 +458,9 @@
                     <a href="#discuss" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="discuss">讨论</a>
                     <a href="#submit" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="submit">投稿</a>
                     <a href="#share" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="share">分享</a>
+                    <a href="#trending" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="trending">
+                        <i class="fa fa-fire text-[#F3BA2F] mr-1"></i>排行
+                    </a>
                     <a href="#features" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="features">建议</a>
                     <a href="#ai" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="ai">AI工具</a>
                     <a href="#binance" class="nav-link px-4 py-4 text-sm font-medium text-[#F3BA2F]" data-page="binance">
@@ -512,6 +516,9 @@
             <a href="#discuss" class="block py-3 text-gray-700 border-b border-gray-100" data-page="discuss" onclick="navigateTo('discuss');toggleMobileMenu()">讨论</a>
             <a href="#submit" class="block py-3 text-gray-700 border-b border-gray-100" data-page="submit" onclick="navigateTo('submit');toggleMobileMenu()">投稿</a>
             <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
+            <a href="#trending" class="block py-3 text-gray-700 border-b border-gray-100" data-page="trending" onclick="navigateTo('trending');toggleMobileMenu()">
+                <i class="fa fa-fire text-[#F3BA2F] mr-1"></i>排行榜
+            </a>
             <a href="#features" class="block py-3 text-gray-700 border-b border-gray-100" data-page="features" onclick="navigateTo('features');toggleMobileMenu()">建议</a>
             <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
             <a href="#binance" class="block py-3 text-[#F3BA2F] font-medium border-b border-gray-100" data-page="binance" onclick="navigateTo('binance');toggleMobileMenu()">
@@ -1112,6 +1119,33 @@
             </div>
         </section>
 
+        <!-- 排行榜页 -->
+        <section id="page-trending" class="page">
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <!-- 页头 -->
+                <div class="text-center mb-6">
+                    <h1 class="text-2xl font-bold mb-2">
+                        <i class="fa fa-fire text-[#F3BA2F] mr-2"></i>热门排行榜
+                    </h1>
+                    <p class="text-gray-500 text-sm">社区最受欢迎的内容和查询</p>
+                </div>
+
+                <!-- 标签切换 -->
+                <div class="flex justify-center mb-6">
+                    <div class="glass-card rounded-full p-1 inline-flex">
+                        <button onclick="switchTrendingTab('content')" class="trending-tab px-4 py-2 rounded-full text-sm font-medium bg-[#F3BA2F] text-white" data-tab="content">内容热门</button>
+                        <button onclick="switchTrendingTab('tokens')" class="trending-tab px-4 py-2 rounded-full text-sm font-medium text-gray-600" data-tab="tokens">代币查询</button>
+                        <button onclick="switchTrendingTab('wallets')" class="trending-tab px-4 py-2 rounded-full text-sm font-medium text-gray-600" data-tab="wallets">钱包查询</button>
+                    </div>
+                </div>
+
+                <!-- 排行榜列表 -->
+                <div id="trendingList" class="space-y-3">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+        </section>
+
         <!-- 功能建议页 -->
         <section id="page-features" class="page">
             <div class="max-w-6xl mx-auto px-4 py-8">
@@ -1521,6 +1555,7 @@
                 case 'submit': renderArticles(); break;
                 case 'article': renderArticleDetail(params.id); break;
                 case 'share': renderShares(); break;
+                case 'trending': renderTrending(); break;
                 case 'features': renderFeatures(); break;
                 case 'profile': renderProfile(); break;
                 case 'admin-docs': renderAdminDocs(); break;
@@ -2113,6 +2148,111 @@
             }
         }
 
+        // ========== 排行榜 ==========
+        let currentTrendingTab = 'content';
+
+        function switchTrendingTab(tab) {
+            currentTrendingTab = tab;
+            // 更新标签样式
+            document.querySelectorAll('.trending-tab').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.classList.add('bg-[#F3BA2F]', 'text-white');
+                    btn.classList.remove('text-gray-600');
+                } else {
+                    btn.classList.remove('bg-[#F3BA2F]', 'text-white');
+                    btn.classList.add('text-gray-600');
+                }
+            });
+            renderTrending();
+        }
+
+        async function renderTrending() {
+            const container = document.getElementById('trendingList');
+            container.innerHTML = '<div class="text-center text-gray-400 py-12"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
+
+            try {
+                let items, title, emptyIcon;
+
+                if (currentTrendingTab === 'content') {
+                    const res = await fetch('/api/content/trending?limit=20');
+                    const data = await res.json();
+                    items = data.data || [];
+                    title = '热门内容';
+                    emptyIcon = 'fa-fire';
+
+                    container.innerHTML = items.map((item, i) => {
+                        const rankIcon = i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="text-gray-400 font-mono">${item.rank}</span>`;
+                        const typeColor = item.type === 'article' ? 'bg-blue-100 text-blue-600' :
+                                          item.type === 'share' ? 'bg-green-100 text-green-600' :
+                                          'bg-orange-100 text-orange-600';
+
+                        return `
+                            <div class="glass-card rounded-xl p-4 flex items-center gap-4 card-enter" style="animation-delay: ${i * 0.05}s">
+                                <div class="w-10 h-10 flex items-center justify-center text-lg">${rankIcon}</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="text-xs px-2 py-0.5 rounded-full ${typeColor}">${item.typeName}</span>
+                                        <h3 class="font-medium text-sm truncate">${item.title}</h3>
+                                    </div>
+                                    <div class="flex items-center gap-3 text-xs text-gray-500">
+                                        <span><i class="fa fa-user mr-1"></i>${item.author}</span>
+                                        <span><i class="fa fa-heart text-red-400 mr-1"></i>${item.likes}</span>
+                                        <span><i class="fa fa-eye text-gray-400 mr-1"></i>${item.views}</span>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-[#F3BA2F]">${item.score}</div>
+                                    <div class="text-xs text-gray-400">热度</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    // 代币或钱包查询
+                    const res = await fetch(`/api/ai/popular?limit=20&type=${currentTrendingTab === 'tokens' ? 'token' : 'wallet'}`);
+                    const data = await res.json();
+                    items = data.data || [];
+                    title = currentTrendingTab === 'tokens' ? '代币查询' : '钱包查询';
+                    emptyIcon = currentTrendingTab === 'tokens' ? 'fa-search' : 'fa-wallet';
+
+                    if (items.length === 0) {
+                        container.innerHTML = `<div class="text-center text-gray-400 py-12"><i class="fa ${emptyIcon} text-4xl mb-3 opacity-50"></i><p>暂无${title}记录</p></div>`;
+                        return;
+                    }
+
+                    container.innerHTML = items.map((item, i) => {
+                        const rankIcon = i === 0 ? '🏆' : i === 1 ? '🥈' : i === 2 ? '🥉' : `<span class="text-gray-400 font-mono">${i + 1}</span>`;
+                        const shortAddress = item.address.slice(0, 6) + '...' + item.address.slice(-4);
+
+                        return `
+                            <div class="glass-card rounded-xl p-4 flex items-center gap-4 card-enter" style="animation-delay: ${i * 0.05}s">
+                                <div class="w-10 h-10 flex items-center justify-center text-lg">${rankIcon}</div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        ${item.symbol ? `<span class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-600 font-medium">${item.symbol}</span>` : ''}
+                                        <code class="text-xs text-gray-500">${shortAddress}</code>
+                                    </div>
+                                    <div class="text-xs text-gray-400">
+                                        <i class="fa fa-clock-o mr-1"></i>最后查询: ${new Date(item.lastQueried).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-[#F3BA2F]">${item.count}</div>
+                                    <div class="text-xs text-gray-400">查询次数</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                if (items.length === 0) {
+                    container.innerHTML = `<div class="text-center text-gray-400 py-12"><i class="fa ${emptyIcon} text-4xl mb-3 opacity-50"></i><p>暂无${title}</p></div>`;
+                }
+            } catch {
+                container.innerHTML = '<div class="text-center text-red-400 py-12">加载失败</div>';
+            }
+        }
+
         // ========== 功能建议相关 ==========
         let currentFeatureFilter = 'all';
         let currentFeatureSort = 'hot';
@@ -2434,22 +2574,76 @@
                     resultDiv.innerHTML = `
                         <div class="bg-white/80 rounded-xl p-4 text-sm">
                             <div class="font-semibold text-base mb-3">${data.data.symbol || 'TOKEN'} - ${data.data.name || 'Unknown'}</div>
-                            <div class="space-y-2 text-gray-600">
+                            <div class="space-y-2 text-gray-600 mb-4">
                                 <div class="flex justify-between"><span>价格</span><span class="font-medium">${data.data.price || 'N/A'}</span></div>
                                 <div class="flex justify-between"><span>流动性</span><span class="font-medium">${data.data.liquidity || 'N/A'}</span></div>
                                 <div class="flex justify-between ${data.data.isHoneypot ? 'text-red-500' : 'text-green-500'}">
-                                    <span>风险检测</span>
-                                    <span class="font-medium">${data.data.isHoneypot ? '⚠️ 蜜罐警告' : '✅ 无蜜罐风险'}</span>
+                                    <span>风险检测</span><span class="font-medium">${data.data.isHoneypot ? '⚠️ 蜜罐警告' : '✅ 无蜜罐风险'}</span>
                                 </div>
                             </div>
+                            <div id="tokenChart" style="height:200px;"></div>
                         </div>
                     `;
+                    // 渲染价格走势图（模拟数据）
+                    renderTokenChart('tokenChart', data.data);
                 } else {
                     resultDiv.innerHTML = '<div class="text-sm text-red-500">分析失败，请检查代币地址</div>';
                 }
             } catch {
                 resultDiv.innerHTML = '<div class="text-sm text-red-500">请求失败，请稍后重试</div>';
             }
+        }
+
+        // 渲染代币价格走势图
+        function renderTokenChart(containerId, tokenData) {
+            const container = document.getElementById(containerId);
+            if (!container || !LightweightCharts) return;
+
+            const chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: 200,
+                layout: { background: { color: 'transparent' }, textColor: '#666' },
+                grid: { vertLines: { color: 'rgba(243, 186, 47, 0.1)' }, horzLines: { color: 'rgba(243, 186, 47, 0.1)' } },
+                timeScale: { borderColor: '#e5e7eb', timeVisible: true, secondsVisible: false },
+                rightPriceScale: { borderColor: '#e5e7eb' }
+            });
+
+            const candleSeries = chart.addCandlestickSeries({
+                upColor: '#22c55e',
+                downColor: '#ef4444',
+                borderVisible: false,
+                wickUpColor: '#22c55e',
+                wickDownColor: '#ef4444'
+            });
+
+            // 生成模拟K线数据
+            const basePrice = parseFloat(tokenData.price) || 0.0001;
+            const data = [];
+            let currentTime = Math.floor(Date.now() / 1000) - 6 * 24 * 3600;
+
+            for (let i = 0; i < 7; i++) {
+                const volatility = basePrice * 0.05;
+                const open = basePrice + (Math.random() - 0.5) * volatility;
+                const close = open + (Math.random() - 0.5) * volatility;
+                const high = Math.max(open, close) + Math.random() * volatility * 0.5;
+                const low = Math.min(open, close) - Math.random() * volatility * 0.5;
+
+                data.push({
+                    time: currentTime,
+                    open: parseFloat(open.toFixed(8)),
+                    high: parseFloat(high.toFixed(8)),
+                    low: parseFloat(low.toFixed(8)),
+                    close: parseFloat(close.toFixed(8))
+                });
+                currentTime += 24 * 3600;
+            }
+
+            candleSeries.setData(data);
+            chart.timeScale().fitContent();
+
+            window.addEventListener('resize', () => {
+                chart.applyOptions({ width: container.clientWidth });
+            });
         }
 
         // ========== 钱包诊断 ==========
@@ -2468,15 +2662,46 @@
                 if (data.success) {
                     resultDiv.innerHTML = `
                         <div class="bg-white/80 rounded-xl p-4 text-sm text-gray-600">
-                            ${data.data.diagnosis || '诊断完成'}
+                            <div class="mb-4">${data.data.diagnosis || '诊断完成'}</div>
+                            <div id="walletChart" style="height:180px;"></div>
                         </div>
                     `;
+                    // 渲染资产分布图
+                    renderWalletChart('walletChart', data.data);
                 } else {
                     resultDiv.innerHTML = '<div class="text-sm text-red-500">诊断失败</div>';
                 }
             } catch {
                 resultDiv.innerHTML = '<div class="text-sm text-red-500">请求失败</div>';
             }
+        }
+
+        // 渲染钱包资产分布图
+        function renderWalletChart(containerId, walletData) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            // 模拟资产分布数据
+            const assets = [
+                { symbol: 'BNB', percent: 45, color: '#F3BA2F' },
+                { symbol: 'USDT', percent: 25, color: '#26A17B' },
+                { symbol: 'ETH', percent: 15, color: '#627EEA' },
+                { symbol: '其他', percent: 15, color: '#9CA3AF' }
+            ];
+
+            container.innerHTML = `
+                <div class="space-y-2">
+                    ${assets.map(a => `
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 text-xs text-gray-500">${a.symbol}</div>
+                            <div class="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all" style="width:${a.percent}%;background:${a.color}"></div>
+                            </div>
+                            <div class="w-10 text-xs text-right">${a.percent}%</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
         }
 
         // ========== AI 助手 ==========

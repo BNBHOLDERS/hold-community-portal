@@ -331,6 +331,49 @@ async function like(req, res) {
     }
 }
 
+/**
+ * 获取热门内容排行榜
+ */
+async function getTrending(req, res) {
+    try {
+        const { limit = 10 } = req.query;
+
+        // 计算热门度分数: likes * 2 + views
+        const score = (item) => (item.likes || 0) * 2 + (item.views || 0);
+
+        // 合并所有内容并添加类型标记
+        const allItems = [
+            ...articles.map(a => ({ ...a, type: 'article', typeName: '投稿' })),
+            ...shares.map(s => ({ ...s, type: 'share', typeName: '分享' })),
+            ...discussions.map(d => ({ ...d, type: 'discussion', typeName: '讨论' }))
+        ];
+
+        // 按热门度排序
+        const trending = allItems
+            .sort((a, b) => score(b) - score(a))
+            .slice(0, parseInt(limit))
+            .map((item, index) => ({
+                rank: index + 1,
+                id: item.id,
+                type: item.type,
+                typeName: item.typeName,
+                title: item.title,
+                author: item.author,
+                likes: item.likes || 0,
+                views: item.views || 0,
+                score: score(item),
+                createdAt: item.createdAt
+            }));
+
+        res.json({
+            success: true,
+            data: trending
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
 module.exports = {
     // 讨论区
     getDiscussions,
@@ -343,5 +386,6 @@ module.exports = {
     createShare,
     // 通用
     getLatest,
-    like
+    like,
+    getTrending
 };
