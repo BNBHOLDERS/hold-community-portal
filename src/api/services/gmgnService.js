@@ -83,7 +83,7 @@ class GMGNService {
   getMockData(endpoint) {
     const mockData = {
       '/v1/token/info': {
-        address: '0x0000000000000000000000000000000000000000',
+        address: '0x55d398326f99059ff775485246999027b3197955',
         symbol: 'MOCK',
         name: 'Mock Token',
         price: 0.0001,
@@ -92,7 +92,7 @@ class GMGNService {
         holders: 1500
       },
       '/v1/token/security': {
-        address: '0x0000000000000000000000000000000000000000',
+        address: '0x55d398326f99059ff775485246999027b3197955',
         security: { score: 80, is_honeypot: false }
       },
       '/v1/market/token_top_holders': {

@@ -27,7 +27,7 @@ class EmailService {
         };
 
         // 检查是否配置了 SMTP
-        if (smtpConfig.host && smtpConfig.host !== 'smtp.gmail.com') {
+        if (smtpConfig.host && smtpConfig.host !== 'smtp.gmail.com' && smtpConfig.host !== process.env.SMTP_HOST) {
             try {
                 this.transporter = nodemailer.createTransport(smtpConfig);
                 this.enabled = true;
@@ -139,7 +139,7 @@ class EmailService {
                         <p style="color: #666;">你的验证码是：</p>
                         <div class="code">${code}</div>
                         <p style="color: #999; font-size: 14px; margin-top: 30px;">
-                            验证码 10 分钟内有效，请勿泄露给他人。
+                            验证码 5 分钟内有效，请勿泄露给他人。
                         </p>
                     </div>
                 </div>

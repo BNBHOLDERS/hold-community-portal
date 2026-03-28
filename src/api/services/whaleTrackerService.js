@@ -3,6 +3,8 @@
  * 追踪大额持有者地址的交易行为
  */
 
+const crypto = require('crypto');
+
 class WhaleTrackerService {
     constructor() {
         // 巨鲸地址列表: { address, label, balance, trackedAt }
@@ -52,7 +54,7 @@ class WhaleTrackerService {
      * 创建交易提醒
      */
     createAlert(userId, whaleAddress, minAmount, alertType = 'all') {
-        const alertId = `alert_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+        const alertId = `alert_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
 
         this.alerts.set(alertId, {
             id: alertId,
@@ -92,7 +94,7 @@ class WhaleTrackerService {
     recordTransaction(transaction) {
         const tx = {
             ...transaction,
-            id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+            id: `tx_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`,
             timestamp: new Date().toISOString()
         };
 

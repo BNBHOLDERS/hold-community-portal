@@ -6,6 +6,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const { STORAGE: STORAGE_LIMITS } = require('../config/constants');
 
 // 数据目录
 const DATA_DIR = path.join(__dirname, '../../data');
@@ -116,8 +117,9 @@ async function appendJsonFile(filePath, item) {
             });
 
             // 限制数组大小
-            if (data.items.length > 10000) {
-                data.items = data.items.slice(-10000);
+            const maxItems = STORAGE_LIMITS.MAX_SENTIMENTS || 10000;
+            if (data.items.length > maxItems) {
+                data.items = data.items.slice(-maxItems);
             }
 
             await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');

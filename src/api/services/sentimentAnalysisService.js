@@ -3,6 +3,8 @@
  * 分析社交媒体和社区讨论的情绪倾向
  */
 
+const crypto = require('crypto');
+
 class SentimentAnalysisService {
     constructor() {
         // 情绪记录: { id, source, content, sentiment, score, keywords, timestamp }
@@ -72,7 +74,7 @@ class SentimentAnalysisService {
         const analysis = this.analyzeSentiment(content);
 
         const record = {
-            id: `sent_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+            id: `sent_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`,
             source, // 'twitter', 'discord', 'telegram', 'community'
             content: content.slice(0, 500), // 限制内容长度
             sentiment: analysis.sentiment,

@@ -3,6 +3,8 @@
  * 提供 RESTful API 供第三方调用
  */
 
+const crypto = require('crypto');
+
 class DeveloperApiService {
     constructor() {
         // API 密钥: { key, userId, rateLimit, requests, createdAt }
@@ -21,7 +23,7 @@ class DeveloperApiService {
      * 生成 API 密钥
      */
     generateApiKey(userId, tier = 'free') {
-        const key = `hold_${tier}_${Math.random().toString(36).slice(2, 34)}`;
+        const key = `hold_${tier}_${crypto.randomBytes(24).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 32)}`;
 
         this.apiKeys.set(key, {
             key,

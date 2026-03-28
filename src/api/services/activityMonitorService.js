@@ -159,7 +159,7 @@ class ActivityMonitorService {
         return {
             amount: (Math.random() * 100000).toFixed(2),
             usdValue: (Math.random() * 50000).toFixed(2),
-            relatedAddress: '0x' + Math.random().toString(16).slice(2, 42)
+            relatedAddress: '0x' + Math.random().toString(16).slice(2, 42).padStart(40, '0')
         };
     }
 

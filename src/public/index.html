@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://*.anthropic.com https://web3.binance.com https://openapi.gmgn.ai;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <title>HOLD - 社区门户</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1732,13 +1736,13 @@
                 <div class="glass-card rounded-2xl p-5 cursor-pointer card-enter" style="animation-delay: ${i * 0.1}s">
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                            ${(item.author || '匿名')[0]}
+                            ${(escapeHtml(item.author || '匿名'))[0]}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold text-base mb-1">${item.title || '无标题'}</h4>
-                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">${item.content || ''}</p>
+                            <h4 class="font-semibold text-base mb-1">${escapeHtml(item.title || '无标题')}</h4>
+                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">${escapeHtml(item.content || '')}</p>
                             <div class="flex items-center gap-4 text-xs text-gray-400">
-                                <span>${item.author || '匿名'}</span>
+                                <span>${escapeHtml(item.author || '匿名')}</span>
                                 <span>·</span>
                                 <span>${timeAgo(item.createdAt)}</span>
                                 <span>·</span>
@@ -1766,11 +1770,11 @@
 
             container.innerHTML = list.map((item, i) => `
                 <div class="glass-card rounded-2xl p-6 cursor-pointer card-enter" style="animation-delay: ${i * 0.1}s" onclick="viewArticle('${item.id}')">
-                    <h4 class="font-semibold text-lg mb-2">${item.title || '无标题'}</h4>
-                    <p class="text-sm text-gray-500 mb-4 line-clamp-2">${item.summary || item.content?.slice(0, 100) || ''}</p>
+                    <h4 class="font-semibold text-lg mb-2">${escapeHtml(item.title || '无标题')}</h4>
+                    <p class="text-sm text-gray-500 mb-4 line-clamp-2">${escapeHtml(item.summary || item.content?.slice(0, 100) || '')}</p>
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3 text-xs text-gray-400">
-                            <span>${item.author || '匿名作者'}</span>
+                            <span>${escapeHtml(item.author || '匿名作者')}</span>
                             <span>·</span>
                             <span>${timeAgo(item.createdAt)}</span>
                         </div>
@@ -1836,14 +1840,14 @@
             }
 
             container.innerHTML = list.map((item, i) => `
-                <div class="glass-card rounded-xl p-4 cursor-pointer card-enter" style="animation-delay: ${i * 0.05}s" onclick="window.open('${item.url}', '_blank')">
+                <div class="glass-card rounded-xl p-4 cursor-pointer card-enter" style="animation-delay: ${i * 0.05}s" onclick="window.open('${escapeHtml(item.url).replace(/'/g, "\\'")}', '_blank')">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">
                             ${getCategoryIcon(item.category)}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-medium text-sm truncate">${item.title || '无标题'}</h4>
-                            <p class="text-xs text-gray-500 truncate">${item.url || ''}</p>
+                            <h4 class="font-medium text-sm truncate">${escapeHtml(item.title || '无标题')}</h4>
+                            <p class="text-xs text-gray-500 truncate">${escapeHtml(item.url || '')}</p>
                         </div>
                         <button class="like-btn flex items-center gap-1 text-gray-400 hover:text-[#F3BA2F] transition text-sm" onclick="event.stopPropagation();likeContent('shares', '${item.id}', this)">
                             <i class="fa fa-heart-o"></i>
@@ -2347,10 +2351,10 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="text-xs px-2 py-0.5 rounded-full ${typeColor}">${item.typeName}</span>
-                                        <h3 class="font-medium text-sm truncate">${item.title}</h3>
+                                        <h3 class="font-medium text-sm truncate">${escapeHtml(item.title)}</h3>
                                     </div>
                                     <div class="flex items-center gap-3 text-xs text-gray-500">
-                                        <span><i class="fa fa-user mr-1"></i>${item.author}</span>
+                                        <span><i class="fa fa-user mr-1"></i>${escapeHtml(item.author)}</span>
                                         <span><i class="fa fa-heart text-red-400 mr-1"></i>${item.likes}</span>
                                         <span><i class="fa fa-eye text-gray-400 mr-1"></i>${item.views}</span>
                                     </div>
@@ -2807,7 +2811,7 @@
                             <i class="fa ${item.icon} text-[#F3BA2F] text-xs"></i>
                         </div>
                         <span class="tag px-2 py-0.5 rounded-full text-xs">${item.type}</span>
-                        <span class="flex-1 text-sm truncate">${item.title}</span>
+                        <span class="flex-1 text-sm truncate">${escapeHtml(item.title)}</span>
                         <span class="text-xs text-gray-400">${timeAgo(item.createdAt)}</span>
                     </div>
                 `).join('');
@@ -3169,13 +3173,13 @@
                 <div class="glass-card rounded-2xl p-5 cursor-pointer card-enter" style="animation-delay: ${i * 0.1}s" onclick="viewDiscussion('${item.id}')">
                     <div class="flex items-start gap-4">
                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                            ${(item.author || '匿名')[0]}
+                            ${(escapeHtml(item.author || '匿名'))[0]}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-semibold text-base mb-1">${item.title || '无标题'}</h4>
-                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">${item.content || ''}</p>
+                            <h4 class="font-semibold text-base mb-1">${escapeHtml(item.title || '无标题')}</h4>
+                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">${escapeHtml(item.content || '')}</p>
                             <div class="flex items-center gap-4 text-xs text-gray-400">
-                                <span>${item.author || '匿名'}</span>
+                                <span>${escapeHtml(item.author || '匿名')}</span>
                                 <span>·</span>
                                 <span>${timeAgo(item.createdAt)}</span>
                                 <span>·</span>

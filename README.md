@@ -176,9 +176,33 @@ hold-community-portal/
 - [x] API 超时保护
 - [x] 异步文件操作
 
+### Phase 6: 开源准备 ✅ (已完成)
+- [x] 添加 MIT 开源许可证
+- [x] 编写贡献指南
+- [x] 修复前端 XSS 漏洞
+- [x] 添加安全响应头
+- [x] 修复 ID 生成安全性
+- [x] 完善代码注释
+
 ---
 
 ## 📝 更新日志 | Changelog
+
+### v1.2.0 (2026-03-28) - 开源版本
+**开源准备**
+- 添加 MIT 开源许可证
+- 编写贡献指南 (CONTRIBUTING.md)
+- 更新 .gitignore 排除用户数据
+
+**安全修复**
+- 修复前端 6 处 XSS 漏洞（用户内容转义）
+- 添加 CSP、X-Frame-Options、X-XSS-Protection 安全头
+- 修复 ID 生成安全性（使用 crypto.randomBytes）
+
+**代码质量**
+- 修复邮件模板时间描述错误
+- 修复模拟数据无效地址
+- 使用 constants 替代硬编码值
 
 ### v1.1.0 (2026-03-28) - 安全修复版本
 **Critical 修复**

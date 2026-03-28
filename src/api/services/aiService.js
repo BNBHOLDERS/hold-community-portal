@@ -7,6 +7,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const apiKeys = require('../config/apiKeys');
 const redis = require('./redisService');
+const { AI: AI_CONFIG } = require('../config/constants');
 
 class AIService {
   constructor() {
@@ -28,7 +29,7 @@ class AIService {
    */
   async chat(message, history = []) {
     // 检查缓存
-    const cacheKey = RedisService.keys.AI_CHAT(message);
+    const cacheKey = redis.keys ? redis.keys.AI_CHAT(message) : `ai:chat:${Buffer.from(message).toString('base64').slice(0, 50)}`;
     const cached = await redis.get(cacheKey);
     if (cached) {
       console.log('AI Chat 缓存命中');
@@ -54,8 +55,8 @@ class AIService {
       ];
 
       const response = await client.messages.create({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 1024,
+        model: AI_CONFIG.DEFAULT_MODEL || 'claude-3-5-sonnet-20241022',
+        max_tokens: AI_CONFIG.MAX_TOKENS || 1024,
         messages,
         system: this.getSystemPrompt()
       });
@@ -84,8 +85,8 @@ class AIService {
     const prompt = this.buildTokenAnalysisPrompt(tokenData);
 
     const response = await this.getClient(apiKey).messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2048,
+      model: AI_CONFIG.DEFAULT_MODEL || 'claude-3-5-sonnet-20241022',
+      max_tokens: AI_CONFIG.MAX_TOKENS || 2048,
       messages: [{ role: 'user', content: prompt }],
       system: '你是 HOLD 社区的 AI 助手，擅长分析代币和识别风险。'
     });
@@ -105,8 +106,8 @@ class AIService {
     const prompt = this.buildWalletDiagnosisPrompt(walletData);
 
     const response = await this.getClient(apiKey).messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 2048,
+      model: AI_CONFIG.DEFAULT_MODEL || 'claude-3-5-sonnet-20241022',
+      max_tokens: AI_CONFIG.MAX_TOKENS || 2048,
       messages: [{ role: 'user', content: prompt }],
       system: '你是 HOLD 社区的 AI 助手，擅长分析钱包交易行为。'
     });
@@ -126,8 +127,8 @@ class AIService {
     const systemPrompt = type === 'security' ? '你是安全专家，擅长识别代币风险。' : this.getSystemPrompt();
 
     const response = await this.getClient(apiKey).messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
+      model: AI_CONFIG.DEFAULT_MODEL || 'claude-3-5-sonnet-20241022',
+      max_tokens: AI_CONFIG.MAX_TOKENS || 1024,
       messages: [{ role: 'user', content }],
       system: systemPrompt
     });
