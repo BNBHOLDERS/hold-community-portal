@@ -72,7 +72,7 @@ class SentimentAnalysisService {
         const analysis = this.analyzeSentiment(content);
 
         const record = {
-            id: `sent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `sent_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
             source, // 'twitter', 'discord', 'telegram', 'community'
             content: content.slice(0, 500), // 限制内容长度
             sentiment: analysis.sentiment,

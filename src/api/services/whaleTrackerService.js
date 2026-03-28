@@ -52,7 +52,7 @@ class WhaleTrackerService {
      * 创建交易提醒
      */
     createAlert(userId, whaleAddress, minAmount, alertType = 'all') {
-        const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const alertId = `alert_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
         this.alerts.set(alertId, {
             id: alertId,
@@ -92,7 +92,7 @@ class WhaleTrackerService {
     recordTransaction(transaction) {
         const tx = {
             ...transaction,
-            id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `tx_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
             timestamp: new Date().toISOString()
         };
 

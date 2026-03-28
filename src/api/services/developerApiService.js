@@ -21,7 +21,7 @@ class DeveloperApiService {
      * 生成 API 密钥
      */
     generateApiKey(userId, tier = 'free') {
-        const key = `hold_${tier}_${Math.random().toString(36).substr(2, 32)}`;
+        const key = `hold_${tier}_${Math.random().toString(36).slice(2, 34)}`;
 
         this.apiKeys.set(key, {
             key,

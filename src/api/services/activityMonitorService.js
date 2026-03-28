@@ -18,7 +18,7 @@ class ActivityMonitorService {
      * 创建监控
      */
     createMonitor(type, target, createdBy = 'system') {
-        const id = `monitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const id = `monitor_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
         const monitor = {
             id,
@@ -159,7 +159,7 @@ class ActivityMonitorService {
         return {
             amount: (Math.random() * 100000).toFixed(2),
             usdValue: (Math.random() * 50000).toFixed(2),
-            relatedAddress: '0x' + Math.random().toString(16).substr(2, 40)
+            relatedAddress: '0x' + Math.random().toString(16).slice(2, 42)
         };
     }
 

@@ -8,15 +8,21 @@ const { v4: uuidv4 } = require('uuid');
 const redis = require('./redisService');
 const emailService = require('./emailService');
 
-// JWT 密钥（生产环境应使用环境变量）
-const JWT_SECRET = process.env.JWT_SECRET || 'hold-community-secret-key-2026';
+// JWT 密钥 - 生产环境必须设置环境变量
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.warn('⚠️  警告: JWT_SECRET 未设置，使用随机密钥（重启后Token将失效）');
+  console.warn('⚠️  请在环境变量中设置 JWT_SECRET 以保持会话持久性');
+}
+const JWT_SECRET_VALUE = JWT_SECRET || require('crypto').randomBytes(64).toString('hex');
 const JWT_EXPIRES_IN = '7d'; // Token 有效期
 const CODE_EXPIRES_IN = 300; // 验证码有效期 5 分钟
 
 // 内存存储（开发环境）
 const users = new Map(); // email -> User
 const usersById = new Map(); // id -> User
-const verificationCodes = new Map(); // email -> { code, expiresAt }
+const verificationCodes = new Map(); // email -> { code, expiresAt, sentAt }
+const codeAttempts = new Map(); // email -> { count, resetAt } // 防暴力破解
 
 // 生成随机验证码
 function generateCode() {
@@ -34,9 +40,20 @@ class AuthService {
       throw new Error('邮箱格式不正确');
     }
 
+    // 检查尝试次数（防暴力破解）
+    const attempts = codeAttempts.get(email);
+    const now = Date.now();
+    if (attempts && attempts.resetAt > now) {
+      if (attempts.count >= 5) {
+        throw new Error('验证码尝试次数过多，请稍后再试');
+      }
+    } else {
+      codeAttempts.set(email, { count: 0, resetAt: now + 3600000 }); // 1小时重置
+    }
+
     // 检查频率限制（1分钟内只能发送一次）
     const existing = verificationCodes.get(email);
-    if (existing && existing.expiresAt > Date.now() && existing.sentAt > Date.now() - 60000) {
+    if (existing && existing.expiresAt > now && existing.sentAt > now - 60000) {
       throw new Error('验证码发送过于频繁，请稍后再试');
     }
 
@@ -46,25 +63,25 @@ class AuthService {
     // 存储验证码
     verificationCodes.set(email, {
       code,
-      sentAt: Date.now(),
-      expiresAt: Date.now() + CODE_EXPIRES_IN * 1000
+      sentAt: now,
+      expiresAt: now + CODE_EXPIRES_IN * 1000
     });
 
     // 发送邮件（如果配置了 SMTP）
     try {
       const result = await emailService.sendVerificationCode(email, code);
 
-      // 检查是否是模拟模式
+      // 开发模式：记录到服务器日志，不返回给客户端
       if (result && result.simulated) {
         console.log(`[开发模式] 验证码: ${code}, 邮箱: ${email}`);
-        return { success: true, message: '验证码已生成（开发模式）', devMode: true, code };
+        return { success: true, message: '验证码已生成' };
       }
 
-      return { success: true, message: '验证码已发送', devMode: false };
+      return { success: true, message: '验证码已发送' };
     } catch (emailError) {
       // 邮件服务未配置时，返回开发模式
       console.log(`[开发模式] 验证码: ${code}, 邮箱: ${email}`);
-      return { success: true, message: '验证码已生成（开发模式）', devMode: true, code };
+      return { success: true, message: '验证码已生成' };
     }
   }
 
@@ -73,8 +90,11 @@ class AuthService {
    */
   verifyCode(email, code) {
     const record = verificationCodes.get(email);
+    const attempts = codeAttempts.get(email);
 
     if (!record) {
+      // 记录失败尝试
+      if (attempts) attempts.count++;
       throw new Error('验证码不存在或已过期');
     }
 
@@ -84,11 +104,14 @@ class AuthService {
     }
 
     if (record.code !== code) {
+      // 记录失败尝试
+      if (attempts) attempts.count++;
       throw new Error('验证码错误');
     }
 
-    // 验证成功，删除验证码
+    // 验证成功，删除验证码和尝试记录
     verificationCodes.delete(email);
+    codeAttempts.delete(email);
     return true;
   }
 
@@ -152,7 +175,7 @@ class AuthService {
    * 生成 JWT Token
    */
   generateToken(userId) {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    return jwt.sign({ userId }, JWT_SECRET_VALUE, { expiresIn: JWT_EXPIRES_IN });
   }
 
   /**
@@ -160,7 +183,7 @@ class AuthService {
    */
   verifyToken(token) {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET_VALUE);
       return decoded.userId;
     } catch (error) {
       throw new Error('Token 无效或已过期');
