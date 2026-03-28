@@ -44,9 +44,18 @@ router.post('/content/:type(articles|shares|discussions)/:id/like', contentContr
 
 // ========== 文档 ==========
 const docsController = require('./controllers/docsController');
+const { admin } = require('./middleware/admin');
+
+// 公开路由
 router.get('/docs', docsController.getDocs);
 router.get('/docs/:slug', docsController.getDoc);
 router.get('/docs/search', docsController.searchDocs);
+
+// 管理员路由（需要认证 + 管理员权限）
+router.post('/docs/admin', auth, admin, docsController.createDoc);
+router.put('/docs/admin/:slug', auth, admin, docsController.updateDoc);
+router.delete('/docs/admin/:slug', auth, admin, docsController.deleteDoc);
+router.get('/docs/admin/list', auth, admin, docsController.getAdminDocs);
 
 // ========== 代币 API（GMGN）==========
 const tokenController = require('./controllers/tokenController');

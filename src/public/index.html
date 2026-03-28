@@ -488,6 +488,9 @@
                                 <a href="#" onclick="navigateTo('profile');return false;" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
                                     <i class="fa fa-user w-4"></i>个人中心
                                 </a>
+                                <a href="#" id="adminDocsLink" onclick="navigateTo('admin-docs');return false;" class="hidden items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
+                                    <i class="fa fa-book w-4"></i>文档管理
+                                </a>
                                 <a href="#" onclick="toggleUserMenu();logout();return false;" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
                                     <i class="fa fa-sign-out w-4"></i>登出
                                 </a>
@@ -543,6 +546,39 @@
                         <button onclick="navigateTo('docs')" class="px-8 py-3 rounded-full bg-white text-gray-700 border border-gray-200 hover:border-[#F3BA2F] transition-all">
                             开始学习
                         </button>
+                    </div>
+                </div>
+
+                <!-- 知识库入口（小白友好） -->
+                <div class="glass-card rounded-2xl p-6 mb-8 bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 card-enter" style="animation-delay: 0.05s">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fa fa-graduation-cap text-2xl text-[#F3BA2F]"></i>
+                                <h3 class="text-xl font-bold">新手必看</h3>
+                                <span class="px-2 py-1 rounded-full bg-[#F3BA2F] text-white text-xs">小白入口</span>
+                            </div>
+                            <p class="text-gray-600 mb-4">从零开始学习链上分析，识别风险，掌握工具。学会看数据，不再被割！</p>
+                            <div class="flex flex-wrap gap-2">
+                                <a href="#" onclick="navigateTo('docs');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
+                                    📘 安全基础
+                                </a>
+                                <a href="#" onclick="navigateTo('docs');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
+                                    🔍 代币分析
+                                </a>
+                                <a href="#" onclick="navigateTo('docs');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
+                                    🛠️ 链上工具
+                                </a>
+                                <button onclick="navigateTo('docs')" class="text-sm px-4 py-1.5 rounded-full btn-primary text-white">
+                                    查看全部 →
+                                </button>
+                            </div>
+                        </div>
+                        <div class="hidden md:flex items-center justify-center">
+                            <div class="w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-4xl">
+                                📚
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1053,6 +1089,29 @@
             </div>
         </section>
 
+        <!-- 文档管理页（管理员） -->
+        <section id="page-admin-docs" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <!-- 页头 -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">
+                            <i class="fa fa-book text-[#F3BA2F] mr-2"></i>文档管理
+                        </h1>
+                        <p class="text-gray-500 text-sm">管理知识库文档内容</p>
+                    </div>
+                    <button onclick="openDocModal()" class="btn-primary px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap">
+                        <i class="fa fa-plus mr-2"></i>��建文档
+                    </button>
+                </div>
+
+                <!-- 文档列表 -->
+                <div id="adminDocsList" class="space-y-3">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+        </section>
+
         <!-- 功能建议页 -->
         <section id="page-features" class="page">
             <div class="max-w-6xl mx-auto px-4 py-8">
@@ -1207,6 +1266,64 @@
         </div>
     </div>
 
+    <!-- 文档编辑弹窗（管���员） -->
+    <div id="docModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeDocModal()">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-3xl transform transition-all shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-lg">
+                    <i class="fa fa-book text-[#F3BA2F] mr-2"></i><span id="docModalTitle">创建文档</span>
+                </h3>
+                <button onclick="closeDocModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fa fa-times text-gray-400"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <input type="hidden" id="docSlug">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm text-gray-500 mb-1 block">标题</label>
+                        <input type="text" id="docTitle" placeholder="文档标题" class="input-base w-full">
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-500 mb-1 block">标识 (英文)</label>
+                        <input type="text" id="docSlugInput" placeholder="如: quickstart" class="input-base w-full">
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm text-gray-500 mb-1 block">分类</label>
+                        <select id="docCategory" class="input-base w-full">
+                            <option value="quickstart">快速开始</option>
+                            <option value="security">安全基础</option>
+                            <option value="analysis">代币分析</option>
+                            <option value="tools">链上工具</option>
+                            <option value="trading">交易技巧</option>
+                            <option value="risk">风险管理</option>
+                            <option value="mindset">心态修炼</option>
+                            <option value="advanced">高级教程</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm text-gray-500 mb-1 block">排序</label>
+                        <input type="number" id="docOrder" placeholder="数字越小越靠前" class="input-base w-full" value="999">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">描述</label>
+                    <input type="text" id="docDescription" placeholder="简短描述" class="input-base w-full">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">内容 (Markdown)</label>
+                    <textarea id="docContent" placeholder="# 标题&#10;&#10;内容..." rows="8" class="input-base w-full font-mono text-sm resize-none"></textarea>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeDocModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
+                    <button onclick="submitDoc()" id="docSubmitBtn" class="btn-primary px-5 py-2.5 rounded-xl text-sm">发布</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI 助手悬浮球 -->
     <div id="aiFab" class="ai-fab flex items-center justify-center" onclick="toggleAIChat()">
         <i class="fa fa-robot text-white text-2xl"></i>
@@ -1310,6 +1427,15 @@
         // 初始化路由
         window.addEventListener('DOMContentLoaded', () => {
             initAuth(); // 初始化用户认证
+
+            // 文档导航点击事件绑定
+            document.querySelectorAll('#docs-nav a').forEach(a => {
+                a.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    loadDoc(a.dataset.slug);
+                });
+            });
+
             const hash = window.location.hash.slice(1);
             if (hash) {
                 navigateTo(hash, {}, false);
@@ -1397,6 +1523,7 @@
                 case 'share': renderShares(); break;
                 case 'features': renderFeatures(); break;
                 case 'profile': renderProfile(); break;
+                case 'admin-docs': renderAdminDocs(); break;
                 case 'docs': loadDoc(params.slug || 'quickstart'); break;
             }
         }
@@ -1578,6 +1705,7 @@
             const userAvatar = document.getElementById('userAvatar');
             const userNickname = document.getElementById('userNickname');
             const userPoints = document.getElementById('userPoints');
+            const adminDocsLink = document.getElementById('adminDocsLink');
 
             if (currentUser) {
                 loginBtn.classList.add('hidden');
@@ -1586,6 +1714,12 @@
                 userAvatar.textContent = (currentUser.nickname || 'U')[0].toUpperCase();
                 userNickname.textContent = currentUser.nickname || '用户';
                 userPoints.textContent = currentUser.points || 0;
+
+                // 显示管理员链接
+                if (currentUser.email && (currentUser.email.includes('admin') || currentUser.email.includes('bnbholders'))) {
+                    adminDocsLink.classList.remove('hidden');
+                    adminDocsLink.classList.add('flex');
+                }
             } else {
                 loginBtn.classList.remove('hidden');
                 loggedInUser.classList.add('hidden');
@@ -1817,6 +1951,168 @@
             }
         }
 
+        // ========== 文档管理相关（管理员）==========
+        let editingDocSlug = null;
+
+        async function renderAdminDocs() {
+            // 检查是否为管理员
+            if (!currentUser || !currentUser.email.includes('admin')) {
+                document.getElementById('adminDocsList').innerHTML =
+                    '<div class="text-center text-red-400 py-12"><i class="fa fa-lock text-4xl mb-3 opacity-50"></i><p>需要管理员权限</p></div>';
+                return;
+            }
+
+            const container = document.getElementById('adminDocsList');
+
+            try {
+                const res = await fetch('/api/docs/admin/list', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                const docs = data.data || [];
+
+                if (docs.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-book text-4xl mb-3 opacity-50"></i><p>暂无文档</p></div>';
+                    return;
+                }
+
+                container.innerHTML = docs.map((doc, i) => `
+                    <div class="glass-card rounded-xl p-4 flex items-center justify-between card-enter" style="animation-delay: ${i * 0.05}s">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-sm font-medium">${doc.title}</span>
+                                <span class="text-xs px-2 py-1 rounded-full ${doc.published ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}">
+                                    ${doc.published ? '已发布' : '草稿'}
+                                </span>
+                                <span class="text-xs text-gray-400">/${doc.slug}</span>
+                            </div>
+                            <p class="text-sm text-gray-500">${doc.description || '无描述'}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editDoc('${doc.slug}')" class="p-2 rounded-lg hover:bg-gray-100 transition text-gray-400">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button onclick="deleteDoc('${doc.slug}')" class="p-2 rounded-lg hover:bg-red-100 transition text-gray-400 hover:text-red-500">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<div class="text-center text-red-400 py-12">加载失败</div>';
+            }
+        }
+
+        function openDocModal(slug = null) {
+            editingDocSlug = slug;
+            const modal = document.getElementById('docModal');
+            const title = document.getElementById('docModalTitle');
+
+            if (slug) {
+                title.textContent = '编辑文档';
+                // 加载文档内容
+                fetch(`/api/docs/${slug}`).then(res => res.json()).then(data => {
+                    const doc = data.data;
+                    document.getElementById('docSlug').value = doc.slug;
+                    document.getElementById('docTitle').value = doc.title;
+                    document.getElementById('docSlugInput').value = doc.slug;
+                    document.getElementById('docCategory').value = doc.category || 'other';
+                    document.getElementById('docOrder').value = doc.order || 999;
+                    document.getElementById('docDescription').value = doc.description || '';
+                    document.getElementById('docContent').value = doc.content;
+                    document.getElementById('docSubmitBtn').textContent = '更新';
+                });
+            } else {
+                title.textContent = '创建文档';
+                document.getElementById('docSlug').value = '';
+                document.getElementById('docTitle').value = '';
+                document.getElementById('docSlugInput').value = '';
+                document.getElementById('docCategory').value = 'quickstart';
+                document.getElementById('docOrder').value = '999';
+                document.getElementById('docDescription').value = '';
+                document.getElementById('docContent').value = '';
+                document.getElementById('docSubmitBtn').textContent = '发布';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeDocModal() {
+            document.getElementById('docModal').classList.add('hidden');
+            editingDocSlug = null;
+        }
+
+        function editDoc(slug) {
+            openDocModal(slug);
+        }
+
+        async function submitDoc() {
+            const slug = document.getElementById('docSlugInput').value.trim() || editingDocSlug;
+            const title = document.getElementById('docTitle').value.trim();
+            const category = document.getElementById('docCategory').value;
+            const order = parseInt(document.getElementById('docOrder').value) || 999;
+            const description = document.getElementById('docDescription').value.trim();
+            const content = document.getElementById('docContent').value.trim();
+
+            if (!slug || !title || !content) {
+                showToast('请填写必填项', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('docSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = '处理中...';
+
+            try {
+                const endpoint = editingDocSlug ? `/api/docs/admin/${editingDocSlug}` : '/api/docs/admin';
+                const method = editingDocSlug ? 'PUT' : 'POST';
+
+                const res = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ slug, title, content, category, description, order })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(editingDocSlug ? '更新成功' : '创建成功', 'success');
+                    closeDocModal();
+                    renderAdminDocs();
+                } else {
+                    showToast(data.error || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('操作失败', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = editingDocSlug ? '更新' : '发布';
+            }
+        }
+
+        async function deleteDoc(slug) {
+            if (!confirm('确定要删除这篇文档吗？')) return;
+
+            try {
+                const res = await fetch(`/api/docs/admin/${slug}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('删除成功', 'success');
+                    renderAdminDocs();
+                } else {
+                    showToast(data.error || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('删除失败', 'error');
+            }
+        }
+
         // ========== 功能建议相关 ==========
         let currentFeatureFilter = 'all';
         let currentFeatureSort = 'hot';
@@ -2044,14 +2340,6 @@
                 container.innerHTML = '<div class="text-center text-gray-400 py-8">加载失败</div>';
             }
         }
-
-        // 文档导航点击
-        document.querySelectorAll('#docs-nav a').forEach(a => {
-            a.addEventListener('click', (e) => {
-                e.preventDefault();
-                loadDoc(a.dataset.slug);
-            });
-        });
 
         // ========== 发布内容 ==========
         async function submitPost(btn) {
