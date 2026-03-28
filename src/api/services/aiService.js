@@ -1,0 +1,158 @@
+/**
+ * Claude AI 服务
+ * 用于数据分析和知识问答
+ */
+
+const Anthropic = require('@anthropic-ai/sdk');
+
+const API_KEY = process.env.ANTHROPIC_API_KEY;
+
+class AIService {
+  constructor() {
+    this.client = new Anthropic({
+      apiKey: API_KEY
+    });
+  }
+
+  /**
+   * 聊天对话
+   */
+  async chat(message, history = []) {
+    try {
+      const messages = [
+        ...history,
+        { role: 'user', content: message }
+      ];
+
+      const response = await this.client.messages.create({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        messages,
+        system: this.getSystemPrompt()
+      });
+
+      return response.content[0].text;
+    } catch (error) {
+      console.error('AI Chat Error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * 分析代币
+   */
+  async analyzeToken(tokenData) {
+    const prompt = this.buildTokenAnalysisPrompt(tokenData);
+
+    const response = await this.client.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+      system: '你是 HOLD 社区的 AI 助手，擅长分析代币和识别风险。'
+    });
+
+    return response.content[0].text;
+  }
+
+  /**
+   * 诊断钱包
+   */
+  async diagnoseWallet(walletData) {
+    const prompt = this.buildWalletDiagnosisPrompt(walletData);
+
+    const response = await this.client.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: prompt }],
+      system: '你是 HOLD 社区的 AI 助手，擅长分析钱包交易行为。'
+    });
+
+    return response.content[0].text;
+  }
+
+  /**
+   * 系统提示词
+   */
+  getSystemPrompt() {
+    return `你是 HOLD 社区的 AI 助手，帮助社区成员学习加密货币知识。
+
+你的特点：
+- 专业：基于数据说话，不瞎猜
+- 客观：分析优缺点，不吹不黑
+- 实用：给出可操作的建议
+- 简洁：直击重点，不绕圈子
+
+你的知识：
+- BSC 链生态
+- GMGN API 数据分析
+- 代币安全检测
+- 交易行为分析
+- 风险识别
+
+回答风格：
+- 简洁明了
+- 用数据和事实说话
+- 给出具体建议
+- 保持中立客观`;
+  }
+
+  /**
+   * 构建代币分析提示词
+   */
+  buildTokenAnalysisPrompt(data) {
+    return `请分析以下代币数据，给出专业评估：
+
+【代币信息】
+名称: ${data.symbol} - ${data.name}
+价格: $${data.price}
+流动性: $${data.liquidity}
+持有人: ${data.holderCount}
+来源: ${data.exchange}
+
+【安全信息】
+蜜罐: ${data.isHoneypot ? '是' : '否'}
+买税: ${data.buyTax}%
+卖税: ${data.sellTax}%
+
+【持仓信息】
+前10持有率: ${data.top10HolderRate}%
+项目方持币: ${data.creatorHoldRate}%
+
+请从以下角度分析：
+1. 安全性评估
+2. 流动性状况
+3. 持仓分布
+4. 风险提示
+5. 操作建议`;
+  }
+
+  /**
+   * 构建钱包诊断提示词
+   */
+  buildWalletDiagnosisPrompt(data) {
+    return `请分析以下钱包的交易行为：
+
+【基本信息】
+地址: ${data.address}
+持仓数量: ${data.holdingCount}
+总价值: $${data.totalValue}
+
+【交易统计】
+交易次数: ${data.transactionCount}
+胜率: ${data.winRate}%
+总盈亏: $${data.totalPnL}
+
+【行为分析】
+追涨次数: ${data.chaseCount}
+止损执行: ${data.stopLossCount}%
+平均持仓时长: ${data.avgHoldTime}
+
+请从以下角度分析：
+1. 交易风格
+2. 主要问题
+3. 改进建议
+4. 修炼等级`;
+  }
+}
+
+module.exports = new AIService();

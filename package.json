@@ -1,0 +1,29 @@
+{
+  "name": "hold-community-portal",
+  "version": "0.1.0",
+  "description": "HOLD 社区门户 - 让 Holders 学会各种知识",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "build": "npm run build:css",
+    "build:css": "tailwindcss -i src/public/css/input.css -o src/public/css/output.css"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "dotenv": "^16.0.3",
+    "node-fetch": "^3.3.1",
+    "ws": "^8.13.0",
+    "postgres": "^3.3.3",
+    "redis": "^4.6.5",
+    "anthropic": "^0.24.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "tailwindcss": "^3.3.0"
+  },
+  "keywords": ["bsc", "hold", "crypto", "community"],
+  "author": "HOLD Community",
+  "license": "MIT"
+}
