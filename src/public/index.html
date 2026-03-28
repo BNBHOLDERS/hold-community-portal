@@ -1905,8 +1905,8 @@
                 userNickname.textContent = currentUser.nickname || '用户';
                 userPoints.textContent = currentUser.points || 0;
 
-                // 显示管理员链接
-                if (currentUser.email && (currentUser.email.includes('admin') || currentUser.email.includes('bnbholders'))) {
+                // 显示管理员链接（基于后端返回的 isAdmin 字段）
+                if (currentUser.isAdmin) {
                     adminDocsLink.classList.remove('hidden');
                     adminDocsLink.classList.add('flex');
                 }
@@ -2145,8 +2145,8 @@
         let editingDocSlug = null;
 
         async function renderAdminDocs() {
-            // 检查是否为管理员
-            if (!currentUser || !currentUser.email.includes('admin')) {
+            // 检查是否为管理员（基于后端返回的 isAdmin 字段）
+            if (!currentUser || !currentUser.isAdmin) {
                 document.getElementById('adminDocsList').innerHTML =
                     '<div class="text-center text-red-400 py-12"><i class="fa fa-lock text-4xl mb-3 opacity-50"></i><p>需要管理员权限</p></div>';
                 return;

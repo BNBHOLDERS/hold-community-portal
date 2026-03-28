@@ -4,6 +4,7 @@
  */
 
 const authService = require('../services/authService');
+const { checkAdmin } = require('../middleware/admin');
 
 /**
  * 发送验证码
@@ -21,8 +22,8 @@ async function sendCode(req, res) {
     res.json({
       success: true,
       message: result.message,
-      // 开发模式返回验证码，生���环境不返回
-      devCode: result.devMode ? result.code : undefined
+      // 仅在明确开发环境且是模拟模式时返回验证码
+      devCode: (process.env.NODE_ENV === 'development' && result.devMode) ? result.code : undefined
     });
   } catch (error) {
     console.error('Send Code Error:', error.message);
@@ -38,7 +39,7 @@ async function register(req, res) {
     const { email, code, nickname } = req.body;
 
     if (!email || !code) {
-      return res.status(400).json({ error: '邮箱和验证��不能为空' });
+      return res.status(400).json({ error: '邮箱和验证码不能为空' });
     }
 
     // 验证验证码
@@ -47,9 +48,15 @@ async function register(req, res) {
     // 注册
     const { user, token } = await authService.register(email, nickname);
 
+    // 添加 isAdmin 字段
+    const userData = {
+      ...user,
+      isAdmin: checkAdmin(user.email)
+    };
+
     res.json({
       success: true,
-      data: { user, token },
+      data: { user: userData, token },
       message: '注册成功'
     });
   } catch (error) {
@@ -75,9 +82,15 @@ async function login(req, res) {
     // 登录
     const { user, token } = await authService.login(email);
 
+    // 添加 isAdmin 字段
+    const userData = {
+      ...user,
+      isAdmin: checkAdmin(user.email)
+    };
+
     res.json({
       success: true,
-      data: { user, token },
+      data: { user: userData, token },
       message: '登录成功'
     });
   } catch (error) {
@@ -126,9 +139,15 @@ async function getMe(req, res) {
       return res.status(404).json({ error: '用户不存在' });
     }
 
+    // 添加 isAdmin 字段
+    const userData = {
+      ...user,
+      isAdmin: checkAdmin(user.email)
+    };
+
     res.json({
       success: true,
-      data: user
+      data: userData
     });
   } catch (error) {
     console.error('Get Me Error:', error.message);

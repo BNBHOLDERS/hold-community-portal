@@ -8,14 +8,10 @@ const { v4: uuidv4 } = require('uuid');
 const redis = require('./redisService');
 const emailService = require('./emailService');
 const dataPersistence = require('./dataPersistenceService');
+const { isAdminEmail } = require('../../config/envValidation');
 
-// JWT 密钥 - 生产环境必须设置环境变量
+// JWT 密钥 - 由 server.js 启动时验证确保存在
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.warn('⚠️  警告: JWT_SECRET 未设置，使用随机密钥（重启后Token将失效）');
-  console.warn('⚠️  请在环境变量中设置 JWT_SECRET 以保持会话持久性');
-}
-const JWT_SECRET_VALUE = JWT_SECRET || require('crypto').randomBytes(64).toString('hex');
 const JWT_EXPIRES_IN = '7d'; // Token 有效期
 const CODE_EXPIRES_IN = 300; // 验证码有效期 5 分钟
 
@@ -231,7 +227,7 @@ class AuthService {
    * 生成 JWT Token
    */
   generateToken(userId) {
-    return jwt.sign({ userId }, JWT_SECRET_VALUE, { expiresIn: JWT_EXPIRES_IN });
+    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
   }
 
   /**
@@ -239,7 +235,7 @@ class AuthService {
    */
   verifyToken(token) {
     try {
-      const decoded = jwt.verify(token, JWT_SECRET_VALUE);
+      const decoded = jwt.verify(token, JWT_SECRET);
       return decoded.userId;
     } catch (error) {
       throw new Error('Token 无效或已过期');
