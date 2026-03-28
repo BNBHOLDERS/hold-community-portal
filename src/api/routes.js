@@ -66,4 +66,35 @@ router.get('/binance/wallet/tokens', binanceWeb3Controller.getWalletTokens);
 router.get('/binance/signals/smart-money', binanceWeb3Controller.getSmartMoney);
 router.get('/binance/market/rank', binanceWeb3Controller.getMarketRank);
 
+// ========== 价格提醒 ==========
+const alertsController = require('./controllers/alertsController');
+
+router.post('/alerts', alertsController.createAlert);
+router.get('/alerts', alertsController.getUserAlerts);
+router.delete('/alerts/:id', alertsController.deleteAlert);
+router.post('/alerts/:id/test', alertsController.testAlert);
+router.get('/alerts/popular', alertsController.getPopularSymbols);
+
+// ========== 系统状态 ==========
+router.get('/system/status', (req, res) => {
+  const aiService = require('./services/aiService');
+  const apiKeys = require('./config/apiKeys');
+  const redis = require('./services/redisService');
+
+  res.json({
+    success: true,
+    data: {
+      ai: aiService.getStatus(),
+      keys: apiKeys.getStatus(),
+      redis: {
+        enabled: redis.enabled,
+        connected: redis.client?.status === 'ready'
+      },
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
 module.exports = router;

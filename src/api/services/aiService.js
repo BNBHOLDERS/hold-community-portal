@@ -1,28 +1,49 @@
 /**
  * Claude AI 服务
  * 用于数据分析和知识问答
+ * 支持多密钥轮换和 Redis 缓存
  */
 
 const Anthropic = require('@anthropic-ai/sdk');
-
-const API_KEY = process.env.ANTHROPIC_API_KEY;
+const apiKeys = require('../config/apiKeys');
+const redis = require('./redisService');
 
 class AIService {
   constructor() {
-    if (API_KEY && API_KEY !== 'your_anthropic_api_key_here') {
-      this.client = new Anthropic({ apiKey: API_KEY });
-    }
+    this.clients = new Map(); // 密钥对应的客户端实例
   }
 
   /**
-   * 聊天对话（支持历史记录）
+   * 获取或创建 Anthropic 客户端
+   */
+  getClient(apiKey) {
+    if (!this.clients.has(apiKey)) {
+      this.clients.set(apiKey, new Anthropic({ apiKey }));
+    }
+    return this.clients.get(apiKey);
+  }
+
+  /**
+   * 聊天对话（支持历史记录、缓存）
    */
   async chat(message, history = []) {
-    if (!this.client) {
+    // 检查缓存
+    const cacheKey = RedisService.keys.AI_CHAT(message);
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      console.log('AI Chat 缓存命中');
+      return cached;
+    }
+
+    // 获取 API 密钥
+    const apiKey = apiKeys.getNextAnthropicKey();
+    if (!apiKey) {
       throw new Error('Anthropic API key not configured');
     }
 
     try {
+      const client = this.getClient(apiKey);
+
       // 构建消息列表
       const messages = [
         ...history.map(h => ({
@@ -32,14 +53,19 @@ class AIService {
         { role: 'user', content: message }
       ];
 
-      const response = await this.client.messages.create({
+      const response = await client.messages.create({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1024,
         messages,
         system: this.getSystemPrompt()
       });
 
-      return response.content[0].text;
+      const reply = response.content[0].text;
+
+      // 缓存结果（1小时）
+      await redis.set(cacheKey, reply, 3600);
+
+      return reply;
     } catch (error) {
       console.error('AI Chat Error:', error.message);
       throw error;
@@ -50,13 +76,14 @@ class AIService {
    * 分析代币
    */
   async analyzeToken(tokenData) {
-    if (!this.client) {
+    const apiKey = apiKeys.getRandomAnthropicKey();
+    if (!apiKey) {
       throw new Error('Anthropic API key not configured');
     }
 
     const prompt = this.buildTokenAnalysisPrompt(tokenData);
 
-    const response = await this.client.messages.create({
+    const response = await this.getClient(apiKey).messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
@@ -70,13 +97,14 @@ class AIService {
    * 诊断钱包
    */
   async diagnoseWallet(walletData) {
-    if (!this.client) {
+    const apiKey = apiKeys.getRandomAnthropicKey();
+    if (!apiKey) {
       throw new Error('Anthropic API key not configured');
     }
 
     const prompt = this.buildWalletDiagnosisPrompt(walletData);
 
-    const response = await this.client.messages.create({
+    const response = await this.getClient(apiKey).messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
@@ -90,13 +118,14 @@ class AIService {
    * 通用分析
    */
   async analyze(content, type = 'general') {
-    if (!this.client) {
+    const apiKey = apiKeys.getRandomAnthropicKey();
+    if (!apiKey) {
       throw new Error('Anthropic API key not configured');
     }
 
     const systemPrompt = type === 'security' ? '你是安全专家，擅长识别代币风险。' : this.getSystemPrompt();
 
-    const response = await this.client.messages.create({
+    const response = await this.getClient(apiKey).messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 1024,
       messages: [{ role: 'user', content }],
@@ -182,6 +211,17 @@ class AIService {
 2. 主要问题
 3. 改进建议
 4. 修炼等级`;
+  }
+
+  /**
+   * 获取服务状态
+   */
+  getStatus() {
+    return {
+      hasKey: apiKeys.hasAnthropicKey(),
+      keyPool: apiKeys.getStatus().anthropic,
+      cacheEnabled: redis.enabled
+    };
   }
 }
 
