@@ -9,18 +9,26 @@ const API_KEY = process.env.ANTHROPIC_API_KEY;
 
 class AIService {
   constructor() {
-    this.client = new Anthropic({
-      apiKey: API_KEY
-    });
+    if (API_KEY && API_KEY !== 'your_anthropic_api_key_here') {
+      this.client = new Anthropic({ apiKey: API_KEY });
+    }
   }
 
   /**
-   * 聊天对话
+   * 聊天对话（支持历史记录）
    */
   async chat(message, history = []) {
+    if (!this.client) {
+      throw new Error('Anthropic API key not configured');
+    }
+
     try {
+      // 构建消息列表
       const messages = [
-        ...history,
+        ...history.map(h => ({
+          role: h.role === 'assistant' ? 'assistant' : 'user',
+          content: h.content
+        })),
         { role: 'user', content: message }
       ];
 
@@ -42,6 +50,10 @@ class AIService {
    * 分析代币
    */
   async analyzeToken(tokenData) {
+    if (!this.client) {
+      throw new Error('Anthropic API key not configured');
+    }
+
     const prompt = this.buildTokenAnalysisPrompt(tokenData);
 
     const response = await this.client.messages.create({
@@ -58,6 +70,10 @@ class AIService {
    * 诊断钱包
    */
   async diagnoseWallet(walletData) {
+    if (!this.client) {
+      throw new Error('Anthropic API key not configured');
+    }
+
     const prompt = this.buildWalletDiagnosisPrompt(walletData);
 
     const response = await this.client.messages.create({
@@ -65,6 +81,26 @@ class AIService {
       max_tokens: 2048,
       messages: [{ role: 'user', content: prompt }],
       system: '你是 HOLD 社区的 AI 助手，擅长分析钱包交易行为。'
+    });
+
+    return response.content[0].text;
+  }
+
+  /**
+   * 通用分析
+   */
+  async analyze(content, type = 'general') {
+    if (!this.client) {
+      throw new Error('Anthropic API key not configured');
+    }
+
+    const systemPrompt = type === 'security' ? '你是安全专家，擅长识别代币风险。' : this.getSystemPrompt();
+
+    const response = await this.client.messages.create({
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content }],
+      system: systemPrompt
     });
 
     return response.content[0].text;
@@ -107,7 +143,6 @@ class AIService {
 价格: $${data.price}
 流动性: $${data.liquidity}
 持有人: ${data.holderCount}
-来源: ${data.exchange}
 
 【安全信息】
 蜜罐: ${data.isHoneypot ? '是' : '否'}
@@ -141,11 +176,6 @@ class AIService {
 交易次数: ${data.transactionCount}
 胜率: ${data.winRate}%
 总盈亏: $${data.totalPnL}
-
-【行为分析】
-追涨次数: ${data.chaseCount}
-止损执行: ${data.stopLossCount}%
-平均持仓时长: ${data.avgHoldTime}
 
 请从以下角度分析：
 1. 交易风格

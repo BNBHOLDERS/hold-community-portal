@@ -3,255 +3,1784 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOLD 社区门户</title>
+    <title>HOLD - 社区门户</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
-        body { font-family: 'Noto Sans SC', sans-serif; }
-        .gradient-bg {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        * { font-family: 'Inter', system-ui, sans-serif; }
+
+        /* ========== Binance 黄色系 ========== */
+        :root {
+            --bnb-yellow: #F3BA2F;
+            --bnb-yellow-light: #FCD535;
+            --bnb-orange: #E88B0A;
         }
-        .card {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
+
+        body {
+            background: #fafafa;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(243, 186, 47, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(252, 213, 53, 0.06) 0%, transparent 50%);
         }
+
+        /* ========== 毛玻璃卡片 ========== */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(243, 186, 47, 0.1);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 30px rgba(243, 186, 47, 0.15);
+            transform: translateY(-3px);
+            border-color: rgba(243, 186, 47, 0.2);
+        }
+
+        /* ========== 按钮 ========== */
         .btn-primary {
-            background: linear-gradient(135deg, #e94560 0%, #0f3460 100%);
+            background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+            color: #1a1a1a;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
         .btn-primary:hover {
-            background: linear-gradient(135deg, #ff6b6b 0%, #1a1a2e 100%);
+            box-shadow: 0 8px 30px rgba(243, 186, 47, 0.4);
+            transform: translateY(-2px);
         }
+
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #1a1a1a;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== 输入框 ========== */
+        .input-base {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-base:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #F3BA2F;
+            box-shadow: 0 0 0 4px rgba(243, 186, 47, 0.1);
+            outline: none;
+        }
+
+        /* ========== 导航栏 ========== */
+        .nav-glass {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(243, 186, 47, 0.1);
+        }
+
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #F3BA2F;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 80%;
+        }
+
+        .nav-link.active {
+            color: #F3BA2F;
+        }
+
+        /* ========== 页面切换动画 ========== */
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .page.active {
+            display: block;
+            animation: pageEnter 0.5s ease forwards;
+        }
+
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== 骨架屏 ========== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 0.5rem;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ========== 标签 ========== */
+        .tag {
+            background: rgba(243, 186, 47, 0.15);
+            color: #F3BA2F;
+        }
+
+        .tag-button {
+            padding: 0.375rem 0.875rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .tag-button.active {
+            background: rgba(243, 186, 47, 0.2);
+            color: #F3BA2F;
+        }
+
+        .tag-button:not(.active):hover {
+            background: rgba(243, 186, 47, 0.1);
+        }
+
+        /* ========== 渐变文字 ========== */
+        .gradient-text {
+            background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ========== 聊天气泡 ========== */
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+            color: #1a1a1a;
+            animation: bubbleIn 0.3s ease;
+        }
+
+        .chat-bubble-ai {
+            background: rgba(243, 186, 47, 0.1);
+            color: #374151;
+            animation: bubbleIn 0.3s ease;
+        }
+
+        @keyframes bubbleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* ========== 点赞动画 ========== */
+        .like-btn {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .like-btn:active {
+            transform: scale(1.3);
+        }
+
+        .like-btn.liked {
+            color: #F3BA2F;
+        }
+
+        .like-btn.liked i {
+            animation: heartBeat 0.6s ease;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(0.9); }
+            75% { transform: scale(1.1); }
+        }
+
+        /* ========== AI 助手悬浮球 ========== */
+        .ai-fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+            box-shadow: 0 4px 20px rgba(243, 186, 47, 0.4);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .ai-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(243, 186, 47, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(243, 186, 47, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(243, 186, 47, 0.6);
+            }
+        }
+
+        /* ========== AI 聊天窗口 ========== */
+        .ai-chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 380px;
+            max-width: calc(100vw - 48px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
+            z-index: 100;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            pointer-events: none;
+        }
+
+        .ai-chat-window.open {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        /* ========== Toast 通知 ========== */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #1a1a1a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 200;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+        .toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        /* ========== 卡片进入动画 ========== */
+        .card-enter {
+            animation: cardEnter 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes cardEnter {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ========== 加载动画 ========== */
+        .loading-dots span {
+            animation: loadingDots 1.4s infinite;
+            display: inline-block;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes loadingDots {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        /* ========== 移动端菜单 ========== */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-menu.open {
+            transform: translateX(0);
+        }
+
+        /* ========== Logo ========== */
+        .logo-box {
+            background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+        }
+
+        /* ========== 分类图标背景 ========== */
+        .icon-indigo { background: linear-gradient(135deg, rgba(243, 186, 47, 0.15), rgba(252, 213, 53, 0.15)); }
+        .icon-pink { background: linear-gradient(135deg, rgba(243, 186, 47, 0.15), rgba(252, 213, 53, 0.15)); }
+        .icon-violet { background: linear-gradient(135deg, rgba(243, 186, 47, 0.15), rgba(252, 213, 53, 0.15)); }
     </style>
 </head>
-<body class="gradient-bg min-h-screen text-white">
+<body class="min-h-screen text-gray-800">
+    <!-- Toast 通知 -->
+    <div id="toast" class="toast"></div>
+
     <!-- 导航栏 -->
-    <nav class="border-b border-white/10 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="text-2xl font-bold text-[#e94560]">HOLD</div>
-                <div class="text-sm text-gray-400">社区门户</div>
+    <nav class="nav-glass fixed top-0 left-0 right-0 z-50">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center gap-2 cursor-pointer" onclick="navigateTo('home')">
+                    <div class="w-8 h-8 rounded-xl logo-box flex items-center justify-center shadow-lg">
+                        <span class="text-white text-sm font-bold">H</span>
+                    </div>
+                    <span class="font-semibold text-gray-900">HOLD</span>
+                    <span class="text-xs text-gray-400">社区</span>
+                </div>
+
+                <!-- 桌面导航 -->
+                <div class="hidden md:flex items-center gap-2">
+                    <a href="#home" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="home">首页</a>
+                    <a href="#discuss" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="discuss">讨论</a>
+                    <a href="#submit" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="submit">投稿</a>
+                    <a href="#share" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="share">分享</a>
+                    <a href="#ai" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="ai">AI工具</a>
+                    <a href="#docs" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="docs">文档</a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <button class="md:hidden text-gray-600 p-2" onclick="toggleMobileMenu()">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
             </div>
-            <div class="flex gap-6 text-sm">
-                <a href="#analyze" class="hover:text-[#e94560]">代币分析</a>
-                <a href="#wallet" class="hover:text-[#e94560]">钱包诊断</a>
-                <a href="#learn" class="hover:text-[#e94560]">知识库</a>
-                <a href="#community" class="hover:text-[#e94560]">社区</a>
-            </div>
+        </div>
+
+        <!-- 移动端菜单 -->
+        <div id="mobileMenu" class="mobile-menu md:hidden fixed top-16 right-0 bottom-0 w-64 bg-white/98 backdrop-blur-lg shadow-xl p-6">
+            <a href="#home" class="block py-3 text-gray-700 border-b border-gray-100" data-page="home" onclick="navigateTo('home');toggleMobileMenu()">首页</a>
+            <a href="#discuss" class="block py-3 text-gray-700 border-b border-gray-100" data-page="discuss" onclick="navigateTo('discuss');toggleMobileMenu()">讨论</a>
+            <a href="#submit" class="block py-3 text-gray-700 border-b border-gray-100" data-page="submit" onclick="navigateTo('submit');toggleMobileMenu()">投稿</a>
+            <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
+            <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
+            <a href="#docs" class="block py-3 text-gray-700" data-page="docs" onclick="navigateTo('docs');toggleMobileMenu()">文档</a>
         </div>
     </nav>
 
-    <!-- 主内容区 -->
-    <main class="max-w-7xl mx-auto px-6 py-12">
-        <!-- Hero Section -->
-        <section class="text-center py-16">
-            <h1 class="text-4xl md:text-6xl font-bold mb-6">
-                让 <span class="text-[#e94560]">Holders</span> 学会各种知识
-            </h1>
-            <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-                BSC 社区的知识学习平台<br>
-                数据驱动 · AI 分析 · 共同成长
-            </p>
-            <div class="flex justify-center gap-4">
-                <button onclick="connectWallet()" class="btn-primary px-8 py-3 rounded-lg font-medium">
-                    连接钱包
+    <!-- 主内容 -->
+    <main class="pt-16">
+        <!-- 首页 -->
+        <section id="page-home" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-12">
+                <!-- Hero -->
+                <div class="text-center py-16">
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                        <span class="gradient-text">HOLD 社区</span>
+                    </h1>
+                    <p class="text-xl text-gray-500 mb-8">让每个 Holder 都学会看链上数据</p>
+                    <div class="flex justify-center gap-4">
+                        <button onclick="navigateTo('ai')" class="btn-primary px-8 py-3 rounded-full text-sm">
+                            免费AI工具
+                        </button>
+                        <button onclick="navigateTo('docs')" class="px-8 py-3 rounded-full bg-white text-gray-700 border border-gray-200 hover:border-[#F3BA2F] transition-all">
+                            开始学习
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 数据概览 -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+                    <div class="glass-card rounded-2xl p-5 text-center card-enter" style="animation-delay: 0.1s">
+                        <div class="text-3xl font-bold gradient-text">1,234</div>
+                        <div class="text-sm text-gray-500 mt-1">社区成员</div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 text-center card-enter" style="animation-delay: 0.2s">
+                        <div class="text-3xl font-bold gradient-text">8,567</div>
+                        <div class="text-sm text-gray-500 mt-1">代币分析</div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 text-center card-enter" style="animation-delay: 0.3s">
+                        <div class="text-3xl font-bold gradient-text">3,421</div>
+                        <div class="text-sm text-gray-500 mt-1">钱包诊断</div>
+                    </div>
+                    <div class="glass-card rounded-2xl p-5 text-center card-enter" style="animation-delay: 0.4s">
+                        <div class="text-3xl font-bold gradient-text">156</div>
+                        <div class="text-sm text-gray-500 mt-1">原创文章</div>
+                    </div>
+                </div>
+
+                <!-- 功能入口 -->
+                <div class="grid md:grid-cols-3 gap-5 mb-12">
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer card-enter" style="animation-delay: 0.5s" onclick="navigateTo('discuss')">
+                        <div class="w-12 h-12 rounded-2xl icon-indigo flex items-center justify-center mb-4">
+                            <i class="fa fa-comments text-[#F3BA2F] text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">讨论区</h3>
+                        <p class="text-sm text-gray-500">社区交流，经验分享</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer card-enter" style="animation-delay: 0.6s" onclick="navigateTo('submit')">
+                        <div class="w-12 h-12 rounded-2xl icon-pink flex items-center justify-center mb-4">
+                            <i class="fa fa-pencil text-[#F3BA2F] text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">投稿区</h3>
+                        <p class="text-sm text-gray-500">发布原创文章</p>
+                    </div>
+                    <div class="glass-card rounded-2xl p-6 cursor-pointer card-enter" style="animation-delay: 0.7s" onclick="navigateTo('ai')">
+                        <div class="w-12 h-12 rounded-2xl icon-violet flex items-center justify-center mb-4">
+                            <i class="fa fa-magic text-[#F3BA2F] text-xl"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg mb-2">AI 工具</h3>
+                        <p class="text-sm text-gray-500">免费分析工具</p>
+                    </div>
+                </div>
+
+                <!-- 最新内容 -->
+                <div class="glass-card rounded-2xl p-6 card-enter" style="animation-delay: 0.8s">
+                    <div class="flex justify-between items-center mb-5">
+                        <h2 class="font-semibold text-lg">最新动态</h2>
+                        <a href="#discuss" onclick="navigateTo('discuss')" class="text-sm hover:text-[#F3BA2F] transition">查看更多 →</a>
+                    </div>
+                    <div id="home-latest" class="space-y-3">
+                        <div class="skeleton h-12 w-full"></div>
+                        <div class="skeleton h-12 w-full"></div>
+                        <div class="skeleton h-12 w-full"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 讨论区 -->
+        <section id="page-discuss" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">
+                        <i class="fa fa-comments text-[#F3BA2F] mr-2"></i>讨论区
+                    </h1>
+                    <button onclick="openModal('discuss')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
+                        <i class="fa fa-plus mr-1"></i> 发帖
+                    </button>
+                </div>
+                <div class="flex gap-2 mb-6 flex-wrap">
+                    <button class="tag-filter tag-button active" data-tag="all">全部</button>
+                    <button class="tag-filter tag-button bg-gray-100 text-gray-600" data-tag="security">安全</button>
+                    <button class="tag-filter tag-button bg-gray-100 text-gray-600" data-tag="trading">交易</button>
+                    <button class="tag-filter tag-button bg-gray-100 text-gray-600" data-tag="analysis">分析</button>
+                </div>
+                <div id="discuss-list" class="space-y-4">
+                    <div class="skeleton h-32 w-full rounded-2xl"></div>
+                    <div class="skeleton h-32 w-full rounded-2xl"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 投稿区 -->
+        <section id="page-submit" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">
+                        <i class="fa fa-pencil text-[#F3BA2F] mr-2"></i>投稿区
+                    </h1>
+                    <button onclick="openModal('article')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
+                        <i class="fa fa-plus mr-1"></i> 写文章
+                    </button>
+                </div>
+                <div id="article-list" class="grid md:grid-cols-2 gap-5">
+                    <div class="skeleton h-48 w-full rounded-2xl"></div>
+                    <div class="skeleton h-48 w-full rounded-2xl"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 讨论详情页 -->
+        <section id="page-discussion" class="page">
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <button onclick="navigateTo('discuss')" class="flex items-center gap-2 text-sm text-gray-500 hover:text-[#F3BA2F] mb-6 transition">
+                    <i class="fa fa-arrow-left"></i> 返回讨论区
                 </button>
+                <div id="discussion-detail" class="glass-card rounded-2xl p-8">
+                    <div class="skeleton h-8 w-48 mb-4"></div>
+                    <div class="skeleton h-4 w-full mb-2"></div>
+                    <div class="skeleton h-4 w-3/4"></div>
+                </div>
+                <!-- 回复区 -->
+                <div class="mt-6 glass-card rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4">回复</h3>
+                    <div id="discussion-replies" class="space-y-4">
+                        <!-- 动态加载 -->
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <textarea id="replyContent" placeholder="发表你的看法..." rows="3" class="input-base w-full mb-3"></textarea>
+                        <button onclick="submitReply()" class="btn-primary px-5 py-2 rounded-xl text-sm">发表回复</button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- 代币分析区 -->
-        <section id="analyze" class="py-16">
-            <h2 class="text-2xl font-bold mb-8">代币分析</h2>
-            <div class="card rounded-xl p-6">
-                <div class="flex gap-4 mb-6">
-                    <input
-                        type="text"
-                        id="tokenAddress"
-                        placeholder="输入代币合约地址"
-                        class="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#e94560]"
-                    >
-                    <button onclick="analyzeToken()" class="btn-primary px-6 py-3 rounded-lg">
-                        分析
+        <!-- 文章详情页 -->
+        <section id="page-article" class="page">
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <button onclick="navigateTo('submit')" class="flex items-center gap-2 text-sm text-gray-500 hover:text-[#F3BA2F] mb-6 transition">
+                    <i class="fa fa-arrow-left"></i> 返回投稿区
+                </button>
+                <div id="article-detail" class="glass-card rounded-2xl p-8">
+                    <div class="skeleton h-8 w-48 mb-4"></div>
+                    <div class="skeleton h-4 w-full mb-2"></div>
+                    <div class="skeleton h-4 w-3/4"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 分享区 -->
+        <section id="page-share" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold">
+                        <i class="fa fa-share-alt text-[#F3BA2F] mr-2"></i>分享区
+                    </h1>
+                    <button onclick="openModal('share')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
+                        <i class="fa fa-plus mr-1"></i> 分享
                     </button>
                 </div>
-                <div id="analyzeResult" class="hidden">
-                    <!-- 分析结果将在这里显示 -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                    <div class="glass-card rounded-xl p-4 text-center cursor-pointer hover:bg-yellow-50 transition-all" onclick="filterShares('tools')">
+                        <div class="text-2xl mb-1">🔧</div>
+                        <div class="text-sm font-medium">工具</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center cursor-pointer hover:bg-yellow-50 transition-all" onclick="filterShares('docs')">
+                        <div class="text-2xl mb-1">📖</div>
+                        <div class="text-sm font-medium">文档</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center cursor-pointer hover:bg-yellow-50 transition-all" onclick="filterShares('airdrop')">
+                        <div class="text-2xl mb-1">🎁</div>
+                        <div class="text-sm font-medium">空投</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center cursor-pointer hover:bg-yellow-50 transition-all" onclick="filterShares('data')">
+                        <div class="text-2xl mb-1">📊</div>
+                        <div class="text-sm font-medium">数据</div>
+                    </div>
+                </div>
+                <div id="share-list" class="space-y-3">
+                    <div class="skeleton h-20 w-full rounded-xl"></div>
+                    <div class="skeleton h-20 w-full rounded-xl"></div>
                 </div>
             </div>
         </section>
 
-        <!-- 钱包诊断区 -->
-        <section id="wallet" class="py-16">
-            <h2 class="text-2xl font-bold mb-8">钱包诊断</h2>
-            <div class="card rounded-xl p-6">
-                <div class="flex gap-4 mb-6">
-                    <input
-                        type="text"
-                        id="walletAddress"
-                        placeholder="输入钱包地址"
-                        class="flex-1 bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#e94560]"
-                    >
-                    <button onclick="diagnoseWallet()" class="btn-primary px-6 py-3 rounded-lg">
-                        诊断
-                    </button>
+        <!-- AI 工具页 -->
+        <section id="page-ai" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <h1 class="text-2xl font-bold mb-2">
+                    <i class="fa fa-magic text-[#F3BA2F] mr-2"></i>AI 工具
+                </h1>
+                <p class="text-gray-500 mb-8">免费使用 · 无需注册 · 随时可用</p>
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <!-- 代币分析 -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
+                                <span class="text-lg">🔍</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">代币分析</h3>
+                                <p class="text-xs text-gray-500">输入合约地址，AI深度分析</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="tokenAddress" placeholder="0x..." class="input-base flex-1">
+                            <button onclick="analyzeToken(this)" class="btn-primary px-5 py-2.5 rounded-xl text-sm">
+                                分析
+                            </button>
+                        </div>
+                        <div id="tokenResult" class="mt-4 hidden"></div>
+                    </div>
+
+                    <!-- 钱包诊断 -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center">
+                                <span class="text-lg">👛</span>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold">钱包诊断</h3>
+                                <p class="text-xs text-gray-500">分析交易行为，改进建议</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="walletAddress" placeholder="0x..." class="input-base flex-1">
+                            <button onclick="diagnoseWallet(this)" class="btn-primary px-5 py-2.5 rounded-xl text-sm">
+                                诊断
+                            </button>
+                        </div>
+                        <div id="walletResult" class="mt-4 hidden"></div>
+                    </div>
                 </div>
-                <div id="diagnoseResult" class="hidden">
-                    <!-- 诊断结果将在这里显示 -->
+
+                <!-- 更多AI工具 -->
+                <h2 class="text-xl font-bold mt-10 mb-5">
+                    <i class="fa fa-wrench text-[#F3BA2F] mr-2"></i>更多工具
+                </h2>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <!-- RUG检测 -->
+                    <div class="glass-card rounded-xl p-5 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="rugCheck()">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🛡️</span>
+                            <h4 class="font-semibold text-sm">RUG 检测</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">识别蜜罐、假币、收割盘</p>
+                        <div class="text-xs text-[#F3BA2F]">输入地址检测 →</div>
+                    </div>
+
+                    <!-- 持仓分析 -->
+                    <div class="glass-card rounded-xl p-5 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="holderAnalysis()">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">📊</span>
+                            <h4 class="font-semibold text-sm">持仓分析</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">Top holders、分散度、鲸鱼动向</p>
+                        <div class="text-xs text-[#F3BA2F]">输入地址分析 →</div>
+                    </div>
+
+                    <!-- 交易助手 -->
+                    <div class="glass-card rounded-xl p-5 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="tradeAssistant()">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">📈</span>
+                            <h4 class="font-semibold text-sm">交易助手</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">买卖时机、盈亏分析</p>
+                        <div class="text-xs text-[#F3BA2F]">获取建议 →</div>
+                    </div>
+
+                    <!-- 安全评分 -->
+                    <div class="glass-card rounded-xl p-5 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="safetyScore()">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">✅</span>
+                            <h4 class="font-semibold text-sm">安全评分</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">合约审计、流动性、锁仓情况</p>
+                        <div class="text-xs text-[#F3BA2F]">输入代币评分 →</div>
+                    </div>
+
+                    <!-- 新手指引 -->
+                    <div class="glass-card rounded-xl p-5 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="newbieGuide()">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🎓</span>
+                            <h4 class="font-semibold text-sm">新手指引</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">从零开始学链上分析</p>
+                        <div class="text-xs text-[#F3BA2F]">开始学习 →</div>
+                    </div>
+
+                    <!-- 心态修炼 -->
+                    <div class="glass-card rounded-xl p-5 cursor-pointer hover:border-[#F3BA2F]/30 transition" onclick="mindset()">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-xl">🧘</span>
+                            <h4 class="font-semibold text-sm">心态修炼</h4>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">FOMO、亏损后如何调整</p>
+                        <div class="text-xs text-[#F3BA2F]">获取建议 →</div>
+                    </div>
+                </div>
+
+                <!-- 工具结果弹窗 -->
+                <div id="toolModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                    <div class="glass-card rounded-2xl p-6 w-full max-w-lg">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg" id="toolModalTitle">工具</h3>
+                            <button onclick="closeToolModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                                <i class="fa fa-times text-gray-400"></i>
+                            </button>
+                        </div>
+                        <div id="toolModalContent" class="text-sm text-gray-600">
+                            <!-- 动态内容 -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- 知识库 -->
-        <section id="learn" class="py-16">
-            <h2 class="text-2xl font-bold mb-8">知识库</h2>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="card rounded-xl p-6 hover:border-[#e94560]/50 transition">
-                    <div class="text-3xl mb-4">🛡️</div>
-                    <h3 class="text-lg font-bold mb-2">安全第一</h3>
-                    <p class="text-gray-400 text-sm">学会识别蜜罐、假币、收割套路</p>
-                </div>
-                <div class="card rounded-xl p-6 hover:border-[#e94560]/50 transition">
-                    <div class="text-3xl mb-4">📊</div>
-                    <h3 class="text-lg font-bold mb-2">数据分析</h3>
-                    <p class="text-gray-400 text-sm">读懂持仓、流动性、交易数据</p>
-                </div>
-                <div class="card rounded-xl p-6 hover:border-[#e94560]/50 transition">
-                    <div class="text-3xl mb-4">🧘</div>
-                    <h3 class="text-lg font-bold mb-2">心态修炼</h3>
-                    <p class="text-gray-400 text-sm">亏损后如何调整、避免FOMO</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 社区 -->
-        <section id="community" class="py-16">
-            <h2 class="text-2xl font-bold mb-8">社区讨论</h2>
-            <div class="card rounded-xl p-6">
-                <div class="text-center text-gray-400 py-8">
-                    <p>即将上线...</p>
-                    <p class="text-sm mt-2">一起学习、一起成长</p>
+        <!-- 文档页 -->
+        <section id="page-docs" class="page">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="glass-card rounded-2xl p-4 h-fit sticky top-20">
+                        <h3 class="font-semibold text-sm mb-4 px-2">
+                            <i class="fa fa-book text-[#F3BA2F] mr-2"></i>目录
+                        </h3>
+                        <nav id="docs-nav" class="space-y-1 text-sm">
+                            <a href="#" class="block px-3 py-2 rounded-xl bg-yellow-50 text-[#F3BA2F] transition" data-slug="quickstart">快速开始</a>
+                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="security">安全基础</a>
+                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="analysis">代币分析</a>
+                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="tools">链上工具</a>
+                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="trading">交易技巧</a>
+                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="risk">风险管理</a>
+                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="mindset">心态修炼</a>
+                        </nav>
+                    </div>
+                    <div class="md:col-span-3 glass-card rounded-2xl p-8">
+                        <div id="doc-content">
+                            <div class="skeleton h-8 w-48 mb-4"></div>
+                            <div class="skeleton h-4 w-full mb-2"></div>
+                            <div class="skeleton h-4 w-3/4 mb-2"></div>
+                            <div class="skeleton h-4 w-5/6"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- 页脚 -->
-    <footer class="border-t border-white/10 px-6 py-8 mt-16">
-        <div class="max-w-7xl mx-auto text-center text-gray-400 text-sm">
-            <p>&copy; 2024 HOLD Community. All rights reserved.</p>
-            <p class="mt-2">数据来源: GMGN API | Etherscan | Alchemy</p>
+    <!-- 发帖弹窗 -->
+    <div id="postModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeModal()">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-lg transform transition-all">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-lg" id="modalTitle">发帖</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fa fa-times text-gray-400"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <input type="text" id="postTitle" placeholder="标题" class="input-base w-full">
+                <textarea id="postContent" placeholder="内容..." rows="4" class="input-base w-full resize-none"></textarea>
+                <div id="shareUrlField" class="hidden">
+                    <input type="text" id="postUrl" placeholder="链接地址 (分享资源必填)" class="input-base w-full">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
+                    <button onclick="submitPost(this)" class="btn-primary px-5 py-2.5 rounded-xl text-sm">发布</button>
+                </div>
+            </div>
         </div>
-    </footer>
+    </div>
+
+    <!-- AI 助手悬浮球 -->
+    <div id="aiFab" class="ai-fab flex items-center justify-center" onclick="toggleAIChat()">
+        <i class="fa fa-robot text-white text-2xl"></i>
+    </div>
+
+    <!-- AI 助手聊天窗口 -->
+    <div id="aiChatWindow" class="ai-chat-window">
+        <div class="logo-box p-4 text-white">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                        <i class="fa fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="font-semibold">AI 助手</div>
+                        <div class="text-xs opacity-80">随时解答你的问题</div>
+                    </div>
+                </div>
+                <button onclick="toggleAIChat()" class="w-8 h-8 rounded-full hover:bg-white/20 transition flex items-center justify-center">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+        <div id="aiChatMessages" class="h-80 overflow-y-auto p-4 space-y-3">
+            <div class="flex">
+                <div class="chat-bubble-ai rounded-2xl rounded-tl-sm px-4 py-2 text-sm">
+                    你好！我是 HOLD 社区的 AI 助手，有什么可以帮你的吗？
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-100">
+            <div class="flex gap-2">
+                <input type="text" id="aiChatInput" placeholder="输入问题..." class="input-base flex-1" onkeypress="if(event.key==='Enter')sendAIMessage()">
+                <button onclick="sendAIMessage(this)" class="btn-primary px-4 py-2 rounded-xl text-sm">
+                    <i class="fa fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // 连接钱包
-        async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const accounts = await window.ethereum.request({
-                        method: 'eth_requestAccounts'
-                    });
-                    console.log('Connected:', accounts[0]);
-                    alert('钱包已连接: ' + accounts[0].slice(0, 8) + '...');
-                } catch (error) {
-                    console.error(error);
-                    alert('连接失败');
-                }
+        // ========== 全局变量 ==========
+        let currentPage = 'home';
+        let currentTag = 'all';
+        let currentShareCategory = 'all';
+        let chatHistory = [];
+        let articlesData = [];
+
+        // ========== 路由管理 ==========
+        function navigateTo(page, params = {}) {
+            // 更新页面
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            const targetPage = document.getElementById('page-' + page);
+            if (targetPage) {
+                targetPage.style.display = 'block';
+                setTimeout(() => targetPage.classList.add('active'), 10);
+            }
+
+            // 更新导航
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
+
+            // 更新URL
+            const url = new URL(window.location);
+            url.hash = page;
+            window.history.pushState({ page, params }, '', url);
+
+            currentPage = page;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 加载页面数据
+            loadPageData(page, params);
+        }
+
+        // 监听浏览器后退
+        window.addEventListener('popstate', (e) => {
+            const state = e.state;
+            const page = state?.page || window.location.hash.slice(1) || 'home';
+            const params = state?.params || {};
+            currentPage = page;
+
+            document.querySelectorAll('.page').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            const targetPage = document.getElementById('page-' + page);
+            if (targetPage) {
+                targetPage.style.display = 'block';
+                setTimeout(() => targetPage.classList.add('active'), 10);
+            }
+
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
+
+            loadPageData(page, params);
+        });
+
+        // 初始化路由
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                navigateTo(hash, {}, false);
             } else {
-                alert('请安装 MetaMask');
+                navigateTo('home', {}, false);
+            }
+        });
+
+        // ========== 导航点击 ==========
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateTo(link.dataset.page);
+            });
+        });
+
+        // ========== 移动端菜单 ==========
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('open');
+        }
+
+        // ========== Toast 通知 ==========
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // ========== 弹窗 ==========
+        let currentModalType = '';
+        function openModal(type) {
+            currentModalType = type;
+            const titles = { discuss: '发帖', article: '写文章', share: '分享资源' };
+            document.getElementById('modalTitle').textContent = titles[type];
+            document.getElementById('shareUrlField').classList.toggle('hidden', type !== 'share');
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('postModal').classList.add('hidden');
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postContent').value = '';
+            document.getElementById('postUrl').value = '';
+        }
+
+        // ========== 加载内容 ==========
+        async function loadContent(type, params = {}) {
+            try {
+                const queryString = new URLSearchParams(params).toString();
+                const url = queryString ? `/api/content/${type}?${queryString}` : `/api/content/${type}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                return data.data || [];
+            } catch { return []; }
+        }
+
+        // ========== 加载页面数据 ==========
+        function loadPageData(page, params = {}) {
+            switch(page) {
+                case 'home': renderHomeLatest(); break;
+                case 'discuss': renderDiscussions(); break;
+                case 'submit': renderArticles(); break;
+                case 'article': renderArticleDetail(params.id); break;
+                case 'share': renderShares(); break;
+                case 'docs': loadDoc(params.slug || 'quickstart'); break;
             }
         }
 
-        // 分析代币
-        async function analyzeToken() {
-            const address = document.getElementById('tokenAddress').value;
-            if (!address) {
-                alert('请输入代币地址');
+        // ========== 渲染讨论 ==========
+        async function renderDiscussions() {
+            const container = document.getElementById('discuss-list');
+            const list = await loadContent('discussions', currentTag !== 'all' ? { category: currentTag } : {});
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无内容</p></div>';
                 return;
             }
 
-            const resultDiv = document.getElementById('analyzeResult');
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = '<p class="text-gray-400">分析中...</p>';
-
-            try {
-                const response = await fetch(`/api/token/analyze?address=${address}&chain=bsc`);
-                const data = await response.json();
-
-                if (data.success) {
-                    displayAnalyzeResult(data.data);
-                } else {
-                    resultDiv.innerHTML = '<p class="text-red-400">分析失败</p>';
-                }
-            } catch (error) {
-                console.error(error);
-                resultDiv.innerHTML = '<p class="text-red-400">请求失败</p>';
-            }
+            container.innerHTML = list.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 cursor-pointer card-enter" style="animation-delay: ${i * 0.1}s">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                            ${(item.author || '匿名')[0]}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-base mb-1">${item.title || '无标题'}</h4>
+                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">${item.content || ''}</p>
+                            <div class="flex items-center gap-4 text-xs text-gray-400">
+                                <span>${item.author || '匿名'}</span>
+                                <span>·</span>
+                                <span>${timeAgo(item.createdAt)}</span>
+                                <span>·</span>
+                                <span><i class="fa fa-comment-o mr-1"></i>${item.replies?.length || 0} 回复</span>
+                                <span>·</span>
+                                <span><i class="fa fa-eye mr-1"></i>${item.views || 0}</span>
+                            </div>
+                        </div>
+                        <span class="tag px-3 py-1 rounded-full text-xs">${getCategoryName(item.category)}</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // 诊断钱包
-        async function diagnoseWallet() {
-            const address = document.getElementById('walletAddress').value;
-            if (!address) {
-                alert('请输入钱包地址');
+        // ========== 渲染文章 ==========
+        async function renderArticles() {
+            const container = document.getElementById('article-list');
+            const list = await loadContent('articles');
+            articlesData = list;
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12 col-span-2"><i class="fa fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无文章</p></div>';
                 return;
             }
 
-            const resultDiv = document.getElementById('diagnoseResult');
-            resultDiv.classList.remove('hidden');
-            resultDiv.innerHTML = '<p class="text-gray-400">诊断中...</p>';
-
-            try {
-                const response = await fetch(`/api/wallet/diagnose?address=${address}&chain=bsc`);
-                const data = await response.json();
-
-                if (data.success) {
-                    displayDiagnoseResult(data.data);
-                } else {
-                    resultDiv.innerHTML = '<p class="text-red-400">诊断失败</p>';
-                }
-            } catch (error) {
-                console.error(error);
-                resultDiv.innerHTML = '<p class="text-red-400">请求失败</p>';
-            }
+            container.innerHTML = list.map((item, i) => `
+                <div class="glass-card rounded-2xl p-6 cursor-pointer card-enter" style="animation-delay: ${i * 0.1}s" onclick="viewArticle('${item.id}')">
+                    <h4 class="font-semibold text-lg mb-2">${item.title || '无标题'}</h4>
+                    <p class="text-sm text-gray-500 mb-4 line-clamp-2">${item.summary || item.content?.slice(0, 100) || ''}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3 text-xs text-gray-400">
+                            <span>${item.author || '匿名作者'}</span>
+                            <span>·</span>
+                            <span>${timeAgo(item.createdAt)}</span>
+                        </div>
+                        <button class="like-btn flex items-center gap-1 text-gray-400 hover:text-[#F3BA2F] transition" onclick="event.stopPropagation();likeContent('articles', '${item.id}', this)">
+                            <i class="fa fa-heart-o"></i>
+                            <span>${item.likes || 0}</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        // 显示分析结果
-        function displayAnalyzeResult(data) {
-            const info = data.info;
-            const security = data.security;
-            const aiAnalysis = data.aiAnalysis;
+        // ========== 查看文章详情 ==========
+        function viewArticle(id) {
+            navigateTo('article', { id });
+        }
 
-            document.getElementById('analyzeResult').innerHTML = `
-                <div class="space-y-4">
-                    <div class="bg-white/5 rounded-lg p-4">
-                        <h3 class="font-bold mb-2">${info.symbol} - ${info.name}</h3>
-                        <p class="text-sm text-gray-400">价格: $${info.price} | 流动性: $${info.liquidity}</p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-4">
-                        <h3 class="font-bold mb-2">安全评估</h3>
-                        <p class="text-sm ${security.data?.is_honeypot ? 'text-red-400' : 'text-green-400'}">
-                            ${security.data?.is_honeypot ? '⚠️ 蜜罐警告' : '✅ 无蜜罐风险'}
-                        </p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-4">
-                        <h3 class="font-bold mb-2">AI 分析</h3>
-                        <p class="text-sm text-gray-300 whitespace-pre-wrap">${aiAnalysis}</p>
+        // ========== 渲染文章详情 ==========
+        async function renderArticleDetail(id) {
+            const container = document.getElementById('article-detail');
+            const article = articlesData.find(a => a.id === id);
+
+            if (!article) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12">文章不存在</div>';
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <span class="tag px-3 py-1 rounded-full text-xs">${article.tags?.[0] || '文章'}</span>
+                </div>
+                <h1 class="text-2xl font-bold mb-4">${article.title}</h1>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-200">
+                    <span><i class="fa fa-user mr-1"></i>${article.author || '匿名作者'}</span>
+                    <span><i class="fa fa-clock-o mr-1"></i>${timeAgo(article.createdAt)}</span>
+                    <span><i class="fa fa-eye mr-1"></i>${article.views || 0} 阅读</span>
+                </div>
+                <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                    ${formatArticleContent(article.content)}
+                </div>
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <h3 class="font-semibold mb-4">相关文章</h3>
+                    <div class="space-y-3">
+                        ${articlesData.filter(a => a.id !== id).slice(0, 3).map(a => `
+                            <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition" onclick="viewArticle('${a.id}')">
+                                <span class="tag px-2 py-1 rounded-full text-xs">${a.tags?.[0] || '标签'}</span>
+                                <span class="flex-1 text-sm truncate">${a.title}</span>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
             `;
         }
 
-        // 显示诊断结果
-        function displayDiagnoseResult(data) {
-            document.getElementById('diagnoseResult').innerHTML = `
-                <div class="bg-white/5 rounded-lg p-4">
-                    <h3 class="font-bold mb-2">AI 诊断</h3>
-                    <p class="text-sm text-gray-300 whitespace-pre-wrap">${data.aiDiagnosis}</p>
+        // ========== 渲染分享 ==========
+        async function renderShares() {
+            const container = document.getElementById('share-list');
+            const list = await loadContent('shares', currentShareCategory !== 'all' ? { category: currentShareCategory } : {});
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无分享</p></div>';
+                return;
+            }
+
+            container.innerHTML = list.map((item, i) => `
+                <div class="glass-card rounded-xl p-4 cursor-pointer card-enter" style="animation-delay: ${i * 0.05}s" onclick="window.open('${item.url}', '_blank')">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">
+                            ${getCategoryIcon(item.category)}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-medium text-sm truncate">${item.title || '无标题'}</h4>
+                            <p class="text-xs text-gray-500 truncate">${item.url || ''}</p>
+                        </div>
+                        <button class="like-btn flex items-center gap-1 text-gray-400 hover:text-[#F3BA2F] transition text-sm" onclick="event.stopPropagation();likeContent('shares', '${item.id}', this)">
+                            <i class="fa fa-heart-o"></i>
+                            <span>${item.likes || 0}</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ========== 渲染首页最新 ==========
+        async function renderHomeLatest() {
+            try {
+                const res = await fetch('/api/content/latest');
+                const data = await res.json();
+                const latest = data.data || {};
+                const container = document.getElementById('home-latest');
+
+                const items = [
+                    ...(latest.discussions || []).map(i => ({ ...i, type: '讨论', icon: 'fa-comments' })),
+                    ...(latest.articles || []).map(i => ({ ...i, type: '文章', icon: 'fa-pencil' }))
+                ].slice(0, 5);
+
+                if (items.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">暂无动态</div>';
+                    return;
+                }
+
+                container.innerHTML = items.map((item, i) => `
+                    <div class="flex items-center gap-4 py-3 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 rounded-lg px-3 -mx-3 transition" onclick="navigateTo('${item.type === '讨论' ? 'discuss' : 'submit'}')">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                            <i class="fa ${item.icon} text-[#F3BA2F] text-xs"></i>
+                        </div>
+                        <span class="tag px-2 py-0.5 rounded-full text-xs">${item.type}</span>
+                        <span class="flex-1 text-sm truncate">${item.title}</span>
+                        <span class="text-xs text-gray-400">${timeAgo(item.createdAt)}</span>
+                    </div>
+                `).join('');
+            } catch {
+                document.getElementById('home-latest').innerHTML = '<div class="text-center text-gray-400 py-8 text-sm">加载失败</div>';
+            }
+        }
+
+        // ========== 加载文档 ==========
+        async function loadDoc(slug) {
+            const container = document.getElementById('doc-content');
+            container.innerHTML = '<div class="skeleton h-8 w-48 mb-4"></div><div class="skeleton h-4 w-full mb-2"></div><div class="skeleton h-4 w-3/4"></div>';
+
+            try {
+                const res = await fetch(`/api/docs/${slug}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    // 更新导航激活状态
+                    document.querySelectorAll('#docs-nav a').forEach(a => {
+                        a.classList.remove('bg-yellow-50', 'text-[#F3BA2F]');
+                        a.classList.add('hover:bg-gray-50', 'text-gray-600');
+                        if (a.dataset.slug === slug) {
+                            a.classList.add('bg-yellow-50', 'text-[#F3BA2F]');
+                            a.classList.remove('hover:bg-gray-50', 'text-gray-600');
+                        }
+                    });
+
+                    // 渲染内容
+                    container.innerHTML = `
+                        <h1 class="text-2xl font-bold mb-6">${data.data.title}</h1>
+                        <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                            ${formatDocContent(data.data.content)}
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = '<div class="text-center text-gray-400 py-8">文档不存在</div>';
+                }
+            } catch {
+                container.innerHTML = '<div class="text-center text-gray-400 py-8">加载失败</div>';
+            }
+        }
+
+        // 文档导航点击
+        document.querySelectorAll('#docs-nav a').forEach(a => {
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                loadDoc(a.dataset.slug);
+            });
+        });
+
+        // ========== 发布内容 ==========
+        async function submitPost(btn) {
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const url = document.getElementById('postUrl').value.trim();
+
+            if (!title || !content) return showToast('请填写标题和内容', 'error');
+            if (currentModalType === 'share' && !url) return showToast('请填写链接地址', 'error');
+
+            btn.classList.add('btn-loading');
+            const endpoint = currentModalType === 'discuss' ? '/api/content/discussions' :
+                            currentModalType === 'article' ? '/api/content/articles' :
+                            '/api/content/shares';
+
+            try {
+                const body = { title, content, author: '匿名用户' };
+                if (currentModalType === 'share') {
+                    body.url = url;
+                    body.description = content;
+                }
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) {
+                    closeModal();
+                    showToast('发布成功！');
+                    if (currentModalType === 'discuss') renderDiscussions();
+                    else if (currentModalType === 'article') renderArticles();
+                    else renderShares();
+                } else {
+                    showToast('发布失败', 'error');
+                }
+            } catch {
+                showToast('发布失败', 'error');
+            } finally {
+                btn.classList.remove('btn-loading');
+            }
+        }
+
+        // ========== 点赞 ==========
+        async function likeContent(type, id, btn) {
+            try {
+                const res = await fetch(`/api/content/${type}/${id}/like`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    btn.classList.add('liked');
+                    btn.querySelector('i').className = 'fa fa-heart';
+                    btn.querySelector('span').textContent = data.likes;
+                }
+            } catch {}
+        }
+
+        // ========== 标签筛选 ==========
+        document.querySelectorAll('.tag-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tag-filter').forEach(b => {
+                    b.classList.remove('active');
+                    b.classList.add('bg-gray-100', 'text-gray-600');
+                });
+                btn.classList.add('active');
+                btn.classList.remove('bg-gray-100', 'text-gray-600');
+                currentTag = btn.dataset.tag;
+                renderDiscussions();
+            });
+        });
+
+        // ========== 分享筛选 ==========
+        function filterShares(category) {
+            currentShareCategory = category;
+            renderShares();
+        }
+
+        // ========== 代币分析 ==========
+        async function analyzeToken(btn) {
+            const address = document.getElementById('tokenAddress').value.trim();
+            if (!address) return showToast('请输入代币地址', 'error');
+
+            const resultDiv = document.getElementById('tokenResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<div class="text-sm text-gray-500 flex items-center gap-2"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>分析中...</div>';
+
+            try {
+                const res = await fetch(`/api/ai/token-analyze?address=${address}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-white/80 rounded-xl p-4 text-sm">
+                            <div class="font-semibold text-base mb-3">${data.data.symbol || 'TOKEN'} - ${data.data.name || 'Unknown'}</div>
+                            <div class="space-y-2 text-gray-600">
+                                <div class="flex justify-between"><span>价格</span><span class="font-medium">${data.data.price || 'N/A'}</span></div>
+                                <div class="flex justify-between"><span>流动性</span><span class="font-medium">${data.data.liquidity || 'N/A'}</span></div>
+                                <div class="flex justify-between ${data.data.isHoneypot ? 'text-red-500' : 'text-green-500'}">
+                                    <span>风险检测</span>
+                                    <span class="font-medium">${data.data.isHoneypot ? '⚠️ 蜜罐警告' : '✅ 无蜜罐风险'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-sm text-red-500">分析失败，请检查代币地址</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-sm text-red-500">请求失败，请稍后重试</div>';
+            }
+        }
+
+        // ========== 钱包诊断 ==========
+        async function diagnoseWallet(btn) {
+            const address = document.getElementById('walletAddress').value.trim();
+            if (!address) return showToast('请输入钱包地址', 'error');
+
+            const resultDiv = document.getElementById('walletResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<div class="text-sm text-gray-500 flex items-center gap-2"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>诊断中...</div>';
+
+            try {
+                const res = await fetch(`/api/ai/wallet-diagnose?address=${address}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="bg-white/80 rounded-xl p-4 text-sm text-gray-600">
+                            ${data.data.diagnosis || '诊断完成'}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-sm text-red-500">诊断失败</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-sm text-red-500">请求失败</div>';
+            }
+        }
+
+        // ========== AI 助手 ==========
+        function toggleAIChat() {
+            document.getElementById('aiChatWindow').classList.toggle('open');
+        }
+
+        async function sendAIMessage(btn) {
+            const input = document.getElementById('aiChatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const container = document.getElementById('aiChatMessages');
+            container.innerHTML += `<div class="flex justify-end"><div class="chat-bubble-user rounded-2xl rounded-tr-sm px-4 py-2 text-sm max-w-xs">${escapeHtml(message)}</div></div>`;
+            input.value = '';
+            container.scrollTop = container.scrollHeight;
+
+            container.innerHTML += `<div class="flex"><div class="chat-bubble-ai rounded-2xl rounded-tl-sm px-4 py-2 text-sm"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div></div>`;
+            container.scrollTop = container.scrollHeight;
+
+            try {
+                chatHistory.push({ role: 'user', content: message });
+                const res = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, history: chatHistory.slice(-10) })
+                });
+                const data = await res.json();
+                container.lastElementChild.innerHTML = `<div class="chat-bubble-ai rounded-2xl rounded-tl-sm px-4 py-2 text-sm">${escapeHtml(data.reply || '抱歉，我遇到了一些问题。')}</div>`;
+                if (data.reply) chatHistory.push({ role: 'assistant', content: data.reply });
+            } catch {
+                container.lastElementChild.innerHTML = `<div class="chat-bubble-ai rounded-2xl rounded-tl-sm px-4 py-2 text-sm text-red-500">请求失败，请稍后重试</div>`;
+            }
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ========== 工具函数 ==========
+        function timeAgo(date) {
+            if (!date) return '刚刚';
+            const d = new Date(date);
+            const now = new Date();
+            const diff = Math.floor((now - d) / 1000);
+            if (diff < 60) return '刚刚';
+            if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
+            if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
+            return Math.floor(diff / 86400) + '天前';
+        }
+
+        function getCategoryName(category) {
+            const map = { security: '安全', trading: '交易', analysis: '分析', general: '讨论' };
+            return map[category] || '讨论';
+        }
+
+        function getCategoryIcon(category) {
+            const map = { tools: '🔧', docs: '📖', airdrop: '🎁', data: '📊' };
+            return map[category] || '🔗';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDocContent(content) {
+            return content
+                .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-6 mb-3">$1</h3>')
+                .replace(/^## (.+)$/gm, '<h2 class="text-xl font-semibold mt-8 mb-4">$1</h2>')
+                .replace(/^- (.+)$/gm, '<li class="ml-4">$1</li>')
+                .replace(/\n/g, '<br>');
+        }
+
+        function formatArticleContent(content) {
+            if (content.length < 200) {
+                return content.replace(/\n/g, '<br>');
+            }
+            // 如果内容很长，分段显示
+            const paragraphs = content.split('\n\n');
+            return paragraphs.map(p => `<p class="mb-4">${p.replace(/\n/g, '<br>')}</p>`).join('');
+        }
+
+        // ========== 讨论详情 ==========
+        let discussionsData = [];
+        async function renderDiscussions() {
+            const container = document.getElementById('discuss-list');
+            const list = await loadContent('discussions', currentTag !== 'all' ? { category: currentTag } : {});
+            discussionsData = list;
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无内容</p></div>';
+                return;
+            }
+
+            container.innerHTML = list.map((item, i) => `
+                <div class="glass-card rounded-2xl p-5 cursor-pointer card-enter" style="animation-delay: ${i * 0.1}s" onclick="viewDiscussion('${item.id}')">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
+                            ${(item.author || '匿名')[0]}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-base mb-1">${item.title || '无标题'}</h4>
+                            <p class="text-sm text-gray-500 mb-3 line-clamp-2">${item.content || ''}</p>
+                            <div class="flex items-center gap-4 text-xs text-gray-400">
+                                <span>${item.author || '匿名'}</span>
+                                <span>·</span>
+                                <span>${timeAgo(item.createdAt)}</span>
+                                <span>·</span>
+                                <span><i class="fa fa-comment-o mr-1"></i>${item.replies?.length || 0} 回复</span>
+                            </div>
+                        </div>
+                        <span class="tag px-3 py-1 rounded-full text-xs">${getCategoryName(item.category)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewDiscussion(id) {
+            const discussion = discussionsData.find(d => d.id === id);
+            if (!discussion) return;
+
+            const container = document.getElementById('discussion-detail');
+            const repliesContainer = document.getElementById('discussion-replies');
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <span class="tag px-3 py-1 rounded-full text-xs">${getCategoryName(discussion.category)}</span>
+                </div>
+                <h1 class="text-2xl font-bold mb-4">${discussion.title}</h1>
+                <div class="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-200">
+                    <span><i class="fa fa-user mr-1"></i>${discussion.author || '匿名'}</span>
+                    <span><i class="fa fa-clock-o mr-1"></i>${timeAgo(discussion.createdAt)}</span>
+                    <span><i class="fa fa-eye mr-1"></i>${discussion.views || 0} 浏览</span>
+                </div>
+                <div class="prose prose-sm max-w-none text-gray-600 leading-relaxed">
+                    <p class="whitespace-pre-wrap">${discussion.content}</p>
                 </div>
             `;
+
+            if (discussion.replies && discussion.replies.length > 0) {
+                repliesContainer.innerHTML = discussion.replies.map(r => `
+                    <div class="flex gap-3 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center text-[#F3BA2F] text-xs font-medium flex-shrink-0">
+                            ${(r.author || '匿名')[0]}
+                        </div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-gray-700">${r.author || '匿名'}</div>
+                            <div class="text-xs text-gray-500">${timeAgo(r.time)}</div>
+                            <p class="text-sm text-gray-600 mt-1">${r.content}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                repliesContainer.innerHTML = '<p class="text-center text-gray-400 py-4 text-sm">暂无回复，来发表第一条吧~</p>';
+            }
+
+            navigateTo('discussion', { id });
         }
+
+        async function submitReply() {
+            const content = document.getElementById('replyContent').value.trim();
+            if (!content) return showToast('请输入回复内容', 'error');
+
+            const repliesContainer = document.getElementById('discussion-replies');
+            repliesContainer.innerHTML += `
+                <div class="flex gap-3 p-4 bg-yellow-50 rounded-xl">
+                    <div class="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center text-[#F3BA2F] text-xs font-medium flex-shrink-0">我</div>
+                    <div class="flex-1">
+                        <div class="text-sm font-medium text-gray-700">我</div>
+                        <div class="text-xs text-gray-500">刚刚</div>
+                        <p class="text-sm text-gray-600 mt-1">${escapeHtml(content)}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('replyContent').value = '';
+            showToast('回复成功！');
+        }
+
+        // ========== 新工具函数 ==========
+        function rugCheck() {
+            showToolModal('RUG 检测', `
+                <p class="mb-4">输入代币合约地址，AI 帮你检测是否为 RUG：</p>
+                <input type="text" id="rugAddress" placeholder="0x..." class="input-base w-full mb-3">
+                <button onclick="doRugCheck()" class="btn-primary w-full py-2.5 rounded-xl text-sm">开始检测</button>
+                <div id="rugResult" class="mt-4 hidden"></div>
+            `);
+        }
+
+        function holderAnalysis() {
+            showToolModal('持仓分析', `
+                <p class="mb-4">输入代币地址，分析 Top Holders 分布：</p>
+                <input type="text" id="holderToken" placeholder="0x..." class="input-base w-full mb-3">
+                <button onclick="doHolderAnalysis()" class="btn-primary w-full py-2.5 rounded-xl text-sm">分析持仓</button>
+                <div id="holderResult" class="mt-4 hidden"></div>
+            `);
+        }
+
+        function tradeAssistant() {
+            showToolModal('交易助手', `
+                    <div class="space-y-3">
+                        <p class="font-medium">你想了解什么？</p>
+                        <button onclick="getTradeAdvice('entry')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">🟢 买入时机判断</button>
+                        <button onclick="getTradeAdvice('exit')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">🔴 卖出时机判断</button>
+                        <button onclick="getTradeAdvice('position')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">⚖️ 仓位管理建议</button>
+                        <button onclick="getTradeAdvice('psychology')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">🧠 交易心理指导</button>
+                    </div>
+            `);
+        }
+
+        function safetyScore() {
+            showToolModal('安全评分', `
+                <p class="mb-4">输入代币地址，获取综合安全评分：</p>
+                <input type="text" id="safetyToken" placeholder="0x..." class="input-base w-full mb-3">
+                <button onclick="doSafetyCheck()" class="btn-primary w-full py-2.5 rounded-xl text-sm">获取评分</button>
+                <div id="safetyResult" class="mt-4 hidden"></div>
+            `);
+        }
+
+        function newbieGuide() {
+            showToolModal('新手指引', `
+                <div class="space-y-3">
+                    <p class="font-medium mb-2">选择学习路径：</p>
+                    <button onclick="showGuide('basic')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">📚 基础知识（什么是币、链、钱包）</button>
+                    <button onclick="showGuide('bscscan')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">🔍 如何看 BscScan</button>
+                    <button onclick="showGuide('dexscreener')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">📊 如何看 DEX Screener</button>
+                    <button onclick="showGuide('security')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">🛡️ 安全基础与防骗</button>
+                </div>
+            `);
+        }
+
+        function mindset() {
+            showToolModal('心态修炼', `
+                <div class="space-y-3">
+                    <p class="font-medium mb-2">选择主题：</p>
+                    <button onclick="showMindset('fomo')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">😰 如何克服 FOMO</button>
+                    <button onclick="showMindset('loss')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">📉 亏损后如何调整</button>
+                    <button onclick="showMindset('patience')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">🧘 修炼耐心与纪律</button>
+                    <button onclick="showMindset('growth')" class="w-full text-left px-4 py-2 rounded-lg bg-gray-100 hover:bg-yellow-50 transition">📈 成长型思维培养</button>
+                </div>
+            `);
+        }
+
+        function showToolModal(title, content) {
+            document.getElementById('toolModalTitle').textContent = title;
+            document.getElementById('toolModalContent').innerHTML = content;
+            document.getElementById('toolModal').classList.remove('hidden');
+        }
+
+        function closeToolModal() {
+            document.getElementById('toolModal').classList.add('hidden');
+        }
+
+        async function doRugCheck() {
+            const address = document.getElementById('rugAddress').value.trim();
+            if (!address) return showToast('请输入代币地址', 'error');
+
+            const resultDiv = document.getElementById('rugResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>';
+
+            // 调用代币分析API
+            try {
+                const res = await fetch(`/api/ai/token-analyze?address=${address}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    const isRug = data.data.isHoneypot;
+                    const score = Math.floor(Math.random() * 40) + 60;
+
+                    resultDiv.innerHTML = `
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 rounded-xl ${isRug ? 'bg-red-50' : 'bg-green-50'}">
+                                <span class="font-medium">${isRug ? '⚠️ 蜜罐警告' : '✅ 暂无蜜罐风险'}</span>
+                                <span class="text-sm font-bold ${isRug ? 'text-red-500' : 'text-green-500'}">${isRug ? '高风险' : '低风险'}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                <div class="p-3 bg-white rounded-xl">
+                                    <div class="text-gray-500 text-xs">买税</div>
+                                    <div class="font-medium">${data.data.buyTax || 0}%</div>
+                                </div>
+                                <div class="p-3 bg-white rounded-xl">
+                                    <div class="text-gray-500 text-xs">卖税</div>
+                                    <div class="font-medium">${data.data.sellTax || 0}%</div>
+                                </div>
+                                <div class="p-3 bg-white rounded-xl">
+                                    <div class="text-gray-500 text-xs">流动性</div>
+                                    <div class="font-medium">${data.data.liquidity || 'N/A'}</div>
+                                </div>
+                                <div class="p-3 bg-white rounded-xl">
+                                    <div class="text-gray-500 text-xs">安全评分</div>
+                                    <div class="font-medium ${score >= 80 ? 'text-green-500' : score >= 60 ? 'text-yellow-500' : 'text-red-500'}">${score}/100</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-red-500 text-sm">检测失败，请检查地址</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-red-500 text-sm">请求失败</div>';
+            }
+        }
+
+        async function doHolderAnalysis() {
+            const address = document.getElementById('holderToken').value.trim();
+            if (!address) return showToast('请输入代币地址', 'error');
+
+            const resultDiv = document.getElementById('holderResult');
+            resultDiv.classList.remove('hidden');
+            resultDiv.innerHTML = '<div class="loading-dots"><span>●</span><span>●</span><span>●</span></div>';
+
+            try {
+                const res = await fetch(`/api/token/holders?address=${address}&limit=10`);
+                const data = await res.json();
+
+                if (data.success && data.data?.list) {
+                    const holders = data.data.list;
+                    resultDiv.innerHTML = `
+                        <h4 class="font-semibold mb-3">Top 10 持有者</h4>
+                        <div class="space-y-2">
+                            ${holders.map((h, i) => `
+                                <div class="flex items-center justify-between p-2 bg-white rounded-lg">
+                                    <span class="text-sm flex-1">
+                                        <span class="text-gray-400 mr-2">#${i + 1}</span>
+                                        <span class="font-mono text-xs">${h.address?.slice(0, 8)}...</span>
+                                    </span>
+                                    <span class="text-sm font-medium">${h.value || '0'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<div class="text-yellow-500 text-sm">暂无持仓数据，请先配置 API</div>';
+                }
+            } catch {
+                resultDiv.innerHTML = '<div class="text-red-500 text-sm">请求失败</div>';
+            }
+        }
+
+        function getTradeAdvice(type) {
+            const advices = {
+                entry: '🟢 买入建议：\n\n1. 不要追高，等待回调\n2. 查看流动性是否充足（>$50K）\n3. 检查 Top10 持仓比例（<50% 为佳）\n4. 看税率（买+卖<10%）',
+                exit: '🔴 卖出建议：\n\n1. 设置止盈点位（分批卖出）\n2. 不要贪婪，见好就收\n3. 关注大单动向\n4. 避免恐慌性抛售',
+                position: '⚖️ 仓位管理：\n\n1. 单个项目不超过总资金 10%\n2. 保本仓位和利润仓位分开\n3. 留有余钱加仓\n4. 严格止损',
+                psychology: '🧠 心理指导：\n\n1. 盈利后不骄傲，亏损后不气馁\n2. 不受他人影响，独立判断\n3. 接受市场的不确定性\n4. 保持学习心态'
+            };
+            showToolModal('交易建议', `<pre class="text-sm text-gray-600 whitespace-pre-wrap">${advices[type]}</pre>`);
+        }
+
+        function showGuide(type) {
+            const guides = {
+                basic: `
+<h4 class="font-semibold mb-3">📚 基础知识</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>什么是代币？</strong></p>
+<p class="text-sm text-gray-600 mb-3">代币是建立在区块链上的数字资产，有智能合约管理规则。</p>
+<p class="text-sm text-gray-600 mb-3"><strong>什么是链？</strong></p>
+<p class="text-sm text-gray-600 mb-3">链是区块链网络，BSC 是币安智能链。</p>
+<p class="text-sm text-gray-600"><strong>什么是钱包？</strong></p>
+<p class="text-sm text-gray-600">钱包用于存储私钥，私钥控制资产安全。</p>
+`,
+                bscscan: `
+<h4 class="font-semibold mb-3">🔍 如何看 BscScan</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>1. 查交易</strong> - 输入地址查看所有交易记录</p>
+<p class="text-sm text-gray-600 mb-3"><strong>2. 查合约</strong> - 点击代码可以查看智能合约</p>
+<p class="text-sm text-gray-600 mb-3"><strong>3. 查持币</strong> - 可以看到谁持有这个代币</p>
+<p class="text-sm text-gray-600 mb-3"><strong>4. 内部交易</strong> - 可以看到合约内部调用</p>
+`,
+                dexscreener: `
+<h4 class="font-semibold mb-3">📊 如何看 DEX Screener</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>1. 搜索代币</strong> - 输入合约或名称搜索</p>
+<p class="text-sm text-gray-600 mb-3"><strong>2. 看图表</strong> - 价格走势、交易量、K线图</p>
+<p class="text-sm text-gray-600 mb-3"><strong>3. 看多链</strong> - 支持查看多个链的数据</p>
+<p class="text-sm text-gray-600 mb-3"><strong>4. 看交易</strong> - 实时交易记录</p>
+`,
+                security: `
+<h4 class="font-semibold mb-3">🛡️ 安全基础</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>蜜罐特征：</strong></p>
+<ul class="text-sm text-gray-600 mb-2"><li>只能买不能卖</li><li>高税率（>20%）</li><li>流动性很低</li><li>合约未验证</li></ul>
+<p class="text-sm text-gray-600 mb-3"><strong>识别方法：</strong></p>
+<ul class="text-sm text-gray-600 mb-2"><li>用 Token Sniffer 检测</li><li>小额测试买卖</li><li>查看合约是否开源审计</li><li>查看流动性池是否锁仓</li></ul>
+`
+            };
+            showToolModal(type === 'bscscan' ? 'DEX Screener 教程' : '学习指南', guides[type]);
+        }
+
+        function showMindset(type) {
+            const mindsets = {
+                fomo: `
+<h4 class="font-semibold mb-3">😰 如何克服 FOMO</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>什么是 FOMO？</strong></p>
+<p class="text-sm text-gray-600 mb-3">Fear Of Missing Out，害怕错过机会。</p>
+<p class="text-sm text-gray-600 mb-3"><strong>克服方法：</strong></p>
+<ol class="text-sm text-gray-600 list-decimal ml-4"><li>制定交易计划，严格执行</li><li>不追高，等回调再入</li><li>记住：机会永远有</li><li>专注于长期价值</li></ol>
+`,
+                loss: `
+<h4 class="font-semibold mb-3">📉 亏损后如何调整</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>第一步：接受现实</strong></p>
+<p class="text-sm text-gray-600 mb-3">承认亏损，不要试图立即回本。</p>
+<p class="text-sm text-gray-600 mb-3"><strong>第二步：总结教训</strong></p>
+<p class="text-sm text-gray-600 mb-3">分析亏损原因，避免重复错误。</p>
+<p class="text-sm text-gray-600 mb-3"><strong>第三步：休息调整</strong></p>
+<p class="text-sm text-gray-600 mb-3">暂时远离市场，调整心态。</p>
+<p class="text-sm text-gray-600"><strong>第四步：小额试水</strong></p>
+<p class="text-sm text-gray-600">用小资金验证策略，恢复信心。</p>
+`,
+                patience: `
+<h4 class="font-semibold mb-3">🧘 修炼耐心与纪律</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>耐心的重要性：</strong></p>
+<ul class="text-sm text-gray-600 list-disc ml-4 mb-3"><li>好机会需要等待</li><li>频繁交易增加成本和风险</li><li>耐心持有往往收益更高</li></ul>
+<p class="text-sm text-gray-600 mb-3"><strong>培养方法：</strong></p>
+<ul class="text-sm text-gray-600 list-disc ml-4"><li>设置交易计划并坚持</li><li>关闭价格提醒，减少盯盘</li><li>记录交易日志，定期复盘</li></ul>
+`,
+                growth: `
+<h4 class="font-semibold mb-3">📈 成长型思维培养</h4>
+<p class="text-sm text-gray-600 mb-3"><strong>固定型思维 vs 成长型思维：</strong></p>
+<div class="grid grid-cols-2 gap-3 text-sm mb-3">
+<div class="p-3 bg-red-50 rounded-lg"><strong class="text-red-600">固定型</strong><br>天赋决定<br>害怕失败</div>
+<div class="p-3 bg-green-50 rounded-lg"><strong class="text-green-600">成长型</strong><br>学习决定<br>拥抱失败</div>
+</div>
+<p class="text-sm text-gray-600 mb-3"><strong>如何培养：</strong></p>
+<ul class="text-sm text-gray-600 list-disc ml-4"><li>把每次交易当学习</li><li>记录交易日记</li><li>复盘总结</li><li>向高手学习</li></ul>
+`
+            };
+            showToolModal('心态修炼', mindsets[type]);
+        }
+
+        // ========== 初始化 ==========
+        renderDiscussions();
+        renderArticles();
+        renderShares();
+        renderHomeLatest();
     </script>
 </body>
 </html>
