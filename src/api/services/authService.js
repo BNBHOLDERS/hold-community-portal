@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const redis = require('./redisService');
 const emailService = require('./emailService');
+const dataPersistence = require('./dataPersistenceService');
 
 // JWT 密钥 - 生产环境必须设置环境变量
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -18,11 +19,55 @@ const JWT_SECRET_VALUE = JWT_SECRET || require('crypto').randomBytes(64).toStrin
 const JWT_EXPIRES_IN = '7d'; // Token 有效期
 const CODE_EXPIRES_IN = 300; // 验证码有效期 5 分钟
 
-// 内存存储（开发环境）
+// 内存存储
 const users = new Map(); // email -> User
 const usersById = new Map(); // id -> User
 const verificationCodes = new Map(); // email -> { code, expiresAt, sentAt }
 const codeAttempts = new Map(); // email -> { count, resetAt } // 防暴力破解
+
+// 自动保存定时器
+let saveTimer = null;
+const SAVE_INTERVAL = 60000; // 1分钟
+
+// 加载保存的用户数据
+function loadUserData() {
+  try {
+    const data = dataPersistence.loadUsers();
+    if (data.usersByEmail.size > 0) {
+      data.usersByEmail.forEach((value, key) => users.set(key, value));
+      data.usersById.forEach((value, key) => usersById.set(key, value));
+      console.log(`✅ 已加载 ${users.size} 个用户数据`);
+    }
+  } catch (error) {
+    console.error('加载用户数据失败:', error.message);
+  }
+}
+
+// 启动时加载数据
+loadUserData();
+
+// 保存用户数据
+function saveUserData() {
+  try {
+    dataPersistence.saveUsers(users, usersById);
+  } catch (error) {
+    console.error('保存用户数据失败:', error.message);
+  }
+}
+
+// 启动自动保存
+function startAutoSave() {
+  if (saveTimer) return;
+  saveTimer = setInterval(saveUserData, SAVE_INTERVAL);
+}
+
+// 停止自动保存
+function stopAutoSave() {
+  if (saveTimer) {
+    clearInterval(saveTimer);
+    saveTimer = null;
+  }
+}
 
 // 生成随机验证码
 function generateCode() {
@@ -30,6 +75,11 @@ function generateCode() {
 }
 
 class AuthService {
+  constructor() {
+    // 启动自动保存
+    startAutoSave();
+  }
+
   /**
    * 发送验证码
    */
@@ -140,6 +190,9 @@ class AuthService {
     users.set(email, user);
     usersById.set(user.id, user);
 
+    // 立即保存
+    saveUserData();
+
     // 生成 Token
     const token = this.generateToken(user.id);
 
@@ -161,6 +214,9 @@ class AuthService {
 
     // 更新最后登录时间
     user.lastLoginAt = new Date().toISOString();
+
+    // 保存更新
+    saveUserData();
 
     // 生成 Token
     const token = this.generateToken(user.id);
@@ -235,6 +291,9 @@ class AuthService {
     if (updates.nickname) user.nickname = updates.nickname;
     if (updates.avatar) user.avatar = updates.avatar;
 
+    // 保存更新
+    saveUserData();
+
     return user;
   }
 
@@ -261,6 +320,21 @@ class AuthService {
         return acc;
       }, {})
     };
+  }
+
+  /**
+   * 手动保存数据
+   */
+  saveData() {
+    saveUserData();
+  }
+
+  /**
+   * 关闭服务
+   */
+  shutdown() {
+    stopAutoSave();
+    saveUserData();
   }
 }
 

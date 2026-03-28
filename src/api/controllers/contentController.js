@@ -1,10 +1,38 @@
 /**
- * 内容控制器 - 带示例数据
+ * 内容控制器 - 带数据持久化
  * 讨论区、投稿区、分享区
  */
 
-// 示例数据
-const discussions = [
+const dataPersistence = require('../services/dataPersistenceService');
+
+// 加载保存的数据
+function loadContentData() {
+    try {
+        return dataPersistence.loadContent();
+    } catch (error) {
+        console.error('加载内容数据失败:', error.message);
+        return { discussions: [], articles: [], shares: [] };
+    }
+}
+
+// 保存内容数据
+function saveContentData() {
+    try {
+        dataPersistence.saveContent({
+            discussions,
+            articles,
+            shares
+        });
+    } catch (error) {
+        console.error('保存内容数据失败:', error.message);
+    }
+}
+
+// 初始化数据
+const initialData = loadContentData();
+
+// 示例数据（如果没有保存的数据）
+const defaultDiscussions = [
     {
         id: '1',
         title: '如何识别蜜罐代币？',
@@ -14,7 +42,7 @@ const discussions = [
         createdAt: new Date(Date.now() - 3600000),
         replies: [
             { author: '新手小王', content: '学到了，感谢分享！', time: new Date(Date.now() - 1800000) },
-            { author: '币圈老兵', content: '补充一点��还要看流动性池', time: new Date(Date.now() - 900000) }
+            { author: '币圈老兵', content: '补充一点，还要看流动性池', time: new Date(Date.now() - 900000) }
         ],
         views: 234
     },
@@ -42,7 +70,7 @@ const discussions = [
     }
 ];
 
-const articles = [
+const defaultArticles = [
     {
         id: '1',
         title: '新手必看：如何看懂 BscScan',
@@ -78,7 +106,7 @@ const articles = [
     }
 ];
 
-const shares = [
+const defaultShares = [
     {
         id: '1',
         title: 'GMGN - 代币分析平台',
@@ -120,6 +148,16 @@ const shares = [
         likes: 123
     }
 ];
+
+// 使用加载的数据或默认数据
+const discussions = initialData.discussions.length > 0 ? initialData.discussions : defaultDiscussions;
+const articles = initialData.articles.length > 0 ? initialData.articles : defaultArticles;
+const shares = initialData.shares.length > 0 ? initialData.shares : defaultShares;
+
+// 如果是首次运行（使用默认数据），保存一次
+if (initialData.discussions.length === 0) {
+    saveContentData();
+}
 
 /**
  * 获取讨论列表
@@ -170,6 +208,7 @@ async function createDiscussion(req, res) {
         };
 
         discussions.unshift(discussion);
+        saveContentData();
         res.json({ success: true, data: discussion });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -221,6 +260,7 @@ async function createArticle(req, res) {
         };
 
         articles.unshift(article);
+        saveContentData();
         res.json({ success: true, data: article });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -276,6 +316,7 @@ async function createShare(req, res) {
         };
 
         shares.unshift(share);
+        saveContentData();
         res.json({ success: true, data: share });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -322,6 +363,7 @@ async function like(req, res) {
 
         if (item) {
             item.likes = (item.likes || 0) + 1;
+            saveContentData();
             res.json({ success: true, likes: item.likes });
         } else {
             res.status(404).json({ error: '内容不存在' });

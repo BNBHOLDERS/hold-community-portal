@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  hold-portal:
+    build: .
+    container_name: hold-community-portal
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      # JWT 密钥（必须设置）
+      - JWT_SECRET=${JWT_SECRET}
+      # 管理员邮箱（必须设置）
+      - ADMIN_EMAILS=${ADMIN_EMAILS}
+      # Claude AI
+      - ANTHROPIC_API_KEY_1=${ANTHROPIC_API_KEY_1}
+      # GMGN API
+      - GMGN_API_KEY_1=${GMGN_API_KEY_1}
+      # SMTP（可选）
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      # Redis（可选）
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+    volumes:
+      # 持久化数据目录
+      - ./data:/app/data
+      # 备份目录
+      - ./backups:/app/data/backups
+    networks:
+      - hold-network
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis（可选，用于缓存）
+  redis:
+    image: redis:7-alpine
+    container_name: hold-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - hold-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  hold-network:
+    driver: bridge
+
+volumes:
+  redis-data:

@@ -191,6 +191,58 @@ npm run build
 
 ---
 
+## 🐳 Docker 部署 | Docker Deployment
+
+### 快速部署
+
+```bash
+# 1. 配置环境变量
+cp .env.example .env
+# 编辑 .env，设置必需的配置：
+# - JWT_SECRET（必须，至少64字符）
+# - ADMIN_EMAILS（必须，管理员邮箱）
+# - ANTHROPIC_API_KEY_1（必须，Claude API）
+# - GMGN_API_KEY_1（可选，GMGN API）
+
+# 2. 启动服务
+docker-compose up -d
+
+# 3. 查看日志
+docker-compose logs -f hold-portal
+```
+
+### 生产环境建议
+
+```bash
+# 设置强随机 JWT 密钥
+export JWT_SECRET=$(openssl rand -hex 32)
+
+# 使用外部 Redis（可选）
+# 修改 docker-compose.yml 中的 REDIS_URL
+
+# 配置反向代理（Nginx 示例）
+# location / {
+#     proxy_pass http://localhost:3000;
+#     proxy_http_version 1.1;
+#     proxy_set_header Upgrade $http_upgrade;
+#     proxy_set_header Connection 'upgrade';
+#     proxy_set_header Host $host;
+#     proxy_cache_bypass $http_upgrade;
+# }
+```
+
+### 数据备份
+
+```bash
+# 数据存储在 ./data 目录
+# 定期备份此目录即可
+
+# 或使用容器内备份
+docker-compose exec hold-portal sh -c "cd /app/data/backups && .."
+```
+
+---
+
 ## 📄 许可证 | License
 
 MIT © 2026 HOLD Community
