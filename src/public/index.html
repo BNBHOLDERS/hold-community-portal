@@ -463,6 +463,37 @@
                         <i class="fa fa-bolt mr-1"></i>Binance
                     </a>
                     <a href="#docs" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="docs">文档</a>
+
+                    <!-- 用户区域 -->
+                    <div id="userArea" class="ml-2 flex items-center gap-2 relative">
+                        <!-- 未登录 -->
+                        <button onclick="openAuthModal()" id="loginBtn" class="px-4 py-2 rounded-full text-sm font-medium bg-[#F3BA2F] text-white hover:bg-[#E88B0A] transition">
+                            登录 / 注册
+                        </button>
+                        <!-- 已登录 (动态显��) -->
+                        <div id="loggedInUser" class="hidden relative">
+                            <button onclick="toggleUserMenu()" class="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-gray-100 transition">
+                                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-sm font-medium" id="userAvatar">
+                                    U
+                                </div>
+                                <span class="text-sm text-gray-600" id="userNickname">用户</span>
+                                <i class="fa fa-chevron-down text-xs text-gray-400"></i>
+                            </button>
+                            <!-- 用户下拉菜单 -->
+                            <div id="userMenu" class="hidden absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                                <div class="px-4 py-2 border-b border-gray-100 mb-2">
+                                    <div class="text-xs text-gray-400">积分</div>
+                                    <div class="font-semibold text-[#F3BA2F]" id="userPoints">0</div>
+                                </div>
+                                <a href="#" onclick="navigateTo('profile');return false;" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
+                                    <i class="fa fa-user w-4"></i>个人中心
+                                </a>
+                                <a href="#" onclick="toggleUserMenu();logout();return false;" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition">
+                                    <i class="fa fa-sign-out w-4"></i>登出
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 移动端菜单按钮 -->
@@ -967,6 +998,61 @@
             </div>
         </section>
 
+        <!-- 个人中心页 -->
+        <section id="page-profile" class="page">
+            <div class="max-w-3xl mx-auto px-4 py-8">
+                <!-- 用户信息卡片 -->
+                <div class="glass-card rounded-2xl p-6 mb-6">
+                    <div class="flex items-center gap-6">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-white text-2xl font-bold" id="profileAvatar">
+                            U
+                        </div>
+                        <div class="flex-1">
+                            <h2 class="text-xl font-bold mb-1" id="profileNickname">用户</h2>
+                            <p class="text-sm text-gray-400" id="profileEmail">user@example.com</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400">等级</div>
+                            <div class="text-2xl font-bold text-[#F3BA2F]" id="profileLevel">Lv.1</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400">积分</div>
+                            <div class="text-2xl font-bold text-[#F3BA2F]" id="profilePoints">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 徽章 -->
+                <div class="glass-card rounded-2xl p-6 mb-6">
+                    <h3 class="font-semibold mb-4"><i class="fa fa-trophy text-[#F3BA2F] mr-2"></i>我的徽章</h3>
+                    <div id="profileBadges" class="flex flex-wrap gap-3">
+                        <div class="text-gray-400 text-sm">暂无徽章</div>
+                    </div>
+                </div>
+
+                <!-- 账户设置 -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="font-semibold mb-4"><i class="fa fa-cog text-gray-400 mr-2"></i>账户设置</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between py-3 border-b border-gray-100">
+                            <div>
+                                <div class="text-sm font-medium">修改昵称</div>
+                                <div class="text-xs text-gray-400">显示在社区中的名称</div>
+                            </div>
+                            <button onclick="openEditNickname()" class="px-4 py-2 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 transition">修改</button>
+                        </div>
+                        <div class="flex items-center justify-between py-3">
+                            <div>
+                                <div class="text-sm font-medium">登出账户</div>
+                                <div class="text-xs text-gray-400">清除本地登录状态</div>
+                            </div>
+                            <button onclick="logout()" class="px-4 py-2 rounded-lg text-sm bg-red-50 text-red-500 hover:bg-red-100 transition">登出</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- 功能建议页 -->
         <section id="page-features" class="page">
             <div class="max-w-6xl mx-auto px-4 py-8">
@@ -1038,6 +1124,55 @@
                     <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
                     <button onclick="submitPost(this)" class="btn-primary px-5 py-2.5 rounded-xl text-sm">发布</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登录/注册弹窗 -->
+    <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeAuthModal()">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md transform transition-all shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-lg" id="authTitle">
+                    <i class="fa fa-user-circle text-[#F3BA2F] mr-2"></i>登录 / 注册
+                </h3>
+                <button onclick="closeAuthModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fa fa-times text-gray-400"></i>
+                </button>
+            </div>
+
+            <!-- Tab 切换 -->
+            <div class="flex gap-2 mb-5">
+                <button onclick="switchAuthTab('login')" id="loginTab" class="flex-1 py-2 rounded-xl text-sm font-medium bg-[#F3BA2F] text-white transition">登录</button>
+                <button onclick="switchAuthTab('register')" id="registerTab" class="flex-1 py-2 rounded-xl text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition">注册</button>
+            </div>
+
+            <!-- 表单 -->
+            <div class="space-y-4">
+                <input type="email" id="authEmail" placeholder="邮箱地址" class="input-base w-full">
+
+                <div class="flex gap-2">
+                    <input type="text" id="authCode" placeholder="验证码" class="input-base flex-1" maxlength="6">
+                    <button onclick="sendAuthCode()" id="sendCodeBtn" class="px-4 py-2 rounded-xl text-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition whitespace-nowrap">
+                        发送验证码
+                    </button>
+                </div>
+
+                <div id="registerNicknameField" class="hidden">
+                    <input type="text" id="authNickname" placeholder="昵称（可选）" class="input-base w-full">
+                </div>
+
+                <div id="devCodeHint" class="hidden text-xs text-gray-400 bg-yellow-50 p-2 rounded-lg">
+                    <i class="fa fa-info-circle mr-1"></i>
+                    开发模式验证码: <span id="devCodeDisplay" class="font-mono font-bold text-[#F3BA2F]">-</span>
+                </div>
+
+                <button onclick="submitAuth()" id="authSubmitBtn" class="w-full btn-primary py-3 rounded-xl text-sm font-medium">
+                    登录
+                </button>
+
+                <p class="text-xs text-gray-400 text-center">
+                    验证码 5 分钟内有效，无需密码
+                </p>
             </div>
         </div>
     </div>
@@ -1174,6 +1309,7 @@
 
         // 初始化路由
         window.addEventListener('DOMContentLoaded', () => {
+            initAuth(); // 初始化用户认证
             const hash = window.location.hash.slice(1);
             if (hash) {
                 navigateTo(hash, {}, false);
@@ -1260,6 +1396,7 @@
                 case 'article': renderArticleDetail(params.id); break;
                 case 'share': renderShares(); break;
                 case 'features': renderFeatures(); break;
+                case 'profile': renderProfile(); break;
                 case 'docs': loadDoc(params.slug || 'quickstart'); break;
             }
         }
@@ -1398,6 +1535,286 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        // ========== 用户认证相关 ==========
+        let currentUser = null;
+        let authToken = null;
+        let authMode = 'login'; // 'login' or 'register'
+
+        // 初始化：检查本地存储的 Token
+        function initAuth() {
+            const savedToken = localStorage.getItem('hold_token');
+            if (savedToken) {
+                authToken = savedToken;
+                fetchUserInfo();
+            }
+        }
+
+        // 获取用户信息
+        async function fetchUserInfo() {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser = data.data;
+                    updateUserUI();
+                } else {
+                    // Token 无效，清除
+                    logout();
+                }
+            } catch (error) {
+                console.error('Fetch user error:', error);
+            }
+        }
+
+        // 更新用户界面
+        function updateUserUI() {
+            const loginBtn = document.getElementById('loginBtn');
+            const loggedInUser = document.getElementById('loggedInUser');
+            const userAvatar = document.getElementById('userAvatar');
+            const userNickname = document.getElementById('userNickname');
+            const userPoints = document.getElementById('userPoints');
+
+            if (currentUser) {
+                loginBtn.classList.add('hidden');
+                loggedInUser.classList.remove('hidden');
+                loggedInUser.classList.add('flex');
+                userAvatar.textContent = (currentUser.nickname || 'U')[0].toUpperCase();
+                userNickname.textContent = currentUser.nickname || '用户';
+                userPoints.textContent = currentUser.points || 0;
+            } else {
+                loginBtn.classList.remove('hidden');
+                loggedInUser.classList.add('hidden');
+                loggedInUser.classList.remove('flex');
+            }
+        }
+
+        // 切换用户菜单
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 点击其他地方关闭菜单
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('userMenu');
+            const userBtn = document.getElementById('loggedInUser');
+            if (menu && !menu.classList.contains('hidden') && !userBtn?.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // 渲染个人中心
+        function renderProfile() {
+            if (!currentUser) {
+                navigateTo('home');
+                openAuthModal();
+                return;
+            }
+
+            document.getElementById('profileAvatar').textContent = (currentUser.nickname || 'U')[0].toUpperCase();
+            document.getElementById('profileNickname').textContent = currentUser.nickname || '用户';
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('profileLevel').textContent = 'Lv.' + (currentUser.level || 1);
+            document.getElementById('profilePoints').textContent = currentUser.points || 0;
+
+            // 徽章
+            const badgesContainer = document.getElementById('profileBadges');
+            if (currentUser.badges && currentUser.badges.length > 0) {
+                badgesContainer.innerHTML = currentUser.badges.map(badge =>
+                    `<span class="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-600">${badge}</span>`
+                ).join('');
+            } else {
+                badgesContainer.innerHTML = '<div class="text-gray-400 text-sm">暂无徽章，继续探索社区吧！</div>';
+            }
+        }
+
+        // 打开修改昵称弹窗
+        function openEditNickname() {
+            const newNickname = prompt('请输入新昵称：', currentUser.nickname || '');
+            if (newNickname && newNickname.trim()) {
+                updateProfile({ nickname: newNickname.trim() });
+            }
+        }
+
+        // 打开认证弹窗
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        // 关闭认证弹窗
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('authEmail').value = '';
+            document.getElementById('authCode').value = '';
+            document.getElementById('authNickname').value = '';
+            document.getElementById('devCodeHint').classList.add('hidden');
+        }
+
+        // 切换登录/注册 Tab
+        function switchAuthTab(mode) {
+            authMode = mode;
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const nicknameField = document.getElementById('registerNicknameField');
+            const submitBtn = document.getElementById('authSubmitBtn');
+
+            if (mode === 'login') {
+                loginTab.classList.remove('bg-gray-100', 'text-gray-600');
+                loginTab.classList.add('bg-[#F3BA2F]', 'text-white');
+                registerTab.classList.remove('bg-[#F3BA2F]', 'text-white');
+                registerTab.classList.add('bg-gray-100', 'text-gray-600');
+                nicknameField.classList.add('hidden');
+                submitBtn.textContent = '登录';
+            } else {
+                registerTab.classList.remove('bg-gray-100', 'text-gray-600');
+                registerTab.classList.add('bg-[#F3BA2F]', 'text-white');
+                loginTab.classList.remove('bg-[#F3BA2F]', 'text-white');
+                loginTab.classList.add('bg-gray-100', 'text-gray-600');
+                nicknameField.classList.remove('hidden');
+                submitBtn.textContent = '注册';
+            }
+        }
+
+        // 发送验证码
+        async function sendAuthCode() {
+            const email = document.getElementById('authEmail').value.trim();
+            const btn = document.getElementById('sendCodeBtn');
+
+            if (!email) {
+                showToast('请输入邮箱', 'error');
+                return;
+            }
+
+            // 禁用按钮
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+
+            try {
+                const res = await fetch('/api/auth/send-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('验证码已发送', 'success');
+
+                    // 开发模式：显示验证码
+                    if (data.devCode) {
+                        document.getElementById('devCodeHint').classList.remove('hidden');
+                        document.getElementById('devCodeDisplay').textContent = data.devCode;
+                    }
+                } else {
+                    showToast(data.error || '发送失败', 'error');
+                }
+            } catch (error) {
+                showToast('发送失败', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '发送验证码';
+            }
+        }
+
+        // 提交登录/注册
+        async function submitAuth() {
+            const email = document.getElementById('authEmail').value.trim();
+            const code = document.getElementById('authCode').value.trim();
+            const nickname = document.getElementById('authNickname').value.trim();
+
+            if (!email || !code) {
+                showToast('请输入邮箱和验证码', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('authSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = '处理中...';
+
+            try {
+                const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/register';
+                const body = authMode === 'login'
+                    ? { email, code }
+                    : { email, code, nickname };
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    authToken = data.data.token;
+                    currentUser = data.data.user;
+
+                    // 保存 Token
+                    localStorage.setItem('hold_token', authToken);
+
+                    updateUserUI();
+                    closeAuthModal();
+                    showToast(authMode === 'login' ? '登录成功' : '注册成功', 'success');
+                } else {
+                    showToast(data.error || '操作失败', 'error');
+                }
+            } catch (error) {
+                showToast('操作失败', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = authMode === 'login' ? '登录' : '注册';
+            }
+        }
+
+        // 登出
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+            } catch (error) {
+                // 忽略错误
+            }
+
+            currentUser = null;
+            authToken = null;
+            localStorage.removeItem('hold_token');
+            updateUserUI();
+            showToast('已登出', 'success');
+            navigateTo('home');
+        }
+
+        // 更新资料
+        async function updateProfile(updates) {
+            try {
+                const res = await fetch('/api/auth/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(updates)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser = data.data;
+                    updateUserUI();
+                    if (document.getElementById('page-profile').classList.contains('active')) {
+                        renderProfile();
+                    }
+                    showToast('更新成功', 'success');
+                } else {
+                    showToast(data.error || '更新失败', 'error');
+                }
+            } catch (error) {
+                showToast('更新失败', 'error');
+            }
         }
 
         // ========== 功能建议相关 ==========

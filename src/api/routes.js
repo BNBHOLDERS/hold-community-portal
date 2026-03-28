@@ -1,6 +1,18 @@
 const express = require('express');
 const router = express.Router();
 
+// ========== 认证 ==========
+const authController = require('./controllers/authController');
+const { auth, optionalAuth } = require('./middleware/auth');
+
+router.post('/auth/send-code', authController.sendCode);
+router.post('/auth/register', authController.register);
+router.post('/auth/login', authController.login);
+router.post('/auth/logout', authController.logout);
+router.get('/auth/me', auth, authController.getMe);
+router.put('/auth/profile', auth, authController.updateProfile);
+router.get('/auth/stats', authController.getStats);
+
 // ========== AI 工具 ==========
 const aiController = require('./controllers/aiController');
 router.post('/ai/chat', aiController.chat);
