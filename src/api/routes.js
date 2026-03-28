@@ -112,6 +112,16 @@ router.post('/features/requests/:id/status', featureController.updateStatus);
 router.post('/features/requests/:id/comment', featureController.addComment);
 router.get('/features/stats', featureController.getStats);
 
+// ========== 链上活动监控 ==========
+const activityMonitorController = require('./controllers/activityMonitorController');
+
+router.get('/monitor/monitors', activityMonitorController.getMonitors);
+router.post('/monitor/monitors', activityMonitorController.createMonitor);
+router.delete('/monitor/monitors/:id', activityMonitorController.deleteMonitor);
+router.get('/monitor/monitors/:id/activities', activityMonitorController.getMonitorActivities);
+router.post('/monitor/check', activityMonitorController.triggerCheck);
+router.get('/monitor/stats', activityMonitorController.getStats);
+
 // ========== 系统状态 ==========
 router.get('/system/status', (req, res) => {
   const aiService = require('./services/aiService');

@@ -461,6 +461,9 @@
                     <a href="#trending" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="trending">
                         <i class="fa fa-fire text-[#F3BA2F] mr-1"></i>排行
                     </a>
+                    <a href="#monitor" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="monitor">
+                        <i class="fa fa-eye text-[#F3BA2F] mr-1"></i>监控
+                    </a>
                     <a href="#features" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="features">建议</a>
                     <a href="#ai" class="nav-link px-4 py-4 text-sm text-gray-600" data-page="ai">AI工具</a>
                     <a href="#binance" class="nav-link px-4 py-4 text-sm font-medium text-[#F3BA2F]" data-page="binance">
@@ -518,6 +521,9 @@
             <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
             <a href="#trending" class="block py-3 text-gray-700 border-b border-gray-100" data-page="trending" onclick="navigateTo('trending');toggleMobileMenu()">
                 <i class="fa fa-fire text-[#F3BA2F] mr-1"></i>排行榜
+            </a>
+            <a href="#monitor" class="block py-3 text-gray-700 border-b border-gray-100" data-page="monitor" onclick="navigateTo('monitor');toggleMobileMenu()">
+                <i class="fa fa-eye text-[#F3BA2F] mr-1"></i>监控
             </a>
             <a href="#features" class="block py-3 text-gray-700 border-b border-gray-100" data-page="features" onclick="navigateTo('features');toggleMobileMenu()">建议</a>
             <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
@@ -1146,6 +1152,45 @@
             </div>
         </section>
 
+        <!-- 链上监控页 -->
+        <section id="page-monitor" class="page">
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <!-- 页头 -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-2">
+                            <i class="fa fa-eye text-[#F3BA2F] mr-2"></i>链上活动监控
+                        </h1>
+                        <p class="text-gray-500 text-sm">监控地址和代币的链上活动</p>
+                    </div>
+                    <button onclick="openMonitorModal()" class="btn-primary px-5 py-2.5 rounded-full text-sm font-medium">
+                        <i class="fa fa-plus mr-2"></i>创建监控
+                    </button>
+                </div>
+
+                <!-- 统计卡片 -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-[#F3BA2F]" id="monitorTotal">0</div>
+                        <div class="text-xs text-gray-500">监控总数</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-green-500" id="monitorActive">0</div>
+                        <div class="text-xs text-gray-500">活跃中</div>
+                    </div>
+                    <div class="glass-card rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-500" id="monitorActivities">0</div>
+                        <div class="text-xs text-gray-500">活动记录</div>
+                    </div>
+                </div>
+
+                <!-- 监控列表 -->
+                <div id="monitorList" class="space-y-3">
+                    <!-- 动态加载 -->
+                </div>
+            </div>
+        </section>
+
         <!-- 功能建议页 -->
         <section id="page-features" class="page">
             <div class="max-w-6xl mx-auto px-4 py-8">
@@ -1358,6 +1403,37 @@
         </div>
     </div>
 
+    <!-- 监控创建模态框 -->
+    <div id="monitorModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeMonitorModal()">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md transform transition-all shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-semibold text-lg">
+                    <i class="fa fa-eye text-[#F3BA2F] mr-2"></i>创建监控
+                </h3>
+                <button onclick="closeMonitorModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 transition flex items-center justify-center">
+                    <i class="fa fa-times text-gray-400"></i>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">监控类型</label>
+                    <select id="monitorType" class="input-base w-full">
+                        <option value="address">钱包地址</option>
+                        <option value="token">代币合约</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-gray-500 mb-1 block">监控目标</label>
+                    <input type="text" id="monitorTarget" placeholder="0x..." class="input-base w-full">
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeMonitorModal()" class="px-5 py-2.5 rounded-xl text-sm text-gray-600 hover:bg-gray-100 transition">取消</button>
+                    <button onclick="submitMonitor()" class="btn-primary px-5 py-2.5 rounded-xl text-sm">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI 助手悬浮球 -->
     <div id="aiFab" class="ai-fab flex items-center justify-center" onclick="toggleAIChat()">
         <i class="fa fa-robot text-white text-2xl"></i>
@@ -1556,6 +1632,7 @@
                 case 'article': renderArticleDetail(params.id); break;
                 case 'share': renderShares(); break;
                 case 'trending': renderTrending(); break;
+                case 'monitor': renderMonitor(); break;
                 case 'features': renderFeatures(); break;
                 case 'profile': renderProfile(); break;
                 case 'admin-docs': renderAdminDocs(); break;
@@ -2411,6 +2488,114 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // ========== 链上监控 ==========
+        async function renderMonitor() {
+            const container = document.getElementById('monitorList');
+            const res = await fetch('/api/monitor/monitors');
+            const data = await res.json();
+
+            // 更新统计
+            if (data.stats) {
+                document.getElementById('monitorTotal').textContent = data.stats.totalMonitors || 0;
+                document.getElementById('monitorActive').textContent = data.stats.activeMonitors || 0;
+                document.getElementById('monitorActivities').textContent = data.stats.totalActivities || 0;
+            }
+
+            const monitors = data.data || [];
+
+            if (monitors.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fa fa-eye text-4xl mb-3 opacity-50"></i><p>暂无监控，点击上方按钮创建</p></div>';
+                return;
+            }
+
+            container.innerHTML = monitors.map((m, i) => `
+                <div class="glass-card rounded-xl p-4 card-enter" style="animation-delay: ${i * 0.05}s">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full ${m.type === 'token' ? 'bg-yellow-100' : 'bg-blue-100'} flex items-center justify-center">
+                                <i class="fa fa-${m.type === 'token' ? 'coin' : 'wallet'} ${m.type === 'token' ? 'text-yellow-600' : 'text-blue-600'}"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-sm">${m.type === 'token' ? '代币监控' : '地址监控'}</div>
+                                <code class="text-xs text-gray-400">${m.target.slice(0, 10)}...</code>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-1 rounded-full ${m.status === 'active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}">
+                                ${m.status === 'active' ? '活跃' : '已暂停'}
+                            </span>
+                            <button onclick="deleteMonitor('${m.id}')" class="p-2 rounded-lg hover:bg-red-100 transition text-gray-400 hover:text-red-500">
+                                <i class="fa fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <span><i class="fa fa-clock-o mr-1"></i>${m.activityCount || 0} 条活动</span>
+                        <span><i class="fa fa-calendar mr-1"></i>${new Date(m.createdAt).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openMonitorModal() {
+            document.getElementById('monitorModal').classList.remove('hidden');
+        }
+
+        function closeMonitorModal() {
+            document.getElementById('monitorModal').classList.add('hidden');
+            document.getElementById('monitorTarget').value = '';
+        }
+
+        async function submitMonitor() {
+            const type = document.getElementById('monitorType').value;
+            const target = document.getElementById('monitorTarget').value.trim();
+
+            if (!target) {
+                return showToast('请输入监控目标', 'error');
+            }
+
+            if (!/^0x[a-fA-F0-9]{40}$/.test(target)) {
+                return showToast('请输入有效的地址格式', 'error');
+            }
+
+            try {
+                const res = await fetch('/api/monitor/monitors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, target })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('监控创建成功', 'success');
+                    closeMonitorModal();
+                    renderMonitor();
+                } else {
+                    showToast(data.error || '创建失败', 'error');
+                }
+            } catch (error) {
+                showToast('创建失败', 'error');
+            }
+        }
+
+        async function deleteMonitor(id) {
+            if (!confirm('确定要删除这个监控吗？')) return;
+
+            try {
+                const res = await fetch(`/api/monitor/monitors/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('监控已删除', 'success');
+                    renderMonitor();
+                } else {
+                    showToast(data.error || '删除失败', 'error');
+                }
+            } catch (error) {
+                showToast('删除失败', 'error');
+            }
         }
 
         // ========== 渲染首页最新 ==========
