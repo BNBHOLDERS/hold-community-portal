@@ -7,6 +7,7 @@ router.post('/ai/chat', aiController.chat);
 router.get('/ai/token-analyze', aiController.tokenAnalyze);
 router.get('/ai/wallet-diagnose', aiController.walletDiagnose);
 router.post('/ai/analyze', aiController.analyze);
+router.get('/ai/stats', aiController.getQuestionStats);
 
 // ========== 内容管理 ==========
 const contentController = require('./controllers/contentController');

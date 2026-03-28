@@ -5,6 +5,7 @@
 
 const aiService = require('../services/aiService');
 const gmgnService = require('../services/gmgnService');
+const questionAnalytics = require('../services/questionAnalytics');
 
 // 示例 AI 回复（当 API 不可用时使用）
 const sampleResponses = {
@@ -47,10 +48,22 @@ async function chat(req, res) {
     // 尝试调用真实 AI
     try {
       const reply = await aiService.chat(message, history);
+
+      // 记录问题用于分析（异步，不阻塞响应）
+      questionAnalytics.recordQuestion(message, reply).catch(err => {
+        console.error('Question analytics error:', err.message);
+      });
+
       return res.json({ success: true, reply });
     } catch (aiError) {
       // AI 不可用时使用示例回复
       const randomReply = sampleResponses.chat[Math.floor(Math.random() * sampleResponses.chat.length)];
+
+      // 同样记录示例回复
+      questionAnalytics.recordQuestion(message, randomReply).catch(err => {
+        console.error('Question analytics error:', err.message);
+      });
+
       return res.json({
         success: true,
         reply: randomReply + '（示例回复，配置 ANTHROPIC_API_KEY 后生效）'
@@ -216,9 +229,35 @@ async function analyze(req, res) {
   }
 }
 
+/**
+ * 获取问题统计（用于了解用户困难）
+ */
+async function getQuestionStats(req, res) {
+  try {
+    const stats = questionAnalytics.getStats();
+    const painPoints = questionAnalytics.getCurrentPainPoints();
+    const commonQuestions = questionAnalytics.getCommonQuestions(10);
+
+    res.json({
+      success: true,
+      data: {
+        total: stats.total,
+        byType: stats.byType,
+        byDifficulty: stats.byDifficulty,
+        painPoints,
+        commonQuestions
+      }
+    });
+  } catch (error) {
+    console.error('Get Stats Error:', error.message);
+    res.status(500).json({ error: '获取统计失败' });
+  }
+}
+
 module.exports = {
   chat,
   tokenAnalyze,
   walletDiagnose,
-  analyze
+  analyze,
+  getQuestionStats
 };
