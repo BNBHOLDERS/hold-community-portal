@@ -30,7 +30,10 @@ const QUOTA_CONFIG = {
 class UserQuotaService {
     constructor() {
         this.userQuota = new Map(); // 内存缓存 { userId: { daily: { ai_chat: 0, ... }, used: {...} } }
+        this.anonymousQuota = new Map(); // 匿名用户配额 { key: { count } }
+        this.pendingWrites = false; // 待写入标志
         this.loadFromFile();
+        this.startCleanupTimer();
     }
 
     /**
@@ -56,21 +59,79 @@ class UserQuotaService {
         try {
             const data = Object.fromEntries(this.userQuota);
             await dataPersistence.saveUserQuota(data);
+            this.pendingWrites = false;
         } catch (error) {
             console.error('保存用户配额失败:', error.message);
         }
     }
 
     /**
-     * 检查用户是否有配额
+     * 启动清理定时器
      */
-    async checkQuota(userId, apiType) {
+    startCleanupTimer() {
+        // 每小时清理一次过期数据
+        this.cleanupInterval = setInterval(() => {
+            this.cleanupExpiredAnonymousQuota();
+        }, 60 * 60 * 1000);
+
+        // 每30秒批量保存待写入数据
+        this.saveInterval = setInterval(() => {
+            if (this.pendingWrites) {
+                this.saveToFile();
+            }
+        }, 30000);
+    }
+
+    /**
+     * 清理过期的匿名配额记录
+     */
+    cleanupExpiredAnonymousQuota() {
+        if (!this.anonymousQuota) return;
+
+        const today = new Date().toISOString().split('T')[0];
+        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const cleaned = 0;
+
+        for (const [key] of this.anonymousQuota.entries()) {
+            const datePart = key.split(':').pop();
+            // 只保留今天和昨天的数据
+            if (datePart !== yesterday && datePart !== today) {
+                this.anonymousQuota.delete(key);
+                cleaned++;
+            }
+        }
+
+        if (cleaned > 0) {
+            console.log(`[配额] 清理了 ${cleaned} 条过期匿名配额记录`);
+        }
+    }
+
+    /**
+     * 关闭服务时的清理
+     */
+    shutdown() {
+        if (this.cleanupInterval) {
+            clearInterval(this.cleanupInterval);
+        }
+        if (this.saveInterval) {
+            clearInterval(this.saveInterval);
+        }
+        return this.saveToFile();
+    }
+
+    /**
+     * 检查用户是否有配额
+     * @param {string} userId - 用户ID（匿名用户为null）
+     * @param {string} apiType - API类型
+     * @param {string} ipAddress - IP地址（用于匿名用户区分）
+     */
+    async checkQuota(userId, apiType, ipAddress = 'unknown') {
         await this.resetIfNewDay(userId);
 
         const userQuota = this.userQuota.get(userId);
         if (!userQuota) {
-            // 未注册用户使用免费配额
-            return this.checkAnonymousQuota(apiType);
+            // 未注册用户使用免费配额（基于IP区分）
+            return this.checkAnonymousQuota(apiType, ipAddress);
         }
 
         const daily = userQuota.daily;
@@ -86,10 +147,12 @@ class UserQuotaService {
     }
 
     /**
-     * 检查匿名用户配额（基于全局限制）
+     * 检查匿名用户配额（基于IP地址区分）
+     * @param {string} apiType - API类型
+     * @param {string} ipAddress - IP地址
      */
-    checkAnonymousQuota(apiType) {
-        const key = `anonymous:${apiType}`;
+    checkAnonymousQuota(apiType, ipAddress = 'unknown') {
+        const key = `anonymous:${ipAddress}:${apiType}`;
         const today = new Date().toISOString().split('T')[0];
 
         if (!this.anonymousQuota) {
@@ -108,14 +171,17 @@ class UserQuotaService {
 
     /**
      * 记录API调用
+     * @param {string} userId - 用���ID（匿名用户为null）
+     * @param {string} apiType - API类型
+     * @param {string} ipAddress - IP地址（用于匿名用户）
      */
-    async recordUsage(userId, apiType) {
+    async recordUsage(userId, apiType, ipAddress = 'unknown') {
         await this.resetIfNewDay(userId);
 
         if (userId) {
             let userQuota = this.userQuota.get(userId);
             if (!userQuota) {
-                userQuota = { tier: 'free', daily: {}, total: {} };
+                userQuota = { tier: 'authenticated', daily: {}, total: {} };
                 this.userQuota.set(userId, userQuota);
             }
             if (!userQuota.daily) {
@@ -123,10 +189,17 @@ class UserQuotaService {
             }
             userQuota.daily[apiType] = (userQuota.daily[apiType] || 0) + 1;
             userQuota.total[apiType] = (userQuota.total[apiType] || 0) + 1;
-            await this.saveToFile();
+
+            // 标记需要保存，但不立即写入（由定时器批量处理）
+            this.pendingWrites = true;
+
+            // 重要操作（如首次使用）立即保存
+            if (userQuota.daily[apiType] === 1) {
+                await this.saveToFile();
+            }
         } else {
-            // 匿名用户
-            const key = `anonymous:${apiType}`;
+            // 匿名用户 - 使用IP区分
+            const key = `anonymous:${ipAddress}:${apiType}`;
             const today = new Date().toISOString().split('T')[0];
             const fullKey = `${key}:${today}`;
 
@@ -145,8 +218,10 @@ class UserQuotaService {
 
     /**
      * 获取用户配额信息
+     * @param {string} userId - 用户ID（匿名用户为null）
+     * @param {string} ipAddress - IP地址（用于匿名用户统计）
      */
-    async getUserQuota(userId) {
+    async getUserQuota(userId, ipAddress = 'unknown') {
         await this.resetIfNewDay(userId);
 
         // 匿名用户
@@ -157,8 +232,8 @@ class UserQuotaService {
             // 从匿名配额中获取今日使用量
             if (this.anonymousQuota) {
                 for (const [key, record] of this.anonymousQuota.entries()) {
-                    if (key.endsWith(`:${today}`)) {
-                        const apiType = key.split(':')[1];
+                    if (key.includes(`:${ipAddress}:`) && key.endsWith(`:${today}`)) {
+                        const apiType = key.split(':')[2];
                         if (apiType && daily.hasOwnProperty(apiType)) {
                             daily[apiType] = record.count || 0;
                         }
@@ -231,30 +306,73 @@ class UserQuotaService {
     }
 
     /**
-     * 设置用户等级
+     * 初始化新用户配额（注册时调用，无需��限检查）
+     * @param {string} userId - 新用户ID
+     * @param {string} email - 用户邮箱（用于判断是否为管理员）
      */
-    async setUserTier(userId, tier) {
+    async initializeUserQuota(userId, email) {
+        const { isAdminEmail } = require('../../config/envValidation');
+        const isAdmin = isAdminEmail(email);
+
         let userQuota = this.userQuota.get(userId);
         if (!userQuota) {
-            userQuota = { tier: 'free', daily: {}, total: {} };
+            userQuota = {
+                tier: isAdmin ? 'admin' : 'authenticated',
+                daily: this.initDailyQuota(),
+                total: {},
+                isAdmin
+            };
             this.userQuota.set(userId, userQuota);
+        }
+
+        await this.saveToFile();
+    }
+
+    /**
+     * 设置用户等级（仅管理员可调用）
+     * @param {string} requesterId - 请求者的用户ID
+     * @param {string} targetUserId - 目标用户ID
+     * @param {string} tier - 新等级
+     */
+    async setUserTier(requesterId, targetUserId, tier) {
+        // 验证请求者权限
+        const requester = this.userQuota.get(requesterId);
+        if (!requester || this.getUserTier(requester) !== 'admin') {
+            throw new Error('无权限修改用户等级');
+        }
+
+        let userQuota = this.userQuota.get(targetUserId);
+        if (!userQuota) {
+            userQuota = { tier: 'authenticated', daily: {}, total: {} };
+            this.userQuota.set(targetUserId, userQuota);
         }
         userQuota.tier = tier;
         await this.saveToFile();
     }
 
     /**
-     * 设置管理员标记
+     * 设置管理员标记（仅管理员可调用）
+     * @param {string} requesterId - 请求者的用户ID
+     * @param {string} targetUserId - 目标用户ID
+     * @param {boolean} isAdmin - 是否为管理员
      */
-    async setAdmin(userId, isAdmin = true) {
-        let userQuota = this.userQuota.get(userId);
+    async setAdmin(requesterId, targetUserId, isAdmin = true) {
+        // 验证请求者权限
+        const requester = this.userQuota.get(requesterId);
+        if (!requester || this.getUserTier(requester) !== 'admin') {
+            throw new Error('无权限设置管理员');
+        }
+
+        let userQuota = this.userQuota.get(targetUserId);
         if (!userQuota) {
-            userQuota = { tier: 'free', daily: {}, total: {} };
-            this.userQuota.set(userId, userQuota);
+            userQuota = { tier: 'authenticated', daily: {}, total: {} };
+            this.userQuota.set(targetUserId, userQuota);
         }
         userQuota.isAdmin = isAdmin;
         if (isAdmin) {
             userQuota.tier = 'admin';
+        } else if (userQuota.tier === 'admin' && !isAdmin) {
+            userQuota.tier = 'authenticated';
         }
         await this.saveToFile();
     }

@@ -5,6 +5,18 @@
 const API_BASE = '/api';
 
 /**
+ * API 错误类
+ */
+class ApiError extends Error {
+    constructor(code, message, details = {}) {
+        super(message);
+        this.code = code;
+        this.details = details;
+        this.name = 'ApiError';
+    }
+}
+
+/**
  * 通用 API 请求
  */
 async function apiRequest(endpoint, options = {}) {
@@ -25,11 +37,43 @@ async function apiRequest(endpoint, options = {}) {
 
     try {
         const response = await fetch(url, config);
+
+        // 检查 HTTP 状态码
+        if (!response.ok) {
+            if (response.status === 429) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new ApiError('RATE_LIMIT', errorData.error || '请求过于频繁，请稍后再试', errorData.quota || {});
+            }
+            if (response.status === 401) {
+                // Token 过期或无效，清除登录状态
+                localStorage.removeItem('token');
+                if (window.Auth) {
+                    window.Auth.currentUser = null;
+                    window.Auth.isAuthenticated = false;
+                    window.Auth.updateAuthUI();
+                }
+                throw new ApiError('UNAUTHORIZED', '请先登录');
+            }
+            if (response.status === 403) {
+                throw new ApiError('FORBIDDEN', '无权限访问');
+            }
+            throw new ApiError('HTTP_ERROR', `请求失败 (${response.status})`);
+        }
+
         const data = await response.json();
+
+        // 业务逻辑错误
+        if (data.success === false && data.error) {
+            throw new ApiError('BUSINESS_ERROR', data.error, data);
+        }
+
         return data;
     } catch (error) {
+        if (error instanceof ApiError) {
+            throw error;
+        }
         console.error('API Error:', error);
-        throw error;
+        throw new ApiError('NETWORK_ERROR', '网络错误，请检查连接');
     }
 }
 
@@ -51,6 +95,9 @@ const AuthAPI = {
 
     // 获取当前用户
     getMe: () => apiRequest('/auth/me'),
+
+    // 获取用户配额
+    getUserQuota: () => apiRequest('/auth/quota'),
 
     // 登出
     logout: () => apiRequest('/auth/logout', {

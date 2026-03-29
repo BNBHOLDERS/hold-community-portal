@@ -122,7 +122,11 @@ async function analyzeToken(btn) {
         if (resultContainer) {
             resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">分析失败</div>';
         }
-        window.UI?.showToast('分析失败', 'error');
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialog(error.details || {});
+        } else {
+            window.UI?.showToast(error.message || '分析失败', 'error');
+        }
     }
 
     btn.textContent = originalText;
@@ -160,7 +164,11 @@ async function diagnoseWallet(btn) {
         if (resultContainer) {
             resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">诊断失败</div>';
         }
-        window.UI?.showToast('诊断失败', 'error');
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialog(error.details || {});
+        } else {
+            window.UI?.showToast(error.message || '诊断失败', 'error');
+        }
     }
 
     btn.textContent = originalText;
@@ -169,29 +177,31 @@ async function diagnoseWallet(btn) {
 
 // 格式化钱包诊断结果
 function formatWalletResult(data) {
+    const escape = window.UI?.escapeHtml || ((s) => String(s));
     return `
         <div class="space-y-3">
             <div class="p-3 bg-gray-50 rounded-lg">
                 <div class="text-sm text-gray-500">钱包地址</div>
-                <div class="font-mono text-sm">${data.address || 'N/A'}</div>
+                <div class="font-mono text-sm">${escape(data.address || 'N/A')}</div>
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <div class="p-2 bg-gray-50 rounded text-center">
                     <div class="text-xs text-gray-500">交易次数</div>
-                    <div class="font-medium">${data.txCount || '0'}</div>
+                    <div class="font-medium">${escape(String(data.txCount || '0'))}</div>
                 </div>
                 <div class="p-2 bg-gray-50 rounded text-center">
                     <div class="text-xs text-gray-500">首次交易</div>
-                    <div class="font-medium">${data.firstTx || 'N/A'}</div>
+                    <div class="font-medium">${escape(String(data.firstTx || 'N/A'))}</div>
                 </div>
             </div>
-            <div class="text-sm text-gray-600">${data.summary || '暂无分析数据'}</div>
+            <div class="text-sm text-gray-600">${escape(data.summary || '暂无分析数据')}</div>
         </div>
     `;
 }
 
 // 格式化代币分析结果
 function formatTokenResult(data) {
+    const escape = window.UI?.escapeHtml || ((s) => String(s));
     const score = data.score || 0;
     return `
         <div class="space-y-3">
@@ -202,14 +212,14 @@ function formatTokenResult(data) {
             <div class="grid grid-cols-2 gap-2">
                 <div class="p-2 bg-gray-50 rounded text-center">
                     <div class="text-xs text-gray-500">流动性</div>
-                    <div class="font-medium">$${data.liquidity || 'N/A'}</div>
+                    <div class="font-medium">$${escape(String(data.liquidity || 'N/A'))}</div>
                 </div>
                 <div class="p-2 bg-gray-50 rounded text-center">
                     <div class="text-xs text-gray-500">持有人</div>
-                    <div class="font-medium">${data.holders || 'N/A'}</div>
+                    <div class="font-medium">${escape(String(data.holders || 'N/A'))}</div>
                 </div>
             </div>
-            <div class="text-sm text-gray-600">${data.warning || '请自行研究后投资'}</div>
+            <div class="text-sm text-gray-600">${escape(data.warning || '请自行研究后投资')}</div>
         </div>
     `;
 }
@@ -234,7 +244,7 @@ async function doRugCheck() {
                         <span class="font-medium">检测结果</span>
                         <span class="${result.isHoneypot ? 'text-red-500' : 'text-green-500'}">${result.isHoneypot ? '⚠️ 可能是蜜罐' : '✅ 看起来安全'}</span>
                     </div>
-                    <div class="text-sm text-gray-600">${result.warning || result.reason || '请自行研究后投资'}</div>
+                    <div class="text-sm text-gray-600">${window.UI?.escapeHtml(result.warning || result.reason || '请自行研究后投资')}</div>
                 </div>
             `;
         } else {
@@ -242,6 +252,9 @@ async function doRugCheck() {
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialog(error.details || {});
+        }
     }
 }
 
@@ -265,8 +278,8 @@ async function doHolderAnalysis() {
                     ${holders.length > 0 ? holders.map((h, i) => `
                         <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
                             <span class="text-gray-500">#${i + 1}</span>
-                            <span class="flex-1 truncate px-2">${h.address?.slice(0, 8)}...${h.address?.slice(-6)}</span>
-                            <span>${h.percentage || h.balance || '0'}%</span>
+                            <span class="flex-1 truncate px-2">${window.UI?.escapeHtml(h.address?.slice(0, 8))}...${window.UI?.escapeHtml(h.address?.slice(-6))}</span>
+                            <span>${window.UI?.escapeHtml(String(h.percentage || h.balance || '0'))}%</span>
                         </div>
                     `).join('') : '<div class="text-center text-gray-400 py-2">暂无持仓数据</div>'}
                 </div>
@@ -276,6 +289,9 @@ async function doHolderAnalysis() {
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">分析失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialog(error.details || {});
+        }
     }
 }
 
@@ -302,22 +318,22 @@ async function doSafetyCheck() {
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div class="p-2 bg-gray-50 rounded text-center">
                             <div class="text-gray-500">流动性</div>
-                            <div class="font-medium">${data.data.liquidity || 'N/A'}</div>
+                            <div class="font-medium">${window.UI?.escapeHtml(String(data.data.liquidity || 'N/A'))}</div>
                         </div>
                         <div class="p-2 bg-gray-50 rounded text-center">
                             <div class="text-gray-500">持有人</div>
-                            <div class="font-medium">${data.data.holderCount || data.data.holders || 'N/A'}</div>
+                            <div class="font-medium">${window.UI?.escapeHtml(String(data.data.holderCount || data.data.holders || 'N/A'))}</div>
                         </div>
                         <div class="p-2 bg-gray-50 rounded text-center">
                             <div class="text-gray-500">交易税</div>
-                            <div class="font-medium">${data.data.buyTax || data.data.sellTax || 'N/A'}</div>
+                            <div class="font-medium">${window.UI?.escapeHtml(String(data.data.buyTax || data.data.sellTax || 'N/A'))}</div>
                         </div>
                         <div class="p-2 bg-gray-50 rounded text-center">
                             <div class="text-gray-500">合约验证</div>
                             <div class="font-medium ${data.data.verified ? 'text-green-500' : 'text-red-500'}">${data.data.verified ? '✅ 已验证' : '⚠️ 未验证'}</div>
                         </div>
                     </div>
-                    <div class="text-xs text-gray-500">${data.data.warning || '请自行研究后投资'}</div>
+                    <div class="text-xs text-gray-500">${window.UI?.escapeHtml(data.data.warning || '请自行研究后投资')}</div>
                 </div>
             `;
         } else {
@@ -325,6 +341,9 @@ async function doSafetyCheck() {
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检查失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialog(error.details || {});
+        }
     }
 }
 
@@ -536,6 +555,38 @@ function toggleAIChat() {
     }
 }
 
+/**
+ * 显示配额超限对话框
+ */
+function showQuotaExceededDialog(quotaInfo) {
+    const modal = document.getElementById('toolModal');
+    const titleEl = document.getElementById('toolModalTitle');
+    const contentEl = document.getElementById('toolModalContent');
+
+    if (modal && titleEl && contentEl) {
+        titleEl.textContent = '配额已用完';
+        const isAnon = !window.Auth?.isAuthenticated();
+        contentEl.innerHTML = `
+            <div class="py-4 text-center">
+                <div class="text-4xl mb-3">🔋</div>
+                <p class="text-gray-600 mb-4">今日 AI 聊天次数已达上限</p>
+                <div class="bg-gray-50 rounded-lg p-3 mb-4 text-sm">
+                    <div>当前配额: <span class="font-medium">${quotaInfo.remaining?.ai_chat || 0}</span> / ${quotaInfo.limits?.ai_chat || (isAnon ? '5' : '50')} 次</div>
+                </div>
+                ${isAnon ? `
+                    <p class="text-sm text-gray-500 mb-4">登录后可获得更多配额</p>
+                    <button onclick="closeToolModal(); window.Auth?.openAuthModal();" class="btn-primary w-full py-2.5 rounded-xl text-sm">
+                        立即登录
+                    </button>
+                ` : `
+                    <p class="text-sm text-gray-500">配额将在每日 0:00 重置</p>
+                `}
+            </div>
+        `;
+        modal.classList.remove('hidden');
+    }
+}
+
 async function sendAIMessage(btn) {
     const input = document.getElementById('aiChatInput');
     const messagesContainer = document.getElementById('aiChatMessages');
@@ -566,12 +617,8 @@ async function sendAIMessage(btn) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     try {
-        const response = await fetch('/api/ai/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, history: chatHistory })
-        });
-        const data = await response.json();
+        // 使用 API 封装，支持错误处理
+        const data = await window.API.AI.chat(message, chatHistory);
 
         // 移除加载状态
         const typingIndicator = document.getElementById('aiTyping');
@@ -595,7 +642,12 @@ async function sendAIMessage(btn) {
     } catch (error) {
         const typingIndicator = document.getElementById('aiTyping');
         if (typingIndicator) typingIndicator.remove();
-        window.UI?.showToast('消息发送失败', 'error');
+
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialog(error.details || {});
+        } else {
+            window.UI?.showToast(error.message || '消息发送失败', 'error');
+        }
     }
 }
 

@@ -78,7 +78,7 @@ async function getMonitorActivities(req, res) {
         const { id } = req.params;
         const { limit = 50 } = req.query;
 
-        const activities = activityMonitor.getMonitorActivities(id, parseInt(limit));
+        const activities = activityMonitor.getMonitorActivities(id, parseInt(limit, 10));
 
         res.json({
             success: true,

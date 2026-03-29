@@ -173,7 +173,4 @@ router.get('/admin/docs', auth, admin, docsController.getAdminDocs);
 // 功能建议别名
 router.post('/features', featureController.createRequest);
 
-// 用户资料更新支持 PATCH
-router.patch('/auth/profile', auth, authController.updateProfile);
-
 module.exports = router;

@@ -24,12 +24,15 @@ function checkQuota(apiType, requireAuth = false) {
                 });
             }
 
+            // 获取客户端IP用于匿名配额追踪
+            const clientIp = req.ip || 'unknown';
+
             // 检查配额
-            const hasQuota = await userQuotaService.checkQuota(userId, apiType);
+            const hasQuota = await userQuotaService.checkQuota(userId, apiType, clientIp);
 
             if (!hasQuota) {
                 // 获取当前配额信息用于返回
-                const quotaInfo = await userQuotaService.getUserQuota(userId);
+                const quotaInfo = await userQuotaService.getUserQuota(userId, clientIp);
                 const limit = quotaInfo.limits?.[apiType] || 0;
 
                 return res.status(429).json({
@@ -48,16 +51,14 @@ function checkQuota(apiType, requireAuth = false) {
             req.quota = {
                 apiType,
                 userId,
-                tier: userId ? (await userQuotaService.getUserQuota(userId)).tier : 'anonymous'
+                tier: userId ? (await userQuotaService.getUserQuota(userId, clientIp)).tier : 'anonymous'
             };
 
             // 在继续之前设置响应监听器（必须在 next() 之前）
             res.on('finish', async () => {
-                console.log(`[配额] res.statusCode=${res.statusCode}, userId=${userId || 'anonymous'}, apiType=${apiType}`);
                 if (res.statusCode < 400) {
                     try {
-                        await userQuotaService.recordUsage(userId, apiType);
-                        console.log(`[配额] 已记录使用: userId=${userId || 'anonymous'}, apiType=${apiType}`);
+                        await userQuotaService.recordUsage(userId, apiType, clientIp);
                     } catch (err) {
                         console.error('记录配额使用失败:', err.message);
                     }
@@ -67,8 +68,11 @@ function checkQuota(apiType, requireAuth = false) {
             next();
         } catch (error) {
             console.error('配额检查错误:', error.message);
-            // 出错时放行，避免影响正常使用
-            next();
+            // 出错时拒绝请求，防止绕过配额检查
+            return res.status(500).json({
+                error: '配额服务异常，请稍后再试',
+                code: 'QUOTA_SERVICE_ERROR'
+            });
         }
     };
 }

@@ -2,6 +2,33 @@
  * HOLD 社区门户 - Binance Web3 功能
  */
 
+// 导入 showQuotaExceededDialog from ai.js
+function showQuotaExceededDialogBinance() {
+    const modal = document.getElementById('toolModal');
+    const titleEl = document.getElementById('toolModalTitle');
+    const contentEl = document.getElementById('toolModalContent');
+
+    if (modal && titleEl && contentEl) {
+        titleEl.textContent = '配额已用完';
+        const isAnon = !window.Auth?.isAuthenticated();
+        contentEl.innerHTML = `
+            <div class="py-4 text-center">
+                <div class="text-4xl mb-3">🔋</div>
+                <p class="text-gray-600 mb-4">今日 API 调用次数已达上限</p>
+                ${isAnon ? `
+                    <p class="text-sm text-gray-500 mb-4">登录后可获得更多配额</p>
+                    <button onclick="closeBinanceSkillModal(); window.Auth?.openAuthModal();" class="btn-primary w-full py-2.5 rounded-xl text-sm">
+                        立即登录
+                    </button>
+                ` : `
+                    <p class="text-sm text-gray-500">配额将在每日 0:00 重置</p>
+                `}
+            </div>
+        `;
+        modal.classList.remove('hidden');
+    }
+}
+
 // ========== Binance Skills 模态框 ==========
 async function openBinanceSkill(skill) {
     const modal = document.getElementById('binanceSkillModal');
@@ -118,26 +145,39 @@ async function doBinanceSearch() {
 
     try {
         const data = await window.API.Binance.searchTokens(keyword, chainId);
+        const escape = window.UI?.escapeHtml || ((s) => String(s));
 
         if (data.success && data.data && data.data.length > 0) {
-            resultsContainer.innerHTML = data.data.map(token => `
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-yellow-50 transition" onclick="viewTokenDetail('${token.chainId}', '${token.address}')">
-                    <img src="${token.logo || ''}" class="w-8 h-8 rounded-full" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>'">
-                    <div class="flex-1">
-                        <div class="font-medium">${token.symbol || ''}</div>
-                        <div class="text-xs text-gray-500">${token.name || ''}</div>
+            resultsContainer.innerHTML = data.data.map(token => {
+                const escapedAddress = escape(String(token.address || ''));
+                const escapedSymbol = escape(String(token.symbol || ''));
+                const escapedName = escape(String(token.name || ''));
+                const escapedLogo = escape(String(token.logo || ''));
+                const escapedPrice = escape(String(token.price || '0'));
+                const escapedChange = escape(String(token.change || '+0'));
+                return `
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-yellow-50 transition" onclick="viewTokenDetail('${escape(String(token.chainId || ''))}', '${escapedAddress}')">
+                        <img src="${escapedLogo}" class="w-8 h-8 rounded-full" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>'">
+                        <div class="flex-1">
+                            <div class="font-medium">${escapedSymbol}</div>
+                            <div class="text-xs text-gray-500">${escapedName}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-medium">$${escapedPrice}</div>
+                            <div class="text-xs ${parseFloat(token.change || 0) >= 0 ? 'text-green-500' : 'text-red-500'}">${escapedChange}%</div>
+                        </div>
                     </div>
-                    <div class="text-right">
-                        <div class="text-sm font-medium">$${token.price || '0'}</div>
-                        <div class="text-xs ${parseFloat(token.change || 0) >= 0 ? 'text-green-500' : 'text-red-500'}">${token.change || '+0'}%</div>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } else {
             resultsContainer.innerHTML = '<div class="text-center text-gray-400 py-4">未找到结果</div>';
         }
     } catch (error) {
-        resultsContainer.innerHTML = '<div class="text-center text-red-400 py-4">搜索失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialogBinance();
+        } else {
+            resultsContainer.innerHTML = '<div class="text-center text-red-400 py-4">搜索失败</div>';
+        }
     }
 }
 
@@ -152,6 +192,7 @@ async function doBinanceAudit() {
 
     try {
         const data = await window.API.Binance.auditToken(chainId, address);
+        const escape = window.UI?.escapeHtml || ((s) => String(s));
 
         if (data.success && data.data) {
             const audit = data.data;
@@ -159,26 +200,30 @@ async function doBinanceAudit() {
                 <div class="space-y-3">
                     <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <span>安全评分</span>
-                        <span class="font-bold ${audit.score >= 80 ? 'text-green-500' : audit.score >= 50 ? 'text-yellow-500' : 'text-red-500'}">${audit.score || 0}/100</span>
+                        <span class="font-bold ${audit.score >= 80 ? 'text-green-500' : audit.score >= 50 ? 'text-yellow-500' : 'text-red-500'}">${escape(String(audit.score || 0))}/100</span>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div class="p-2 bg-gray-50 rounded text-center">
                             <div class="text-xs text-gray-500">流动性</div>
-                            <div class="font-medium">${audit.liquidity || 'N/A'}</div>
+                            <div class="font-medium">${escape(String(audit.liquidity || 'N/A'))}</div>
                         </div>
                         <div class="p-2 bg-gray-50 rounded text-center">
                             <div class="text-xs text-gray-500">持有人</div>
-                            <div class="font-medium">${audit.holders || 'N/A'}</div>
+                            <div class="font-medium">${escape(String(audit.holders || 'N/A'))}</div>
                         </div>
                     </div>
-                    <div class="text-xs text-gray-500">${audit.warning || '请自行研究后投资'}</div>
+                    <div class="text-xs text-gray-500">${escape(audit.warning || '请自行研究后投资')}</div>
                 </div>
             `;
         } else {
             resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
         }
     } catch (error) {
-        resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialogBinance();
+        } else {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
+        }
     }
 }
 
@@ -193,15 +238,16 @@ async function doBinanceWallet() {
 
     try {
         const data = await window.API.Binance.getWalletHoldings(address, chainId);
+        const escape = window.UI?.escapeHtml || ((s) => String(s));
 
         if (data.success && data.data && data.data.length > 0) {
             resultContainer.innerHTML = `
                 <div class="space-y-2 max-h-64 overflow-y-auto">
                     ${data.data.map(item => `
                         <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                            <span class="font-medium">${item.symbol || ''}</span>
-                            <span class="flex-1 text-right">${item.balance || '0'}</span>
-                            <span class="text-sm text-gray-500">$${item.value || '0'}</span>
+                            <span class="font-medium">${escape(String(item.symbol || ''))}</span>
+                            <span class="flex-1 text-right">${escape(String(item.balance || '0'))}</span>
+                            <span class="text-sm text-gray-500">$${escape(String(item.value || '0'))}</span>
                         </div>
                     `).join('')}
                 </div>
@@ -210,7 +256,11 @@ async function doBinanceWallet() {
             resultContainer.innerHTML = '<div class="text-center text-gray-400 py-4">无持仓数据</div>';
         }
     } catch (error) {
-        resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">查询失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialogBinance();
+        } else {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">查询失败</div>';
+        }
     }
 }
 
@@ -224,25 +274,36 @@ async function loadBinanceSignals() {
 
     try {
         const data = await window.API.Binance.getSmartMoneySignals(chainId);
+        const escape = window.UI?.escapeHtml || ((s) => String(s));
 
         if (data.success && data.data && data.data.length > 0) {
-            container.innerHTML = data.data.map((signal, i) => `
-                <div class="p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="font-medium">${signal.token || ''}</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full ${signal.action === 'buy' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">${signal.action === 'buy' ? '买入' : '卖出'}</span>
+            container.innerHTML = data.data.map((signal, i) => {
+                const token = escape(String(signal.token || ''));
+                const amount = escape(String(signal.amount || '0'));
+                const action = signal.action === 'buy' ? '买入' : '卖出';
+                const actionClass = signal.action === 'buy' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600';
+                return `
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium">${token}</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full ${actionClass}">${action}</span>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <span>金额: $${amount}</span>
+                            <span class="ml-2">${window.AppConfig?.timeAgo(signal.timestamp) || '刚刚'}</span>
+                        </div>
                     </div>
-                    <div class="text-xs text-gray-500">
-                        <span>金额: $${signal.amount || '0'}</span>
-                        <span class="ml-2">${window.AppConfig?.timeAgo(signal.timestamp) || '刚刚'}</span>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         } else {
             container.innerHTML = '<div class="text-center text-gray-400 py-4">暂无信号</div>';
         }
     } catch (error) {
-        container.innerHTML = '<div class="text-center text-gray-400 py-4">加载失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialogBinance();
+        } else {
+            container.innerHTML = '<div class="text-center text-gray-400 py-4">加载失败</div>';
+        }
     }
 }
 
@@ -256,21 +317,30 @@ async function loadBinanceRank() {
 
     try {
         const data = await window.API.Binance.getMarketRank(chainId);
+        const escape = window.UI?.escapeHtml || ((s) => String(s));
 
         if (data.success && data.data && data.data.length > 0) {
-            container.innerHTML = data.data.map((token, i) => `
-                <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                    <span class="w-6 h-6 flex items-center justify-center rounded-full ${i < 3 ? 'bg-[#F3BA2F] text-white' : 'bg-gray-200'} text-xs font-bold">${i + 1}</span>
-                    <span class="flex-1 font-medium">${token.symbol || ''}</span>
-                    <span class="text-sm">$${token.price || '0'}</span>
-                    <span class="text-xs ${parseFloat(token.change || 0) >= 0 ? 'text-green-500' : 'text-red-500'}">${token.change || '+0'}%</span>
-                </div>
-            `).join('');
+            container.innerHTML = data.data.map((token, i) => {
+                const rankClass = i < 3 ? 'bg-[#F3BA2F] text-white' : 'bg-gray-200';
+                const changeClass = parseFloat(token.change || 0) >= 0 ? 'text-green-500' : 'text-red-500';
+                return `
+                    <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                        <span class="w-6 h-6 flex items-center justify-center rounded-full ${rankClass} text-xs font-bold">${i + 1}</span>
+                        <span class="flex-1 font-medium">${escape(String(token.symbol || ''))}</span>
+                        <span class="text-sm">$${escape(String(token.price || '0'))}</span>
+                        <span class="text-xs ${changeClass}">${escape(String(token.change || '+0'))}%</span>
+                    </div>
+                `;
+            }).join('');
         } else {
             container.innerHTML = '<div class="text-center text-gray-400 py-4">暂无排行数据</div>';
         }
     } catch (error) {
-        container.innerHTML = '<div class="text-center text-gray-400 py-4">加载失败</div>';
+        if (error.code === 'RATE_LIMIT') {
+            showQuotaExceededDialogBinance();
+        } else {
+            container.innerHTML = '<div class="text-center text-gray-400 py-4">加载失败</div>';
+        }
     }
 }
 

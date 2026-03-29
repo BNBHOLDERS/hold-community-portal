@@ -206,12 +206,8 @@ class AuthService {
     // 立即保存
     saveUserData();
 
-    // 初始化用户配额
-    if (isAdmin) {
-      await userQuotaService.setAdmin(user.id, true);
-    } else {
-      await userQuotaService.setUserTier(user.id, 'authenticated');
-    }
+    // 初始化用户配额（根据邮箱判断是否为管理员）
+    await userQuotaService.initializeUserQuota(user.id, email);
 
     // 生成 Token
     const token = this.generateToken(user.id);

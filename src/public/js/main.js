@@ -468,7 +468,7 @@ async function likeContent(type, id, btn) {
             // 更新点赞数
             const countSpan = btn.querySelector('span');
             if (countSpan) {
-                const currentCount = parseInt(countSpan.textContent) || 0;
+                const currentCount = parseInt(countSpan.textContent, 10) || 0;
                 countSpan.textContent = currentCount + 1;
             }
             // 更新按钮状态
@@ -492,7 +492,7 @@ async function voteForFeature(id, btn) {
             const card = btn.closest('.glass-card');
             const voteCount = card?.querySelector('.font-bold.text-[#F3BA2F]');
             if (voteCount) {
-                const current = parseInt(voteCount.textContent) || 0;
+                const current = parseInt(voteCount.textContent, 10) || 0;
                 voteCount.textContent = window.AppConfig?.formatNumber(current + 1) || (current + 1);
             }
             btn.disabled = true;

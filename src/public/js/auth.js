@@ -88,11 +88,31 @@ async function logout() {
 }
 
 /**
+ * 获取用户配额信息
+ */
+async function getUserQuota() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+        const response = await fetch('/api/auth/quota', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        return data.success ? data.data : null;
+    } catch (error) {
+        console.error('获取配额失败:', error);
+        return null;
+    }
+}
+
+/**
  * 更新认证相关 UI
  */
-function updateAuthUI() {
+async function updateAuthUI() {
     const userAvatar = document.getElementById('userAvatar');
     const userName = document.getElementById('userName');
+    const userPoints = document.getElementById('userPoints');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const adminDocsLink = document.getElementById('adminDocsLink');
@@ -116,6 +136,19 @@ function updateAuthUI() {
         if (adminDocsLink && currentUser.isAdmin) {
             adminDocsLink.classList.remove('hidden');
         }
+
+        // 显示配额信息
+        if (userPoints) {
+            const quota = await getUserQuota();
+            if (quota) {
+                const remaining = quota.remaining?.ai_chat || 0;
+                const limit = quota.limits?.ai_chat || 50;
+                userPoints.textContent = `AI: ${remaining}/${limit}`;
+                userPoints.title = `今日已使用 ${limit - remaining}/${limit} 次 AI 聊天`;
+            } else {
+                userPoints.textContent = 'AI: --/--';
+            }
+        }
     } else {
         // 未登录
         if (userAvatar) {
@@ -129,6 +162,16 @@ function updateAuthUI() {
         }
         if (adminDocsLink) {
             adminDocsLink.classList.add('hidden');
+        }
+        if (userPoints) {
+            // 未登录用户也显示配额
+            const quota = await getUserQuota();
+            if (quota) {
+                const remaining = quota.remaining?.ai_chat || 0;
+                const limit = quota.limits?.ai_chat || 5;
+                userPoints.textContent = `AI: ${remaining}/${limit}`;
+                userPoints.title = '登录后可获得更多配额';
+            }
         }
     }
 }
