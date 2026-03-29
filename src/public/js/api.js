@@ -72,7 +72,7 @@ const ContentAPI = {
     getShares: () => apiRequest('/content/shares'),
 
     // 获取知识库
-    getDocs: (category) => apiRequest(`/content/docs?category=${category}`),
+    getDocs: (category) => apiRequest(`/docs?category=${category}`),
 
     // 点赞
     likeContent: (type, id) => apiRequest(`/content/${type}/${id}/like`, {
@@ -108,40 +108,16 @@ const AIAPI = {
         body: JSON.stringify({ message, history })
     }),
 
-    // 代币分析
-    analyzeToken: (data) => apiRequest('/ai/analyze-token', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }),
+    // 代币分析 - 使用 GET 请求
+    analyzeToken: (address) => apiRequest(`/ai/token-analyze?address=${address}&chain=bsc`),
 
-    // 钱包诊断
-    diagnoseWallet: (data) => apiRequest('/ai/diagnose-wallet', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }),
+    // 钱包诊断 - 使用 GET 请求
+    diagnoseWallet: (address) => apiRequest(`/ai/wallet-diagnose?address=${address}&chain=bsc`),
 
-    // RUG 检测
-    checkHoneypot: (data) => apiRequest('/ai/check-honeypot', {
+    // 通用分析
+    analyze: (content, type) => apiRequest('/ai/analyze', {
         method: 'POST',
-        body: JSON.stringify(data)
-    }),
-
-    // 持仓分析
-    analyzeHolders: (data) => apiRequest('/ai/analyze-holders', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }),
-
-    // 交易建议
-    tradingAdvice: (data) => apiRequest('/ai/trading-advice', {
-        method: 'POST',
-        body: JSON.stringify(data)
-    }),
-
-    // 安全评分
-    safetyScore: (data) => apiRequest('/ai/safety-score', {
-        method: 'POST',
-        body: JSON.stringify(data)
+        body: JSON.stringify({ content, type })
     })
 };
 
@@ -150,46 +126,28 @@ const AIAPI = {
  */
 const BinanceAPI = {
     // 搜索代币
-    searchTokens: (keyword, chainId) => apiRequest('/binance/search-tokens', {
-        method: 'POST',
-        body: JSON.stringify({ keyword, chainId })
-    }),
+    searchTokens: (keyword, chainId) => apiRequest(`/binance/token/search?keyword=${encodeURIComponent(keyword)}&chainId=${chainId}`),
 
     // 获取代币元数据
-    getTokenMetadata: (chainId, address) => apiRequest('/binance/token-metadata', {
-        method: 'POST',
-        body: JSON.stringify({ chainId, address })
-    }),
+    getTokenMetadata: (chainId, address) => apiRequest(`/binance/token/detail?chainId=${chainId}&address=${address}`),
 
     // 获取代币动态
-    getTokenDynamic: (chainId, address) => apiRequest('/binance/token-dynamic', {
-        method: 'POST',
-        body: JSON.stringify({ chainId, address })
-    }),
+    getTokenDynamic: (chainId, address) => apiRequest(`/binance/token/detail?chainId=${chainId}&address=${address}`),
 
     // 审计代币
-    auditToken: (chainId, address) => apiRequest('/binance/audit-token', {
-        method: 'POST',
-        body: JSON.stringify({ chainId, address })
-    }),
+    auditToken: (chainId, address) => apiRequest(`/binance/token/audit?chainId=${chainId}&address=${address}`),
 
     // 获取钱包持仓
-    getWalletHoldings: (address, chainId) => apiRequest('/binance/wallet-holdings', {
-        method: 'POST',
-        body: JSON.stringify({ address, chainId })
-    }),
+    getWalletHoldings: (address, chainId) => apiRequest(`/binance/wallet/tokens?address=${address}&chainId=${chainId}`),
 
     // 聪明钱信号
-    getSmartMoneySignals: (chainId) => apiRequest('/binance/smart-money-signals', {
-        method: 'POST',
-        body: JSON.stringify({ chainId })
-    }),
+    getSmartMoneySignals: (chainId) => apiRequest(`/binance/signals/smart-money?chainId=${chainId}`),
 
     // 市场排行
-    getMarketRank: (chainId) => apiRequest('/binance/market-rank', {
-        method: 'POST',
-        body: JSON.stringify({ chainId })
-    })
+    getMarketRank: (chainId) => apiRequest(`/binance/market/rank?chainId=${chainId}`),
+
+    // 技能概览
+    getSkillsOverview: () => apiRequest('/binance/skills')
 };
 
 /**
@@ -197,15 +155,15 @@ const BinanceAPI = {
  */
 const FeatureAPI = {
     // 获取建议列表
-    getFeatures: () => apiRequest('/features'),
+    getFeatures: () => apiRequest('/features/requests'),
 
     // 投票
-    vote: (id) => apiRequest(`/features/${id}/vote`, {
+    vote: (id) => apiRequest(`/features/requests/${id}/vote`, {
         method: 'POST'
     }),
 
     // 提交建议
-    submitFeature: (data) => apiRequest('/features', {
+    submitFeature: (data) => apiRequest('/features/requests', {
         method: 'POST',
         body: JSON.stringify(data)
     })

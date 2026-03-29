@@ -92,30 +92,30 @@
                 </button>
             </div>
         </div>
-
-        <!-- 移动端菜单 -->
-        <div id="mobileMenu" class="mobile-menu md:hidden fixed top-16 right-0 bottom-0 w-64 bg-white/98 backdrop-blur-lg shadow-xl p-6">
-            <a href="#home" class="block py-3 text-gray-700 border-b border-gray-100" data-page="home" onclick="navigateTo('home');toggleMobileMenu()">首页</a>
-            <a href="#discuss" class="block py-3 text-gray-700 border-b border-gray-100" data-page="discuss" onclick="navigateTo('discuss');toggleMobileMenu()">讨论</a>
-            <a href="#submit" class="block py-3 text-gray-700 border-b border-gray-100" data-page="submit" onclick="navigateTo('submit');toggleMobileMenu()">投稿</a>
-            <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
-            <a href="#trending" class="block py-3 text-gray-700 border-b border-gray-100" data-page="trending" onclick="navigateTo('trending');toggleMobileMenu()">
-                <i class="fa fa-fire text-[#F3BA2F] mr-1"></i>排行榜
-            </a>
-            <a href="#monitor" class="block py-3 text-gray-700 border-b border-gray-100" data-page="monitor" onclick="navigateTo('monitor');toggleMobileMenu()">
-                <i class="fa fa-eye text-[#F3BA2F] mr-1"></i>监控
-            </a>
-            <a href="#whale" class="block py-3 text-gray-700 border-b border-gray-100" data-page="whale" onclick="navigateTo('whale');toggleMobileMenu()">
-                <i class="fa fa-flag text-[#F3BA2F] mr-1"></i>巨鲸
-            </a>
-            <a href="#features" class="block py-3 text-gray-700 border-b border-gray-100" data-page="features" onclick="navigateTo('features');toggleMobileMenu()">建议</a>
-            <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
-            <a href="#binance" class="block py-3 text-[#F3BA2F] font-medium border-b border-gray-100" data-page="binance" onclick="navigateTo('binance');toggleMobileMenu()">
-                <i class="fa fa-bolt mr-1"></i>Binance
-            </a>
-            <a href="#docs" class="block py-3 text-gray-700" data-page="docs" onclick="navigateTo('docs');toggleMobileMenu()">文档</a>
-        </div>
     </nav>
+
+    <!-- 移动端菜单（移到nav外面） -->
+    <div id="mobileMenu" class="mobile-menu md:hidden fixed top-16 right-0 bottom-0 w-64 bg-white shadow-xl p-6">
+        <a href="#home" class="block py-3 text-gray-700 border-b border-gray-100" data-page="home" onclick="navigateTo('home');toggleMobileMenu()">首页</a>
+        <a href="#discuss" class="block py-3 text-gray-700 border-b border-gray-100" data-page="discuss" onclick="navigateTo('discuss');toggleMobileMenu()">讨论</a>
+        <a href="#submit" class="block py-3 text-gray-700 border-b border-gray-100" data-page="submit" onclick="navigateTo('submit');toggleMobileMenu()">投稿</a>
+        <a href="#share" class="block py-3 text-gray-700 border-b border-gray-100" data-page="share" onclick="navigateTo('share');toggleMobileMenu()">分享</a>
+        <a href="#trending" class="block py-3 text-gray-700 border-b border-gray-100" data-page="trending" onclick="navigateTo('trending');toggleMobileMenu()">
+            <i class="fa fa-fire text-[#F3BA2F] mr-1"></i>排行榜
+        </a>
+        <a href="#monitor" class="block py-3 text-gray-700 border-b border-gray-100" data-page="monitor" onclick="navigateTo('monitor');toggleMobileMenu()">
+            <i class="fa fa-eye text-[#F3BA2F] mr-1"></i>监控
+        </a>
+        <a href="#whale" class="block py-3 text-gray-700 border-b border-gray-100" data-page="whale" onclick="navigateTo('whale');toggleMobileMenu()">
+            <i class="fa fa-flag text-[#F3BA2F] mr-1"></i>巨鲸
+        </a>
+        <a href="#features" class="block py-3 text-gray-700 border-b border-gray-100" data-page="features" onclick="navigateTo('features');toggleMobileMenu()">建议</a>
+        <a href="#ai" class="block py-3 text-gray-700 border-b border-gray-100" data-page="ai" onclick="navigateTo('ai');toggleMobileMenu()">AI工具</a>
+        <a href="#binance" class="block py-3 text-[#F3BA2F] font-medium border-b border-gray-100" data-page="binance" onclick="navigateTo('binance');toggleMobileMenu()">
+            <i class="fa fa-bolt mr-1"></i>Binance
+        </a>
+        <a href="#docs" class="block py-3 text-gray-700" data-page="docs" onclick="navigateTo('docs');toggleMobileMenu()">文档</a>
+    </div>
 
     <!-- 实时价格跑马灯（移动端适配） -->
     <div id="priceTicker" class="bg-gray-900 text-white py-2 overflow-hidden border-b border-gray-800">
@@ -156,13 +156,13 @@
                             </div>
                             <p class="text-gray-600 mb-4">从零开始学习链上分析，识别风险，掌握工具。学会看数据，不再被割！</p>
                             <div class="flex flex-wrap gap-2">
-                                <a href="#" onclick="navigateTo('docs');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
+                                <a href="#" onclick="navigateToDocs('security');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
                                     📘 安全基础
                                 </a>
-                                <a href="#" onclick="navigateTo('docs');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
+                                <a href="#" onclick="navigateToDocs('analysis');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
                                     🔍 代币分析
                                 </a>
-                                <a href="#" onclick="navigateTo('docs');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
+                                <a href="#" onclick="navigateToDocs('tools');return false;" class="text-sm px-3 py-1.5 rounded-full bg-white border border-gray-200 hover:border-[#F3BA2F] hover:text-[#F3BA2F] transition">
                                     🛠️ 链上工具
                                 </a>
                                 <button onclick="navigateTo('docs')" class="text-sm px-4 py-1.5 rounded-full btn-primary text-white">
@@ -229,7 +229,7 @@
                         <h2 class="font-semibold text-lg">最新动态</h2>
                         <a href="#discuss" onclick="navigateTo('discuss')" class="text-sm hover:text-[#F3BA2F] transition">查看更多 →</a>
                     </div>
-                    <div id="home-latest" class="space-y-3">
+                    <div id="homeLatest" class="space-y-3">
                         <div class="skeleton h-12 w-full"></div>
                         <div class="skeleton h-12 w-full"></div>
                         <div class="skeleton h-12 w-full"></div>
@@ -245,7 +245,7 @@
                     <h1 class="text-2xl font-bold">
                         <i class="fa fa-comments text-[#F3BA2F] mr-2"></i>讨论区
                     </h1>
-                    <button onclick="openModal('discuss')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
+                    <button onclick="openPostModal('discuss')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
                         <i class="fa fa-plus mr-1"></i> 发帖
                     </button>
                 </div>
@@ -255,7 +255,7 @@
                     <button class="tag-filter tag-button bg-gray-100 text-gray-600" data-tag="trading">交易</button>
                     <button class="tag-filter tag-button bg-gray-100 text-gray-600" data-tag="analysis">分析</button>
                 </div>
-                <div id="discuss-list" class="space-y-4">
+                <div id="discussList" class="space-y-4">
                     <div class="skeleton h-32 w-full rounded-2xl"></div>
                     <div class="skeleton h-32 w-full rounded-2xl"></div>
                 </div>
@@ -269,11 +269,11 @@
                     <h1 class="text-2xl font-bold">
                         <i class="fa fa-pencil text-[#F3BA2F] mr-2"></i>投稿区
                     </h1>
-                    <button onclick="openModal('article')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
+                    <button onclick="openPostModal('article')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
                         <i class="fa fa-plus mr-1"></i> 写文章
                     </button>
                 </div>
-                <div id="article-list" class="grid md:grid-cols-2 gap-5">
+                <div id="articleList" class="grid md:grid-cols-2 gap-5">
                     <div class="skeleton h-48 w-full rounded-2xl"></div>
                     <div class="skeleton h-48 w-full rounded-2xl"></div>
                 </div>
@@ -326,7 +326,7 @@
                     <h1 class="text-2xl font-bold">
                         <i class="fa fa-share-alt text-[#F3BA2F] mr-2"></i>分享区
                     </h1>
-                    <button onclick="openModal('share')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
+                    <button onclick="openPostModal('share')" class="btn-primary px-5 py-2.5 rounded-full text-sm">
                         <i class="fa fa-plus mr-1"></i> 分享
                     </button>
                 </div>
@@ -348,7 +348,7 @@
                         <div class="text-sm font-medium">数据</div>
                     </div>
                 </div>
-                <div id="share-list" class="space-y-3">
+                <div id="shareList" class="space-y-3">
                     <div class="skeleton h-20 w-full rounded-xl"></div>
                     <div class="skeleton h-20 w-full rounded-xl"></div>
                 </div>
@@ -497,17 +497,17 @@
                             <i class="fa fa-book text-[#F3BA2F] mr-2"></i>目录
                         </h3>
                         <nav id="docs-nav" class="space-y-1 text-sm">
-                            <a href="#" class="block px-3 py-2 rounded-xl bg-yellow-50 text-[#F3BA2F] transition" data-slug="quickstart">快速开始</a>
-                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="security">安全基础</a>
-                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="analysis">代币分析</a>
-                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="tools">链上工具</a>
-                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="trading">交易技巧</a>
-                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="risk">风险管理</a>
-                            <a href="#" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="mindset">心态修炼</a>
+                            <a href="#" onclick="loadDocContent('quickstart');return false;" class="block px-3 py-2 rounded-xl bg-yellow-50 text-[#F3BA2F] transition" data-slug="quickstart">快速开始</a>
+                            <a href="#" onclick="loadDocContent('security');return false;" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="security">安全基础</a>
+                            <a href="#" onclick="loadDocContent('analysis');return false;" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="analysis">代币分析</a>
+                            <a href="#" onclick="loadDocContent('tools');return false;" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="tools">链上工具</a>
+                            <a href="#" onclick="loadDocContent('trading');return false;" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="trading">交易技巧</a>
+                            <a href="#" onclick="loadDocContent('risk');return false;" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="risk">风险管理</a>
+                            <a href="#" onclick="loadDocContent('mindset');return false;" class="block px-3 py-2 rounded-xl hover:bg-gray-50 text-gray-600 transition" data-slug="mindset">心态修炼</a>
                         </nav>
                     </div>
                     <div class="md:col-span-3 glass-card rounded-2xl p-8">
-                        <div id="doc-content">
+                        <div id="docsContent">
                             <div class="skeleton h-8 w-48 mb-4"></div>
                             <div class="skeleton h-4 w-full mb-2"></div>
                             <div class="skeleton h-4 w-3/4 mb-2"></div>
@@ -846,7 +846,7 @@
                 </div>
 
                 <!-- 建议列表 -->
-                <div id="features-list" class="space-y-4">
+                <div id="featuresList" class="space-y-4">
                     <!-- 骨架屏 -->
                     <div class="glass-card rounded-2xl p-6">
                         <div class="skeleton h-6 w-3/4 mb-3"></div>
@@ -1133,32 +1133,9 @@
     <script src="/js/utils.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/auth.js"></script>
-    <script src="/js/components.js"></script>
     <script src="/js/pages.js"></script>
     <script src="/js/binance.js"></script>
     <script src="/js/ai.js"></script>
     <script src="/js/main.js"></script>
-
-    <!-- 初始化脚本 -->
-    <script>
-        // 初始化路由
-        window.addEventListener("DOMContentLoaded", () => {
-            // 初始化认证
-            window.Auth?.init();
-
-            // 初始化路由
-            const hash = window.location.hash.slice(1) || "home";
-            window.navigateTo?.(hash);
-
-            // 启动实时价格
-            window.Utils?.initPriceTicker();
-
-            // 渲染首页内容
-            window.Pages?.renderHomeLatest();
-            window.Pages?.renderDiscussions();
-            window.Pages?.renderArticles();
-            window.Pages?.renderShares();
-        });
-    </script>
 </body>
 </html>

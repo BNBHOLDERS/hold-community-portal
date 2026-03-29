@@ -414,11 +414,33 @@ body {
 /* ========== 移动端菜单 ========== */
 .mobile-menu {
     transform: translateX(100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 50;
+    background: #ffffff;
 }
 
 .mobile-menu.open {
     transform: translateX(0);
+}
+
+/* 移动菜单链接项 */
+.mobile-menu a {
+    background: #ffffff;
+    transition: background 0.2s ease;
+}
+
+.mobile-menu a:hover {
+    background: #fafafa;
+}
+
+/* 移动菜单覆盖层 */
+#mobileMenuOverlay {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 /* ========== Logo ========== */

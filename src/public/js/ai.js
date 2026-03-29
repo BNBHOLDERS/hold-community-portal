@@ -2,6 +2,9 @@
  * HOLD 社区门户 - AI 工具功能
  */
 
+// 聊天历史记录
+let chatHistory = [];
+
 // ========== AI 工具模态框 ==========
 function showToolModal(title, content) {
     const modal = document.getElementById('toolModal');
@@ -88,27 +91,127 @@ function mindset() {
 
 // ========== AI API 调用 ==========
 
-// 钱包诊断
-async function diagnoseWallet(btn) {
+// 代币分析
+async function analyzeToken(btn) {
+    const input = document.getElementById('tokenAddress');
+    const resultContainer = document.getElementById('tokenResult');
+
+    const address = input?.value?.trim();
+    if (!address) {
+        window.UI?.showToast('请输入代币地址', 'warning');
+        return;
+    }
+
     const originalText = btn.textContent;
     btn.textContent = '分析中...';
     btn.disabled = true;
 
-    try {
-        const response = await fetch('/api/ai/diagnose-wallet', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address: '0x...' })
-        });
-        const data = await response.json();
+    if (resultContainer) {
+        resultContainer.classList.remove('hidden');
+        resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
+    }
 
+    try {
+        const data = await window.API.AI.analyzeToken(address);
+
+        if (resultContainer && data.success && data.data) {
+            resultContainer.innerHTML = formatTokenResult(data.data);
+        }
+        window.UI?.showToast('分析完成', 'success');
+    } catch (error) {
+        if (resultContainer) {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">分析失败</div>';
+        }
+        window.UI?.showToast('分析失败', 'error');
+    }
+
+    btn.textContent = originalText;
+    btn.disabled = false;
+}
+
+// 钱包诊断
+async function diagnoseWallet(btn) {
+    const input = document.getElementById('walletAddress');
+    const resultContainer = document.getElementById('walletResult');
+
+    const address = input?.value?.trim();
+    if (!address) {
+        window.UI?.showToast('请输入钱包地址', 'warning');
+        return;
+    }
+
+    const originalText = btn.textContent;
+    btn.textContent = '分析中...';
+    btn.disabled = true;
+
+    if (resultContainer) {
+        resultContainer.classList.remove('hidden');
+        resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
+    }
+
+    try {
+        const data = await window.API.AI.diagnoseWallet(address);
+
+        if (resultContainer && data.success && data.data) {
+            resultContainer.innerHTML = formatWalletResult(data.data);
+        }
         window.UI?.showToast('诊断完成', 'success');
     } catch (error) {
+        if (resultContainer) {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">诊断失败</div>';
+        }
         window.UI?.showToast('诊断失败', 'error');
     }
 
     btn.textContent = originalText;
     btn.disabled = false;
+}
+
+// 格式化钱包诊断结果
+function formatWalletResult(data) {
+    return `
+        <div class="space-y-3">
+            <div class="p-3 bg-gray-50 rounded-lg">
+                <div class="text-sm text-gray-500">钱包地址</div>
+                <div class="font-mono text-sm">${data.address || 'N/A'}</div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="p-2 bg-gray-50 rounded text-center">
+                    <div class="text-xs text-gray-500">交易次数</div>
+                    <div class="font-medium">${data.txCount || '0'}</div>
+                </div>
+                <div class="p-2 bg-gray-50 rounded text-center">
+                    <div class="text-xs text-gray-500">首次交易</div>
+                    <div class="font-medium">${data.firstTx || 'N/A'}</div>
+                </div>
+            </div>
+            <div class="text-sm text-gray-600">${data.summary || '暂无分析数据'}</div>
+        </div>
+    `;
+}
+
+// 格式化代币分析结果
+function formatTokenResult(data) {
+    const score = data.score || 0;
+    return `
+        <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <span class="font-medium">安全评分</span>
+                <span class="font-bold ${score >= 80 ? 'text-green-500' : score >= 50 ? 'text-yellow-500' : 'text-red-500'}">${score}/100</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div class="p-2 bg-gray-50 rounded text-center">
+                    <div class="text-xs text-gray-500">流动性</div>
+                    <div class="font-medium">$${data.liquidity || 'N/A'}</div>
+                </div>
+                <div class="p-2 bg-gray-50 rounded text-center">
+                    <div class="text-xs text-gray-500">持有人</div>
+                    <div class="font-medium">${data.holders || 'N/A'}</div>
+                </div>
+            </div>
+            <div class="text-sm text-gray-600">${data.warning || '请自行研究后投资'}</div>
+        </div>
+    `;
 }
 
 // RUG 检测
@@ -122,14 +225,8 @@ async function doRugCheck() {
     resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/ai/check-honeypot', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address })
-        });
-        const data = await response.json();
-
-        if (data.data) {
+        const data = await window.API.AI.analyzeToken(address);
+        if (data.success && data.data) {
             const result = data.data;
             resultContainer.innerHTML = `
                 <div class="space-y-3">
@@ -137,9 +234,11 @@ async function doRugCheck() {
                         <span class="font-medium">检测结果</span>
                         <span class="${result.isHoneypot ? 'text-red-500' : 'text-green-500'}">${result.isHoneypot ? '⚠️ 可能是蜜罐' : '✅ 看起来安全'}</span>
                     </div>
-                    <div class="text-sm text-gray-600">${result.reason || '请自行研究后投资'}</div>
+                    <div class="text-sm text-gray-600">${result.warning || result.reason || '请自行研究后投资'}</div>
                 </div>
             `;
+        } else {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">分析失败</div>';
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
@@ -157,27 +256,23 @@ async function doHolderAnalysis() {
     resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/ai/analyze-holders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tokenAddress: token })
-        });
-        const data = await response.json();
-
-        if (data.data) {
-            const holders = data.data.holders || [];
+        const data = await window.API.AI.analyzeToken(token);
+        if (data.success && data.data) {
+            const holders = data.data.topHolders || [];
             resultContainer.innerHTML = `
                 <div class="space-y-2">
                     <div class="text-sm font-medium mb-2">Top 10 持仓地址</div>
-                    ${holders.map((h, i) => `
+                    ${holders.length > 0 ? holders.map((h, i) => `
                         <div class="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
                             <span class="text-gray-500">#${i + 1}</span>
                             <span class="flex-1 truncate px-2">${h.address?.slice(0, 8)}...${h.address?.slice(-6)}</span>
-                            <span>${h.percentage || '0'}%</span>
+                            <span>${h.percentage || h.balance || '0'}%</span>
                         </div>
-                    `).join('')}
+                    `).join('') : '<div class="text-center text-gray-400 py-2">暂无持仓数据</div>'}
                 </div>
             `;
+        } else {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">分析失败</div>';
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">分析失败</div>';
@@ -195,15 +290,9 @@ async function doSafetyCheck() {
     resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/ai/safety-score', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tokenAddress: token })
-        });
-        const data = await response.json();
-
-        if (data.data) {
-            const score = data.data.score || 0;
+        const data = await window.API.AI.analyzeToken(token);
+        if (data.success && data.data) {
+            const score = data.data.safetyScore || calculateSafetyScore(data.data);
             resultContainer.innerHTML = `
                 <div class="space-y-3">
                     <div class="text-center">
@@ -216,16 +305,44 @@ async function doSafetyCheck() {
                             <div class="font-medium">${data.data.liquidity || 'N/A'}</div>
                         </div>
                         <div class="p-2 bg-gray-50 rounded text-center">
-                            <div class="text-gray-500">合约</div>
-                            <div class="font-medium">${data.data.contract || 'N/A'}</div>
+                            <div class="text-gray-500">持有人</div>
+                            <div class="font-medium">${data.data.holderCount || data.data.holders || 'N/A'}</div>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded text-center">
+                            <div class="text-gray-500">交易税</div>
+                            <div class="font-medium">${data.data.buyTax || data.data.sellTax || 'N/A'}</div>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded text-center">
+                            <div class="text-gray-500">合约验证</div>
+                            <div class="font-medium ${data.data.verified ? 'text-green-500' : 'text-red-500'}">${data.data.verified ? '✅ 已验证' : '⚠️ 未验证'}</div>
                         </div>
                     </div>
+                    <div class="text-xs text-gray-500">${data.data.warning || '请自行研究后投资'}</div>
                 </div>
             `;
+        } else {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检查失败</div>';
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检查失败</div>';
     }
+}
+
+// 计算安全评分
+function calculateSafetyScore(data) {
+    let score = 50;
+    if (!data.isHoneypot) score += 20;
+    if (data.verified) score += 15;
+    if (data.liquidity && parseFloat(data.liquidity) > 10000) score += 10;
+    if (data.holderCount && data.holderCount > 100) score += 5;
+    const tax = Math.max(
+        parseFloat(data.buyTax) || 0,
+        parseFloat(data.sellTax) || 0
+    );
+    if (tax <= 5) score += 10;
+    else if (tax <= 10) score += 5;
+    else if (tax > 15) score -= 10;
+    return Math.min(100, Math.max(0, score));
 }
 
 // 交易建议
@@ -492,6 +609,7 @@ window.AI = {
     mindset,
     showToolModal,
     closeToolModal,
+    analyzeToken,
     diagnoseWallet,
     doRugCheck,
     doHolderAnalysis,
@@ -502,3 +620,22 @@ window.AI = {
     toggleAIChat,
     sendAIMessage
 };
+
+// 导出函数到 window（供 HTML 调用）
+window.rugCheck = rugCheck;
+window.holderAnalysis = holderAnalysis;
+window.tradeAssistant = tradeAssistant;
+window.safetyScore = safetyScore;
+window.newbieGuide = newbieGuide;
+window.mindset = mindset;
+window.analyzeToken = analyzeToken;
+window.diagnoseWallet = diagnoseWallet;
+window.closeToolModal = closeToolModal;
+window.toggleAIChat = toggleAIChat;
+window.sendAIMessage = sendAIMessage;
+window.doRugCheck = doRugCheck;
+window.doHolderAnalysis = doHolderAnalysis;
+window.doSafetyCheck = doSafetyCheck;
+window.getTradeAdvice = getTradeAdvice;
+window.showGuide = showGuide;
+window.showMindset = showMindset;

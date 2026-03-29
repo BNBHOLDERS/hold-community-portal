@@ -4,7 +4,6 @@
  */
 
 // ========== API 配置 ==========
-const API_BASE = '/api';
 const WS_URL = `ws://${window.location.host}`;
 
 // ========== 分类配置 ==========
@@ -90,7 +89,6 @@ function formatNumber(num) {
 
 // ========== 导出配置 ==========
 window.AppConfig = {
-    API_BASE,
     WS_URL,
     CATEGORIES,
     AI_TOOLS,

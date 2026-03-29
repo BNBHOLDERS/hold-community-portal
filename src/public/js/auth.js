@@ -36,17 +36,14 @@ async function sendVerificationCode(email) {
     try {
         const result = await window.API.Auth.sendCode(email);
         if (result.success) {
-            showToast(result.message || '验证码已发送', 'success');
-            // 开发模式：如果有 devCode，显示给用户
-            if (result.devCode) {
-                console.log('[开发模式] 验证码:', result.devCode);
-            }
-            return true;
+            window.UI.showToast(result.message || '验证码已发送', 'success');
+            // 返回完整结果，包含 devCode
+            return result;
         }
-        return false;
+        return result;
     } catch (error) {
-        showToast(error.message || '发送失败', 'error');
-        return false;
+        window.UI.showToast(error.message || '发送失败', 'error');
+        return { success: false };
     }
 }
 
@@ -61,13 +58,13 @@ async function verifyAndLogin(email, code, nickname) {
             isAuthenticated = true;
             localStorage.setItem('token', result.data.token);
             updateAuthUI();
-            closeModal('loginModal');
-            showToast(`欢迎回来，${currentUser.nickname}！`, 'success');
+            window.UI.closeModal('authModal');
+            window.UI.showToast(`欢迎回来，${currentUser.nickname}！`, 'success');
             return true;
         }
         return false;
     } catch (error) {
-        showToast(error.message || '登录失败', 'error');
+        window.UI.showToast(error.message || '登录失败', 'error');
         return false;
     }
 }
@@ -86,7 +83,7 @@ async function logout() {
     isAuthenticated = false;
     localStorage.removeItem('token');
     updateAuthUI();
-    showToast('已登出', 'success');
+    window.UI.showToast('已登出', 'success');
     navigateTo('home');
 }
 
@@ -153,7 +150,7 @@ function openLoginModal() {
     if (isAuthenticated) {
         toggleUserMenu();
     } else {
-        openModal('loginModal');
+        window.UI.openModal('authModal');
     }
 }
 
@@ -164,5 +161,12 @@ window.Auth = {
     verifyAndLogin,
     logout,
     getCurrentUser: () => currentUser,
-    isAuthenticated: () => isAuthenticated
+    isAuthenticated: () => isAuthenticated,
+    openLoginModal,
+    openAuthModal: openLoginModal
 };
+
+// 导出函数到 window（供 HTML 调用）
+window.logout = logout;
+window.toggleUserMenu = toggleUserMenu;
+window.openLoginModal = openLoginModal;

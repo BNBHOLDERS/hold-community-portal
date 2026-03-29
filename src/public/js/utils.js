@@ -161,12 +161,19 @@ function showSkeleton(container, count = 3) {
     container.innerHTML = skeletonHTML;
 }
 
-function showEmpty(container, message = '暂无数据', icon = 'fa-inbox') {
+function showEmpty(container, message = '暂无数据', icon = 'fa-inbox', action = null, actionText = '') {
     if (!container) return;
+    let actionHtml = '';
+    if (action && actionText) {
+        actionHtml = `<button onclick="${action}" class="mt-4 px-4 py-2 bg-[#F3BA2F] text-white rounded-lg text-sm hover:bg-[#FCD535] transition">${actionText}</button>`;
+    }
     container.innerHTML = `
-        <div class="text-center text-gray-400 py-12">
-            <i class="fa ${icon} text-4xl mb-3 opacity-50"></i>
-            <p>${message}</p>
+        <div class="text-center text-gray-400 py-16">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+                <i class="fa ${icon} text-3xl text-gray-300"></i>
+            </div>
+            <p class="text-gray-500">${message}</p>
+            ${actionHtml}
         </div>
     `;
 }

@@ -117,14 +117,9 @@ async function doBinanceSearch() {
     resultsContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/binance/search-tokens', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ keyword, chainId })
-        });
-        const data = await response.json();
+        const data = await window.API.Binance.searchTokens(keyword, chainId);
 
-        if (data.data && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
             resultsContainer.innerHTML = data.data.map(token => `
                 <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-yellow-50 transition" onclick="viewTokenDetail('${token.chainId}', '${token.address}')">
                     <img src="${token.logo || ''}" class="w-8 h-8 rounded-full" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪙</text></svg>'">
@@ -156,14 +151,9 @@ async function doBinanceAudit() {
     resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/binance/audit-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chainId, address })
-        });
-        const data = await response.json();
+        const data = await window.API.Binance.auditToken(chainId, address);
 
-        if (data.data) {
+        if (data.success && data.data) {
             const audit = data.data;
             resultContainer.innerHTML = `
                 <div class="space-y-3">
@@ -184,6 +174,8 @@ async function doBinanceAudit() {
                     <div class="text-xs text-gray-500">${audit.warning || '请自行研究后投资'}</div>
                 </div>
             `;
+        } else {
+            resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
         }
     } catch (error) {
         resultContainer.innerHTML = '<div class="text-center text-red-400 py-4">检测失败</div>';
@@ -200,14 +192,9 @@ async function doBinanceWallet() {
     resultContainer.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/binance/wallet-holdings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address, chainId })
-        });
-        const data = await response.json();
+        const data = await window.API.Binance.getWalletHoldings(address, chainId);
 
-        if (data.data && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
             resultContainer.innerHTML = `
                 <div class="space-y-2 max-h-64 overflow-y-auto">
                     ${data.data.map(item => `
@@ -236,14 +223,9 @@ async function loadBinanceSignals() {
     container.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/binance/smart-money-signals', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chainId })
-        });
-        const data = await response.json();
+        const data = await window.API.Binance.getSmartMoneySignals(chainId);
 
-        if (data.data && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
             container.innerHTML = data.data.map((signal, i) => `
                 <div class="p-3 bg-gray-50 rounded-lg">
                     <div class="flex items-center justify-between mb-2">
@@ -273,14 +255,9 @@ async function loadBinanceRank() {
     container.innerHTML = '<div class="text-center py-4"><div class="loading-dots"><span>●</span><span>●</span><span>●</span></div></div>';
 
     try {
-        const response = await fetch('/api/binance/market-rank', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chainId })
-        });
-        const data = await response.json();
+        const data = await window.API.Binance.getMarketRank(chainId);
 
-        if (data.data && data.data.length > 0) {
+        if (data.success && data.data && data.data.length > 0) {
             container.innerHTML = data.data.map((token, i) => `
                 <div class="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
                     <span class="w-6 h-6 flex items-center justify-center rounded-full ${i < 3 ? 'bg-[#F3BA2F] text-white' : 'bg-gray-200'} text-xs font-bold">${i + 1}</span>
@@ -399,3 +376,13 @@ window.Binance = {
     renderTokenChart,
     renderWalletChart
 };
+
+// 导出函数到 window（供 HTML 调用）
+window.openBinanceSkill = openBinanceSkill;
+window.closeBinanceSkillModal = closeBinanceSkillModal;
+window.doBinanceSearch = doBinanceSearch;
+window.doBinanceAudit = doBinanceAudit;
+window.doBinanceWallet = doBinanceWallet;
+window.loadBinanceSignals = loadBinanceSignals;
+window.loadBinanceRank = loadBinanceRank;
+window.viewTokenDetail = viewTokenDetail;

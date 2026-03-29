@@ -11,6 +11,7 @@ router.post('/auth/login', authController.login);
 router.post('/auth/logout', authController.logout);
 router.get('/auth/me', auth, authController.getMe);
 router.put('/auth/profile', auth, authController.updateProfile);
+router.patch('/auth/profile', auth, authController.updateProfile);
 router.get('/auth/stats', authController.getStats);
 
 // ========== AI 工具 ==========
@@ -156,5 +157,19 @@ router.get('/system/status', (req, res) => {
     }
   });
 });
+
+// ========== API 别名路由（兼容前端调用） ==========
+
+// 文档管理别名
+router.post('/admin/docs', auth, admin, docsController.createDoc);
+router.put('/admin/docs/:slug', auth, admin, docsController.updateDoc);
+router.delete('/admin/docs/:slug', auth, admin, docsController.deleteDoc);
+router.get('/admin/docs', auth, admin, docsController.getAdminDocs);
+
+// 功能建议别名
+router.post('/features', featureController.createRequest);
+
+// 用户资料更新支持 PATCH
+router.patch('/auth/profile', auth, authController.updateProfile);
 
 module.exports = router;
