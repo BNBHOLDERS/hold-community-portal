@@ -77,9 +77,16 @@ hold-community-portal/
 │           ├── aiService.js            # Claude AI
 │           ├── binanceWeb3Service.js   # Binance Web3 API
 │           ├── gmgnService.js          # GMGN API
+│           ├── userQuotaService.js     # 用户配额管理
 │           ├── questionAnalytics.js    # 问题分析
 │           ├── redisService.js         # Redis 缓存
+│           ├── dataPersistenceService.js # 数据持久化
+│           ├── authService.js          # 用户认证
 │           └── emailService.js         # 邮件服务
+│       └── middleware/         # 中间件
+│           ├── auth.js                 # 认证中间件
+│           ├── admin.js                # 管理员权限
+│           └── quota.js                # 配额检查
 ├── .env.example
 ├── package.json
 └── README.md
@@ -129,9 +136,10 @@ hold-community-portal/
 ### 👤 用户功能 | User Features
 | 功能 | 状态 | 描述 |
 |:---|:---:|:---|
-| 邮箱注册登录 | ✅ | 验证码登录，无密码 |
+| 邮箱注册��录 | ✅ | 验证码登录，无密码 |
 | 个人中心 | ✅ | 资料管理 |
 | 文档管理 | ✅ | 管理员编辑文档 |
+| API配额管理 | ✅ | 分级配额，注册用户双倍 |
 
 ### 📊 数据功能 | Data Features
 | 功能 | 状态 | 描述 |
@@ -139,6 +147,7 @@ hold-community-portal/
 | 实时价格跑马灯 | ✅ | WebSocket 实时更新 |
 | 价格提醒 | ✅ | Email/通知推送 |
 | AI 对话统计 | ✅ | 问题分类分析 |
+| 配额使用统计 | ✅ | API调用次数追踪 |
 
 ### 🚧 开发中 | Under Development
 | 功能 | 状态 |
@@ -157,6 +166,21 @@ hold-community-portal/
 ---
 
 ## 📝 更新日志 | Changelog
+
+### v1.5.0 (2026-03-29) - 配额系统版本
+**API配额管理**
+- 新增用户配额系统，区分匿名用户和注册用户
+- 匿名用户：AI对话50次/天，AI分析20次/天，Binance API 100次/天
+- 注册用户：AI对话100次/天，AI分析50次/天，Binance API 200次/天
+- 管理员：AI对话1000次/天，AI分析500次/天，Binance API 1000次/天
+- 新增 GET /api/auth/quota 接口查询配额使用情况
+- 配额每日自动重置，使用情况持久化存储
+
+**代码质量改进**
+- 修复 emailService parseInt 类型错误
+- 修复 authService 异步加载问题
+- 新增配额中间件，统一API调用限制
+- 优化匿名用户配额追踪逻辑
 
 ### v1.4.0 (2026-03-29) - 用户体验优化版本
 **用户体验改进**

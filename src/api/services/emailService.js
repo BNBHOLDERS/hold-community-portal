@@ -18,7 +18,7 @@ class EmailService {
     init() {
         const smtpConfig = {
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT, 10) || '587'),
+            port: parseInt(process.env.SMTP_PORT, 10) || 587,
             secure: false, // STARTTLS
             auth: {
                 user: process.env.SMTP_USER,

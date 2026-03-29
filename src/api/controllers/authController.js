@@ -5,6 +5,7 @@
 
 const authService = require('../services/authService');
 const { checkAdmin } = require('../middleware/admin');
+const userQuotaService = require('../services/userQuotaService');
 
 /**
  * 发送验证码
@@ -197,6 +198,38 @@ async function getStats(req, res) {
   }
 }
 
+/**
+ * 获取用户配额信息
+ */
+async function getUserQuota(req, res) {
+  try {
+    // 从可选认证中间件获取用户ID
+    const userId = req.user?.id;
+
+    // 获取配额信息（匿名用户也可以���用）
+    const quotaInfo = await userQuotaService.getUserQuota(userId);
+
+    // 添加剩余配额计算
+    const result = {
+      ...quotaInfo,
+      remaining: {
+        ai_chat: (quotaInfo.limits?.ai_chat || 0) - (quotaInfo.daily?.ai_chat || 0),
+        ai_analyze: (quotaInfo.limits?.ai_analyze || 0) - (quotaInfo.daily?.ai_analyze || 0),
+        binance: (quotaInfo.limits?.binance || 0) - (quotaInfo.daily?.binance || 0)
+      },
+      resetAt: new Date().setHours(24, 0, 0, 0)
+    };
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('Get User Quota Error:', error.message);
+    res.status(500).json({ error: '获取配额信息失败' });
+  }
+}
+
 module.exports = {
   sendCode,
   register,
@@ -204,5 +237,6 @@ module.exports = {
   logout,
   getMe,
   updateProfile,
-  getStats
+  getStats,
+  getUserQuota
 };

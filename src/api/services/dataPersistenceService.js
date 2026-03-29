@@ -372,6 +372,26 @@ class DataPersistenceService {
         }
         return results;
     }
+
+    /**
+     * 保存用户配额数据
+     */
+    async saveUserQuota(quotaData) {
+        const QUOTA_FILE = path.join(DATA_DIR, 'userQuota.json');
+        return writeJsonFile(QUOTA_FILE, {
+            quotas: quotaData,
+            savedAt: new Date().toISOString()
+        });
+    }
+
+    /**
+     * 加载用户配额数据
+     */
+    async loadUserQuota() {
+        const QUOTA_FILE = path.join(DATA_DIR, 'userQuota.json');
+        const data = await readJsonFile(QUOTA_FILE, { quotas: {} });
+        return data.quotas || {};
+    }
 }
 
 module.exports = new DataPersistenceService();

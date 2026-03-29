@@ -8,6 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const redis = require('./redisService');
 const emailService = require('./emailService');
 const dataPersistence = require('./dataPersistenceService');
+const userQuotaService = require('./userQuotaService');
 const { isAdminEmail } = require('../../config/envValidation');
 
 // JWT 密钥 - 由 server.js 启动时验证确保存在
@@ -25,11 +26,11 @@ const codeAttempts = new Map(); // email -> { count, resetAt } // 防暴力破�
 let saveTimer = null;
 const SAVE_INTERVAL = 60000; // 1分钟
 
-// 加载保存的用户数据
-function loadUserData() {
+// 加载保存的用户数据（使用 IIFE 异步加载）
+(async function loadUserData() {
   try {
-    const data = dataPersistence.loadUsers();
-    if (data.usersByEmail.size > 0) {
+    const data = await dataPersistence.loadUsers();
+    if (data && data.usersByEmail && data.usersByEmail.size > 0) {
       data.usersByEmail.forEach((value, key) => users.set(key, value));
       data.usersById.forEach((value, key) => usersById.set(key, value));
       console.log(`✅ 已加载 ${users.size} 个用户数据`);
@@ -37,10 +38,7 @@ function loadUserData() {
   } catch (error) {
     console.error('加载用户数据失败:', error.message);
   }
-}
-
-// 启动时加载数据
-loadUserData();
+})();
 
 // 保存用户数据
 function saveUserData() {
@@ -186,6 +184,9 @@ class AuthService {
       throw new Error('该邮箱已注册');
     }
 
+    // 检查是否为管理员邮箱
+    const isAdmin = isAdminEmail(email);
+
     // 创建用户
     const user = {
       id: uuidv4(),
@@ -204,6 +205,13 @@ class AuthService {
 
     // 立即保存
     saveUserData();
+
+    // 初始化用户配额
+    if (isAdmin) {
+      await userQuotaService.setAdmin(user.id, true);
+    } else {
+      await userQuotaService.setUserTier(user.id, 'authenticated');
+    }
 
     // 生成 Token
     const token = this.generateToken(user.id);

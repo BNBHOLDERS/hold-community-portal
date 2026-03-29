@@ -13,13 +13,17 @@ router.get('/auth/me', auth, authController.getMe);
 router.put('/auth/profile', auth, authController.updateProfile);
 router.patch('/auth/profile', auth, authController.updateProfile);
 router.get('/auth/stats', authController.getStats);
+router.get('/auth/quota', optionalAuth, authController.getUserQuota);
+
+// ========== 配额 ==========
+const { checkAiChatQuota, checkAiAnalyzeQuota, checkBinanceQuota, checkGmgnQuota } = require('./middleware/quota');
 
 // ========== AI 工具 ==========
 const aiController = require('./controllers/aiController');
-router.post('/ai/chat', aiController.chat);
-router.get('/ai/token-analyze', aiController.tokenAnalyze);
-router.get('/ai/wallet-diagnose', aiController.walletDiagnose);
-router.post('/ai/analyze', aiController.analyze);
+router.post('/ai/chat', optionalAuth, checkAiChatQuota(), aiController.chat);
+router.get('/ai/token-analyze', optionalAuth, checkAiAnalyzeQuota(), aiController.tokenAnalyze);
+router.get('/ai/wallet-diagnose', optionalAuth, checkAiAnalyzeQuota(), aiController.walletDiagnose);
+router.post('/ai/analyze', optionalAuth, checkAiAnalyzeQuota(), aiController.analyze);
 router.get('/ai/stats', aiController.getQuestionStats);
 router.get('/ai/popular', aiController.getPopularQueries);
 
@@ -64,34 +68,34 @@ router.get('/docs/admin/list', auth, admin, docsController.getAdminDocs);
 
 // ========== 代币 API（GMGN）==========
 const tokenController = require('./controllers/tokenController');
-router.get('/token/info', tokenController.getTokenInfo);
-router.get('/token/security', tokenController.getTokenSecurity);
-router.get('/token/holders', tokenController.getTokenHolders);
-router.get('/token/traders', tokenController.getTokenTraders);
+router.get('/token/info', optionalAuth, checkGmgnQuota(), tokenController.getTokenInfo);
+router.get('/token/security', optionalAuth, checkGmgnQuota(), tokenController.getTokenSecurity);
+router.get('/token/holders', optionalAuth, checkGmgnQuota(), tokenController.getTokenHolders);
+router.get('/token/traders', optionalAuth, checkGmgnQuota(), tokenController.getTokenTraders);
 
 // ========== 钱包 API（GMGN）==========
 const walletController = require('./controllers/walletController');
-router.get('/wallet/holdings', walletController.getWalletHoldings);
-router.get('/wallet/activity', walletController.getWalletActivity);
-router.get('/wallet/stats', walletController.getWalletStats);
+router.get('/wallet/holdings', optionalAuth, checkGmgnQuota(), walletController.getWalletHoldings);
+router.get('/wallet/activity', optionalAuth, checkGmgnQuota(), walletController.getWalletActivity);
+router.get('/wallet/stats', optionalAuth, checkGmgnQuota(), walletController.getWalletStats);
 
 // ========== Binance Web3 Skills（官方）==========
 const binanceWeb3Controller = require('./controllers/binanceWeb3Controller');
 
 // 技能概览
-router.get('/binance/skills', binanceWeb3Controller.getSkillsOverview);
+router.get('/binance/skills', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.getSkillsOverview);
 
 // 代币相关
-router.get('/binance/token/search', binanceWeb3Controller.searchToken);
-router.get('/binance/token/detail', binanceWeb3Controller.getTokenDetail);
-router.get('/binance/token/audit', binanceWeb3Controller.auditToken);
+router.get('/binance/token/search', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.searchToken);
+router.get('/binance/token/detail', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.getTokenDetail);
+router.get('/binance/token/audit', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.auditToken);
 
 // 钱包相关
-router.get('/binance/wallet/tokens', binanceWeb3Controller.getWalletTokens);
+router.get('/binance/wallet/tokens', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.getWalletTokens);
 
 // 市场相关
-router.get('/binance/signals/smart-money', binanceWeb3Controller.getSmartMoney);
-router.get('/binance/market/rank', binanceWeb3Controller.getMarketRank);
+router.get('/binance/signals/smart-money', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.getSmartMoney);
+router.get('/binance/market/rank', optionalAuth, checkBinanceQuota(), binanceWeb3Controller.getMarketRank);
 
 // ========== 价格提醒 ==========
 const alertsController = require('./controllers/alertsController');
@@ -116,25 +120,25 @@ router.get('/features/stats', featureController.getStats);
 // ========== 链上活动监控 ==========
 const activityMonitorController = require('./controllers/activityMonitorController');
 
-router.get('/monitor/monitors', activityMonitorController.getMonitors);
-router.post('/monitor/monitors', activityMonitorController.createMonitor);
-router.delete('/monitor/monitors/:id', activityMonitorController.deleteMonitor);
-router.get('/monitor/monitors/:id/activities', activityMonitorController.getMonitorActivities);
-router.post('/monitor/check', activityMonitorController.triggerCheck);
+router.get('/monitor/monitors', auth, activityMonitorController.getMonitors);
+router.post('/monitor/monitors', auth, activityMonitorController.createMonitor);
+router.delete('/monitor/monitors/:id', auth, activityMonitorController.deleteMonitor);
+router.get('/monitor/monitors/:id/activities', auth, activityMonitorController.getMonitorActivities);
+router.post('/monitor/check', optionalAuth, checkBinanceQuota(), activityMonitorController.triggerCheck);
 router.get('/monitor/stats', activityMonitorController.getStats);
 
 // ========== 巨鲸追踪 ==========
 const whaleTrackerController = require('./controllers/whaleTrackerController');
 
-router.get('/whale/whales', whaleTrackerController.getWhales);
-router.post('/whale/whales', whaleTrackerController.addWhale);
-router.delete('/whale/whales/:address', whaleTrackerController.removeWhale);
-router.get('/whale/whales/:address', whaleTrackerController.getWhale);
-router.get('/whale/transactions', whaleTrackerController.getTransactions);
-router.post('/whale/alerts', whaleTrackerController.createAlert);
-router.get('/whale/alerts', whaleTrackerController.getUserAlerts);
-router.delete('/whale/alerts/:id', whaleTrackerController.deleteAlert);
-router.post('/whale/simulate', whaleTrackerController.simulateTransaction);
+router.get('/whale/whales', optionalAuth, checkBinanceQuota(), whaleTrackerController.getWhales);
+router.post('/whale/whales', auth, whaleTrackerController.addWhale);
+router.delete('/whale/whales/:address', auth, whaleTrackerController.removeWhale);
+router.get('/whale/whales/:address', optionalAuth, checkBinanceQuota(), whaleTrackerController.getWhale);
+router.get('/whale/transactions', optionalAuth, checkBinanceQuota(), whaleTrackerController.getTransactions);
+router.post('/whale/alerts', auth, whaleTrackerController.createAlert);
+router.get('/whale/alerts', auth, whaleTrackerController.getUserAlerts);
+router.delete('/whale/alerts/:id', auth, whaleTrackerController.deleteAlert);
+router.post('/whale/simulate', optionalAuth, checkBinanceQuota(), whaleTrackerController.simulateTransaction);
 
 // ========== 系统状态 ==========
 router.get('/system/status', (req, res) => {
