@@ -6,9 +6,10 @@
 const dataPersistence = require('../services/dataPersistenceService');
 
 // 加载保存的数据
-function loadContentData() {
+async function loadContentData() {
     try {
-        return dataPersistence.loadContent();
+        const data = await dataPersistence.loadContent();
+        return data || { discussions: [], articles: [], shares: [] };
     } catch (error) {
         console.error('加载内容数据失败:', error.message);
         return { discussions: [], articles: [], shares: [] };
@@ -28,10 +29,12 @@ function saveContentData() {
     }
 }
 
-// 初始化数据
-const initialData = loadContentData();
+// 初始化数据（使用默认值，运行时从存储加载）
+let discussions = [];
+let articles = [];
+let shares = [];
 
-// 示例数据（如果没有保存的数据）
+// 示例数据（默认值）
 const defaultDiscussions = [
     {
         id: '1',
@@ -149,15 +152,38 @@ const defaultShares = [
     }
 ];
 
-// 使用加载的数据或默认数据
-const discussions = initialData.discussions.length > 0 ? initialData.discussions : defaultDiscussions;
-const articles = initialData.articles.length > 0 ? initialData.articles : defaultArticles;
-const shares = initialData.shares.length > 0 ? initialData.shares : defaultShares;
-
-// 如果是首次运行（使用默认数据），保存一次
-if (initialData.discussions.length === 0) {
-    saveContentData();
+// 加载保存的数据
+async function initializeContentData() {
+    try {
+        const data = await dataPersistence.loadContent();
+        if (data && data.discussions && data.discussions.length > 0) {
+            discussions = data.discussions;
+        } else {
+            discussions = defaultDiscussions;
+        }
+        if (data && data.articles && data.articles.length > 0) {
+            articles = data.articles;
+        } else {
+            articles = defaultArticles;
+        }
+        if (data && data.shares && data.shares.length > 0) {
+            shares = data.shares;
+        } else {
+            shares = defaultShares;
+        }
+        // 如果使用默认数据，保存一次
+        if (!data || data.discussions.length === 0) {
+            saveContentData();
+        }
+    } catch (error) {
+        discussions = defaultDiscussions;
+        articles = defaultArticles;
+        shares = defaultShares;
+    }
 }
+
+// 启动时初始化（不等待，让它在后台加载）
+initializeContentData();
 
 /**
  * 获取讨论列表

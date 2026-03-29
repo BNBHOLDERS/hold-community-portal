@@ -179,7 +179,7 @@ class DataPersistenceService {
      * 加载内容数据
      */
     async loadContent() {
-        return readJsonFile(CONTENT_FILE, { discussions: [], posts: [], resources: [] });
+        return readJsonFile(CONTENT_FILE, { discussions: [], articles: [], shares: [] });
     }
 
     /**

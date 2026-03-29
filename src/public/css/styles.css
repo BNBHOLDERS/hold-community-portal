@@ -1,0 +1,432 @@
+/**
+ * HOLD 社区门户 - 样式表
+ * Binance Yellow Theme + Glass Morphism UI
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* ========== Binance 黄色系 ========== */
+:root {
+    --bnb-yellow: #F3BA2F;
+    --bnb-yellow-light: #FCD535;
+    --bnb-orange: #E88B0A;
+}
+
+body {
+    background: #fafafa;
+    background-image:
+        radial-gradient(circle at 20% 50%, rgba(243, 186, 47, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(252, 213, 53, 0.06) 0%, transparent 50%);
+}
+
+/* ========== 毛玻璃卡片 ========== */
+.glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(243, 186, 47, 0.1);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 8px 30px rgba(243, 186, 47, 0.15);
+    transform: translateY(-3px);
+    border-color: rgba(243, 186, 47, 0.2);
+}
+
+/* ========== 按钮 ========== */
+.btn-primary {
+    background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+    color: #1a1a1a;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:active::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 8px 30px rgba(243, 186, 47, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-primary:active {
+    transform: scale(0.95);
+}
+
+.btn-loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid #1a1a1a;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== 输入框 ========== */
+.input-base {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.input-base:focus {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #F3BA2F;
+    box-shadow: 0 0 0 4px rgba(243, 186, 47, 0.1);
+    outline: none;
+}
+
+/* ========== 导航栏 ========== */
+.nav-glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(243, 186, 47, 0.1);
+}
+
+.nav-link {
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #F3BA2F;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 80%;
+}
+
+.nav-link.active {
+    color: #F3BA2F;
+}
+
+/* ========== 页面切换动画 ========== */
+.page {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.page.active {
+    display: block;
+    animation: pageEnter 0.5s ease forwards;
+}
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 骨架屏 ========== */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 0.5rem;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ========== 标签 ========== */
+.tag {
+    background: rgba(243, 186, 47, 0.15);
+    color: #F3BA2F;
+}
+
+.tag-button {
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.tag-button.active {
+    background: rgba(243, 186, 47, 0.2);
+    color: #F3BA2F;
+}
+
+.tag-button:not(.active):hover {
+    background: rgba(243, 186, 47, 0.1);
+}
+
+/* ========== 渐变文字 ========== */
+.gradient-text {
+    background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ========== 聊天气泡 ========== */
+.chat-bubble-user {
+    background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+    color: #1a1a1a;
+    animation: bubbleIn 0.3s ease;
+}
+
+.chat-bubble-ai {
+    background: rgba(243, 186, 47, 0.1);
+    color: #374151;
+    animation: bubbleIn 0.3s ease;
+}
+
+@keyframes bubbleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* ========== 点赞动画 ========== */
+.like-btn {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.like-btn:active {
+    transform: scale(1.3);
+}
+
+.like-btn.liked {
+    color: #F3BA2F;
+}
+
+.like-btn.liked i {
+    animation: heartBeat 0.6s ease;
+}
+
+@keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(0.9); }
+    75% { transform: scale(1.1); }
+}
+
+/* ========== AI 助手悬浮球 ========== */
+.ai-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+    box-shadow: 0 4px 20px rgba(243, 186, 47, 0.4);
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.ai-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 30px rgba(243, 186, 47, 0.5);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(243, 186, 47, 0.4);
+    }
+    50% {
+        box-shadow: 0 4px 30px rgba(243, 186, 47, 0.6);
+    }
+}
+
+/* ========== AI 聊天窗口 ========== */
+.ai-chat-window {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 48px);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    pointer-events: none;
+}
+
+.ai-chat-window.open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+}
+
+/* ========== Toast 通知 ========== */
+.toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: #1a1a1a;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.success { background: linear-gradient(135deg, #10b981, #059669); }
+.toast.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+/* ========== 卡片进入动画 ========== */
+.card-enter {
+    animation: cardEnter 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== 加载动画 ========== */
+.loading-dots span {
+    animation: loadingDots 1.4s infinite;
+    display: inline-block;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes loadingDots {
+    0%, 80%, 100% { opacity: 0; }
+    40% { opacity: 1; }
+}
+
+/* ========== 实时价格跑马灯 ========== */
+@keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.animate-ticker {
+    animation: ticker 30s linear infinite;
+}
+
+.animate-ticker:hover {
+    animation-play-state: paused;
+}
+
+.price-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.price-up { color: #00c853; }
+.price-down { color: #ff5252; }
+
+/* 移动端优化：跑马灯在手机上更紧凑 */
+@media (max-width: 768px) {
+    .price-item {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* ========== 移动端菜单 ========== */
+.mobile-menu {
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.mobile-menu.open {
+    transform: translateX(0);
+}
+
+/* ========== Logo ========== */
+.logo-box {
+    background: linear-gradient(135deg, #F3BA2F 0%, #FCD535 100%);
+}
+
+/* ========== 分类图标背景 ========== */
+.icon-indigo { background: linear-gradient(135deg, rgba(243, 186, 47, 0.15), rgba(252, 213, 53, 0.15)); }
+.icon-pink { background: linear-gradient(135deg, rgba(243, 186, 47, 0.15), rgba(252, 213, 53, 0.15)); }
+.icon-violet { background: linear-gradient(135deg, rgba(243, 186, 47, 0.15), rgba(252, 213, 53, 0.15)); }

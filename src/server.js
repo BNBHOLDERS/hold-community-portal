@@ -5,6 +5,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const compression = require('compression');
 const apiRoutes = require('./api/routes');
@@ -69,6 +70,11 @@ app.set('trust proxy', 1);
 app.use('/api', conditionalRateLimit);
 
 // ========== 路由 ==========
+// 根路径返回前端页面
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 // API 路由
 app.use('/api', apiRoutes);
 
