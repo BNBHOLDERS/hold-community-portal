@@ -106,7 +106,10 @@ class DocsService {
           let value = line.slice(colon + 1).trim();
           if (value === 'true') value = true;
           if (value === 'false') value = false;
-          if (!isNaN(value)) value = Number(value);
+          // 更准确的数字检查：必须是纯数字字符串
+          if (value && !isNaN(value) && !isNaN(parseFloat(value))) {
+            value = Number(value);
+          }
           frontmatter[key] = value;
         }
         i++;

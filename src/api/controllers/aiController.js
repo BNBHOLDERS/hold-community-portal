@@ -274,11 +274,11 @@ async function getPopularQueries(req, res) {
 
     let data;
     if (type === 'token') {
-      data = queryStats.getPopularTokens(parseInt(limit));
+      data = queryStats.getPopularTokens(parseInt(limit, 10));
     } else if (type === 'wallet') {
-      data = queryStats.getPopularWallets(parseInt(limit));
+      data = queryStats.getPopularWallets(parseInt(limit, 10));
     } else {
-      data = queryStats.getPopular(parseInt(limit));
+      data = queryStats.getPopular(parseInt(limit, 10));
     }
 
     res.json({

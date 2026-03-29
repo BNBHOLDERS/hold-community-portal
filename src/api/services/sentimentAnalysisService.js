@@ -142,7 +142,7 @@ class SentimentAnalysisService {
 
         stats.trend = Object.entries(hourly)
             .sort((a, b) => a[0] - b[0])
-            .map(([hour, data]) => ({ hour: parseInt(hour), ...data }));
+            .map(([hour, data]) => ({ hour: parseInt(hour, 10), ...data }));
 
         return stats;
     }

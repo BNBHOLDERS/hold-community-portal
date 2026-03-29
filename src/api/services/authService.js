@@ -94,6 +94,11 @@ class AuthService {
         throw new Error('验证码尝试次数过多，请稍后再试');
       }
     } else {
+      // 清理过期的记录
+      if (attempts && attempts.resetAt <= now) {
+        codeAttempts.delete(email);
+      }
+      // 创建新的尝试记录
       codeAttempts.set(email, { count: 0, resetAt: now + 3600000 }); // 1小时重置
     }
 

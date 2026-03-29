@@ -60,7 +60,13 @@ class RedisService {
         if (this.enabled && this.client) {
             try {
                 const value = await this.client.get(key);
-                return value ? JSON.parse(value) : null;
+                if (!value) return null;
+                try {
+                    return JSON.parse(value);
+                } catch {
+                    // JSON 解析失败，返回原始值
+                    return value;
+                }
             } catch {
                 return this.getMemory(key);
             }

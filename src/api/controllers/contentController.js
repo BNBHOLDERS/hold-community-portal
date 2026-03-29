@@ -199,7 +199,7 @@ async function getDiscussions(req, res) {
 
         const result = filtered
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+            .slice(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit));
 
         res.json({
             success: true,
@@ -250,7 +250,7 @@ async function getArticles(req, res) {
 
         const result = articles
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+            .slice(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit));
 
         res.json({
             success: true,
@@ -307,7 +307,7 @@ async function getShares(req, res) {
 
         const result = filtered
             .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-            .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+            .slice(parseInt(offset, 10), parseInt(offset, 10) + parseInt(limit));
 
         res.json({
             success: true,

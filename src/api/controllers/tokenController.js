@@ -52,7 +52,7 @@ async function getTokenHolders(req, res) {
       return res.status(400).json({ error: '地址参数必填' });
     }
 
-    const data = await gmgnService.getTokenHolders(address, chain, parseInt(limit));
+    const data = await gmgnService.getTokenHolders(address, chain, parseInt(limit, 10));
     res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -70,7 +70,7 @@ async function getTokenTraders(req, res) {
       return res.status(400).json({ error: '地址参数必填' });
     }
 
-    const data = await gmgnService.getTokenTraders(address, chain, parseInt(limit));
+    const data = await gmgnService.getTokenTraders(address, chain, parseInt(limit, 10));
     res.json({ success: true, data });
   } catch (error) {
     res.status(500).json({ error: error.message });

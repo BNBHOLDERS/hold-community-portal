@@ -224,7 +224,7 @@ const WhaleAPI = {
     }),
 
     // 获取巨鲸交易
-    getWhaleTransactions: (address) => apiRequest(`/whale/whales/${address}/transactions`)
+    getWhaleTransactions: (address, limit = 50) => apiRequest(`/whale/transactions?address=${address}&limit=${limit}`)
 };
 
 // 导出所有 API

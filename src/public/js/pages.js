@@ -432,6 +432,8 @@ async function submitWhale() {
 }
 
 // ========== 发帖模态框 ==========
+let currentPostType = 'discuss'; // 存储当前帖子类型
+
 function openPostModal(type) {
     const modal = document.getElementById('postModal');
     const title = document.getElementById('modalTitle');
@@ -439,16 +441,19 @@ function openPostModal(type) {
 
     if (!modal || !title) return;
 
+    // 保存当前帖子类型
+    currentPostType = type || 'discuss';
+
     const titles = {
         discuss: '发帖',
         article: '写文章',
         share: '分享资源'
     };
 
-    title.textContent = titles[type] || '发布';
+    title.textContent = titles[currentPostType] || '发布';
 
     // 分享类型显示 URL 输入框
-    if (type === 'share' && urlField) {
+    if (currentPostType === 'share' && urlField) {
         urlField.classList.remove('hidden');
     } else if (urlField) {
         urlField.classList.add('hidden');
@@ -467,25 +472,47 @@ async function submitPost(btn) {
         return;
     }
 
+    // 分享类型需要链接
+    if (currentPostType === 'share' && !url) {
+        window.UI?.showToast('请填写链接地址', 'warning');
+        return;
+    }
+
     // 禁用按钮
     const originalText = btn.textContent;
     btn.textContent = '发布中...';
     btn.disabled = true;
 
     try {
-        const response = await fetch('/api/content/posts', {
+        // 根据类型调用不同的API
+        const apiPaths = {
+            discuss: '/api/content/discussions',
+            article: '/api/content/articles',
+            share: '/api/content/shares'
+        };
+
+        const response = await fetch(apiPaths[currentPostType], {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ title, content, url })
+            body: JSON.stringify({ title, content, url, category: currentPostType })
         });
         const data = await response.json();
 
         if (data.success) {
             window.UI?.showToast('发布成功', 'success');
             window.UI?.closeModal('postModal');
+            // 刷新当前页面
+            const pageRenderers = {
+                discuss: () => renderDiscuss(),
+                article: () => renderSubmit(),
+                share: () => renderShare()
+            };
+            if (pageRenderers[currentPostType]) {
+                pageRenderers[currentPostType]();
+            }
         } else {
             window.UI?.showToast(data.message || '发布失败', 'error');
         }

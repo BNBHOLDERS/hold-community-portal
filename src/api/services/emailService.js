@@ -18,7 +18,7 @@ class EmailService {
     init() {
         const smtpConfig = {
             host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT || '587'),
+            port: parseInt(process.env.SMTP_PORT, 10) || '587'),
             secure: false, // STARTTLS
             auth: {
                 user: process.env.SMTP_USER,
@@ -27,7 +27,7 @@ class EmailService {
         };
 
         // 检查是否配置了 SMTP
-        if (smtpConfig.host && smtpConfig.host !== 'smtp.gmail.com' && smtpConfig.host !== process.env.SMTP_HOST) {
+        if (smtpConfig.host) {
             try {
                 this.transporter = nodemailer.createTransport(smtpConfig);
                 this.enabled = true;
@@ -36,7 +36,7 @@ class EmailService {
                 console.error('邮件服务初始化失败:', error.message);
             }
         } else {
-            console.log('邮件服务未配置（使用模拟模式）');
+            console.log('邮件服务未配置（使用模拟��式）');
         }
     }
 

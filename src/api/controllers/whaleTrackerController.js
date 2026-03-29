@@ -34,7 +34,7 @@ async function getWhale(req, res) {
 
         // 获取最近交易
         const { limit = 20 } = req.query;
-        const transactions = whaleTracker.getWhaleTransactions(address, parseInt(limit));
+        const transactions = whaleTracker.getWhaleTransactions(address, parseInt(limit, 10));
 
         res.json({
             success: true,
@@ -212,11 +212,11 @@ async function getTransactions(req, res) {
         const { address, limit = 50 } = req.query;
 
         if (address) {
-            const transactions = whaleTracker.getWhaleTransactions(address, parseInt(limit));
+            const transactions = whaleTracker.getWhaleTransactions(address, parseInt(limit, 10));
             res.json({ success: true, data: transactions });
         } else {
             // 返回所有最近交易
-            res.json({ success: true, data: whaleTracker.transactions.slice(-parseInt(limit)).reverse() });
+            res.json({ success: true, data: whaleTracker.transactions.slice(-parseInt(limit, 10)).reverse() });
         }
     } catch (error) {
         res.status(500).json({ error: error.message });
