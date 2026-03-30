@@ -46,12 +46,39 @@ async function chat(req, res) {
       return res.status(400).json({ error: '消息内容不能为空' });
     }
 
+    // 验证并清理聊天历史
+    let sanitizedHistory = [];
+    if (Array.isArray(history)) {
+      // 限制历史记录数量，防止滥用
+      const maxHistory = 20;
+      const limitedHistory = history.slice(-maxHistory);
+
+      sanitizedHistory = limitedHistory.filter(item => {
+        // 验证历史项结构
+        if (!item || typeof item !== 'object') return false;
+        if (!['user', 'assistant', 'system'].includes(item.role)) return false;
+        if (typeof item.content !== 'string') return false;
+        // 限制内容长度
+        if (item.content.length > 5000) return false;
+        return true;
+      }).map(item => ({
+        role: item.role,
+        content: item.content.trim().slice(0, 5000)
+      }));
+    }
+
+    // 限制当前消息长度
+    const trimmedMessage = message.trim().slice(0, 2000);
+    if (!trimmedMessage) {
+      return res.status(400).json({ error: '消息内容不能为空' });
+    }
+
     // 尝试调用真实 AI
     try {
-      const reply = await aiService.chat(message, history);
+      const reply = await aiService.chat(trimmedMessage, sanitizedHistory);
 
       // 记录问题用于分析（异步，不阻塞响应）
-      questionAnalytics.recordQuestion(message, reply).catch(err => {
+      questionAnalytics.recordQuestion(trimmedMessage, reply).catch(err => {
         console.error('Question analytics error:', err.message);
       });
 
@@ -61,7 +88,7 @@ async function chat(req, res) {
       const randomReply = sampleResponses.chat[Math.floor(Math.random() * sampleResponses.chat.length)];
 
       // 同样记录示例回复
-      questionAnalytics.recordQuestion(message, randomReply).catch(err => {
+      questionAnalytics.recordQuestion(trimmedMessage, randomReply).catch(err => {
         console.error('Question analytics error:', err.message);
       });
 

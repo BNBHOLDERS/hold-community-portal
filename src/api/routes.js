@@ -24,23 +24,23 @@ router.post('/ai/chat', optionalAuth, checkAiChatQuota(), aiController.chat);
 router.get('/ai/token-analyze', optionalAuth, checkAiAnalyzeQuota(), aiController.tokenAnalyze);
 router.get('/ai/wallet-diagnose', optionalAuth, checkAiAnalyzeQuota(), aiController.walletDiagnose);
 router.post('/ai/analyze', optionalAuth, checkAiAnalyzeQuota(), aiController.analyze);
-router.get('/ai/stats', aiController.getQuestionStats);
-router.get('/ai/popular', aiController.getPopularQueries);
+router.get('/ai/stats', optionalAuth, checkAiChatQuota(), aiController.getQuestionStats);
+router.get('/ai/popular', optionalAuth, checkAiChatQuota(), aiController.getPopularQueries);
 
 // ========== 内容管理 ==========
 const contentController = require('./controllers/contentController');
 
 // 讨论区
 router.get('/content/discussions', contentController.getDiscussions);
-router.post('/content/discussions', contentController.createDiscussion);
+router.post('/content/discussions', optionalAuth, checkAiChatQuota(), contentController.createDiscussion);
 
 // 投稿区
 router.get('/content/articles', contentController.getArticles);
-router.post('/content/articles', contentController.createArticle);
+router.post('/content/articles', optionalAuth, checkAiChatQuota(), contentController.createArticle);
 
 // 分享区
 router.get('/content/shares', contentController.getShares);
-router.post('/content/shares', contentController.createShare);
+router.post('/content/shares', optionalAuth, checkAiChatQuota(), contentController.createShare);
 
 // 最新动态（首页）
 router.get('/content/latest', contentController.getLatest);
@@ -110,22 +110,22 @@ router.get('/alerts/popular', alertsController.getPopularSymbols);
 const featureController = require('./controllers/featureController');
 
 router.get('/features/requests', featureController.getRequests);
-router.post('/features/requests', featureController.createRequest);
+router.post('/features/requests', optionalAuth, checkAiChatQuota(), featureController.createRequest);
 router.get('/features/requests/:id', featureController.getRequest);
-router.post('/features/requests/:id/vote', featureController.voteRequest);
-router.post('/features/requests/:id/status', featureController.updateStatus);
-router.post('/features/requests/:id/comment', featureController.addComment);
+router.post('/features/requests/:id/vote', optionalAuth, checkAiChatQuota(), featureController.voteRequest);
+router.post('/features/requests/:id/status', auth, admin, featureController.updateStatus);
+router.post('/features/requests/:id/comment', optionalAuth, checkAiChatQuota(), featureController.addComment);
 router.get('/features/stats', featureController.getStats);
 
 // ========== 链上活动监控 ==========
 const activityMonitorController = require('./controllers/activityMonitorController');
 
 router.get('/monitor/monitors', auth, activityMonitorController.getMonitors);
-router.post('/monitor/monitors', auth, activityMonitorController.createMonitor);
+router.post('/monitor/monitors', auth, checkAiChatQuota(), activityMonitorController.createMonitor);
 router.delete('/monitor/monitors/:id', auth, activityMonitorController.deleteMonitor);
 router.get('/monitor/monitors/:id/activities', auth, activityMonitorController.getMonitorActivities);
 router.post('/monitor/check', optionalAuth, checkBinanceQuota(), activityMonitorController.triggerCheck);
-router.get('/monitor/stats', activityMonitorController.getStats);
+router.get('/monitor/stats', optionalAuth, checkAiChatQuota(), activityMonitorController.getStats);
 
 // ========== 巨鲸追踪 ==========
 const whaleTrackerController = require('./controllers/whaleTrackerController');

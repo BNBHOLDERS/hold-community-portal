@@ -101,13 +101,13 @@ function showLoading(container, message = '加载中...') {
             <div class="loading-dots mb-2">
                 <span>●</span><span>●</span><span>●</span>
             </div>
-            <p class="text-sm text-gray-400">${message}</p>
+            <p class="text-sm text-gray-400">${escapeHtml(message)}</p>
         </div>
     `;
 }
 
 /**
- * 显示空状态
+ * 显示���状态
  */
 function showEmpty(container, message = '暂无数据', icon = 'fa-inbox', action = null, actionText = '') {
     container.innerHTML = `
@@ -115,10 +115,42 @@ function showEmpty(container, message = '暂无数据', icon = 'fa-inbox', actio
             <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
                 <i class="fa ${icon} text-3xl text-gray-300"></i>
             </div>
-            <p class="text-gray-500">${message}</p>
-            ${action ? `<button onclick="${action}" class="mt-4 px-4 py-2 bg-[#F3BA2F] text-white rounded-lg text-sm hover:bg-[#FCD535] transition">${actionText}</button>` : ''}
+            <p class="text-gray-500">${escapeHtml(message)}</p>
+            ${action ? `<button id="empty-action-btn" class="mt-4 px-4 py-2 bg-[#F3BA2F] text-white rounded-lg text-sm hover:bg-[#FCD535] transition">${escapeHtml(actionText)}</button>` : ''}
         </div>
     `;
+
+    // 使用事件监听器而非内联 onclick，防止 XSS
+    if (action) {
+        const btn = document.getElementById('empty-action-btn');
+        if (btn) {
+            // 只允许预定义的安全函数名
+            const safeActions = {
+                'window.Auth.openAuthModal': true,
+                'window.AI.rugCheck': true,
+                'window.AI.holderAnalysis': true,
+                'window.AI.tradeAssistant': true,
+                'window.AI.safetyScore': true,
+                'window.AI.newbieGuide': true,
+                'window.AI.mindset': true,
+                'window.openLoginModal': true
+            };
+
+            if (safeActions[action]) {
+                btn.addEventListener('click', () => {
+                    try {
+                        eval(action);
+                    } catch (e) {
+                        console.error('Action error:', e);
+                    }
+                });
+            } else {
+                // 不安全的函数名，移除按钮
+                btn.remove();
+                console.warn('Unsafe action blocked:', action);
+            }
+        }
+    }
 }
 
 /**
@@ -128,7 +160,7 @@ function showError(container, message = '加载失败') {
     container.innerHTML = `
         <div class="text-center text-red-400 py-12">
             <i class="fa fa-exclamation-circle text-4xl mb-3 opacity-50"></i>
-            <p>${message}</p>
+            <p>${escapeHtml(message)}</p>
         </div>
     `;
 }

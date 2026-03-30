@@ -42,7 +42,7 @@ app.use(cors({
     // 允许无 origin 的请求（服务器端、移动应用、Postman 等）
     if (!origin) return callback(null, true);
 
-    // 检查来源是否在白名单中
+    // 检���来源是否在白名单中
     if (corsOrigins.indexOf(origin) !== -1 || corsOrigins.includes('*')) {
       callback(null, true);
     } else {
@@ -64,6 +64,7 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 信任代理（用于正确获取 IP）
+// 只信任一级代理，防止 X-Forwarded-For 伪造
 app.set('trust proxy', 1);
 
 // API 速率限制
@@ -127,13 +128,93 @@ app.use((req, res) => {
   res.status(404).json({ error: '请求的资源不存在' });
 });
 
+// ========== 进程信号处理（优雅关闭） ==========
+const shutdownHandlers = [];
+
+function registerShutdownHandler(fn) {
+  shutdownHandlers.push(fn);
+}
+
+// 优雅关闭
+function gracefulShutdown(signal) {
+  console.log(`\n收到 ${signal} 信号，开始优雅关闭...`);
+
+  // 设置超时强制退出
+  const forceExitTimeout = setTimeout(() => {
+    console.error('⚠️  关闭超时，强制退出');
+    process.exit(1);
+  }, 10000); // 10秒后强制退出
+
+  // 执行所有清理函数
+  Promise.all(shutdownHandlers.map(fn => fn()))
+    .then(() => {
+      console.log('✅ 所有清理完成，正在关闭服务器');
+      clearTimeout(forceExitTimeout);
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error('❌ 清理过程中出错:', err);
+      clearTimeout(forceExitTimeout);
+      process.exit(1);
+    });
+}
+
+// 注册信号监听器
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// 未捕获异常处理
+process.on('uncaughtException', (err) => {
+  console.error('未捕获的异常:', err);
+  // 给日志时间写入
+  setTimeout(() => process.exit(1), 1000);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('未处理的 Promise 拒绝:', reason);
+  // 生产环境可能不退出
+  if (process.env.NODE_ENV === 'development') {
+    setTimeout(() => process.exit(1), 1000);
+  }
+});
+
 // ========== 启动服务器 ==========
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log('\n🚀 ========== HOLD 社区门户启动成功 ==========');
   console.log(`📍 服务地址: http://localhost:${PORT}`);
   console.log(`🌍 环境: ${process.env.NODE_ENV || 'development'}`);
   console.log(`👤 管理员: ${getAdminEmails().join(', ')}`);
   console.log('=============================================\n');
+});
+
+// 注册服务器关闭处理
+registerShutdownHandler(() => {
+  return new Promise((resolve) => {
+    server.close(() => {
+      console.log('✅ HTTP 服务器已关闭');
+      resolve();
+    });
+
+    // 如果连接没有活动，立即关闭
+    setTimeout(() => {
+      server.close(() => {
+        console.log('✅ HTTP 服务器已强制关闭');
+        resolve();
+      });
+    }, 5000);
+  });
+});
+
+// 注册配额服务关闭处理
+registerShutdownHandler(() => {
+  const userQuotaService = require('./api/services/userQuotaService');
+  return userQuotaService.shutdown();
+});
+
+// 注册认证服务关闭处理
+registerShutdownHandler(() => {
+  const authService = require('./api/services/authService');
+  return authService.shutdown();
 });
 
 module.exports = app;

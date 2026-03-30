@@ -3,13 +3,26 @@
  * 包含格式化工具、模态框管理等辅助功能
  */
 
+// HTML 转义函数
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 // ========== 全局变量 ==========
 let articlesData = [];
 
 // ========== 内容格式化工具 ==========
 function formatDocContent(content) {
+    // 先转义 HTML 特殊字符，再进行 Markdown 格式化
+    const escaped = escapeHtml(content);
     // 简单的 Markdown 格式化
-    return content
+    return escaped
         .replace(/^### (.*$)/gm, '<h3 class="text-lg font-bold mt-4 mb-2">$1</h3>')
         .replace(/^## (.*$)/gm, '<h2 class="text-xl font-bold mt-6 mb-3">$1</h2>')
         .replace(/^# (.*$)/gm, '<h1 class="text-2xl font-bold mt-8 mb-4">$1</h1>')

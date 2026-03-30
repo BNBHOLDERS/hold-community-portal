@@ -140,38 +140,56 @@ class AuthService {
   verifyCode(email, code) {
     const record = verificationCodes.get(email);
     const attempts = codeAttempts.get(email);
+    const now = Date.now();
 
     if (!record) {
       // 记录失败尝试
-      if (attempts) attempts.count++;
-      throw new Error('验证码不存在或已过期');
+      if (attempts) {
+        attempts.count++;
+      } else {
+        codeAttempts.set(email, { count: 1, resetAt: now + 3600000 });
+      }
+      throw new Error('验证码不存��或已过期');
     }
 
-    if (record.expiresAt < Date.now()) {
+    if (record.expiresAt < now) {
       // 验证码过期，删除记录
       verificationCodes.delete(email);
       throw new Error('验证码已过期');
     }
 
-    if (record.code !== code) {
-      // 验证码错误，立即删除验证码防止暴力破解
+    // 检查是否超过尝试次数
+    if (attempts && attempts.count >= 5) {
+      // 超过尝试次数，删除验证码强制重新获取
       verificationCodes.delete(email);
+      codeAttempts.delete(email);
+      throw new Error('验证码错误次数过多，请重新获取');
+    }
 
-      // 记录失败尝试
+    if (record.code !== code) {
+      // 验证码错误 - 不删除验证码，只增加尝试计数
       if (attempts) {
         attempts.count++;
-        // 如果超过尝试次数，删除记录重新计时
-        if (attempts.count >= 5) {
-          codeAttempts.delete(email);
-          throw new Error('验证码错误次数过多，请重新获取');
-        }
+      } else {
+        codeAttempts.set(email, { count: 1, resetAt: now + 3600000 });
       }
-      throw new Error('验证码错误');
+
+      const remaining = 5 - (attempts ? attempts.count : 1);
+      if (remaining > 0) {
+        throw new Error(`验证码错误，还可尝试 ${remaining} 次`);
+      } else {
+        // 最后一次尝试也失败，删除验证码
+        verificationCodes.delete(email);
+        codeAttempts.delete(email);
+        throw new Error('验证码错误次数过多，请重新获取');
+      }
     }
 
     // 验证成功，删除验证码和尝试记录
     verificationCodes.delete(email);
-    codeAttempts.delete(email);
+    if (attempts) {
+      codeAttempts.delete(email);
+    }
     return true;
   }
 

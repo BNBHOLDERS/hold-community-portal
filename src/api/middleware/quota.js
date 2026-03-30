@@ -1,9 +1,11 @@
 /**
  * 配额检查中间件
  * 区分注册用户和匿名用户的 API 调用配额
+ * 使用原子化���作防止竞态条件
  */
 
 const userQuotaService = require('../services/userQuotaService');
+const crypto = require('crypto');
 
 /**
  * 创建配额检查中间件
@@ -27,10 +29,13 @@ function checkQuota(apiType, requireAuth = false) {
             // 获取客户端IP用于匿名配额追踪
             const clientIp = req.ip || 'unknown';
 
-            // 检查配额
-            const hasQuota = await userQuotaService.checkQuota(userId, apiType, clientIp);
+            // 生成请求ID用于预留
+            const requestId = crypto.randomBytes(16).toString('hex');
 
-            if (!hasQuota) {
+            // 原子化消耗配额（检查并扣除）
+            const consumed = await userQuotaService.consumeQuota(userId, apiType, clientIp, requestId);
+
+            if (!consumed) {
                 // 获取当前配额信息用于返回
                 const quotaInfo = await userQuotaService.getUserQuota(userId, clientIp);
                 const limit = quotaInfo.limits?.[apiType] || 0;
@@ -51,20 +56,11 @@ function checkQuota(apiType, requireAuth = false) {
             req.quota = {
                 apiType,
                 userId,
-                tier: userId ? (await userQuotaService.getUserQuota(userId, clientIp)).tier : 'anonymous'
+                tier: userId ? (await userQuotaService.getUserQuota(userId, clientIp)).tier : 'anonymous',
+                consumed: true
             };
 
-            // 在继续之前设置响应监听器（必须在 next() 之前）
-            res.on('finish', async () => {
-                if (res.statusCode < 400) {
-                    try {
-                        await userQuotaService.recordUsage(userId, apiType, clientIp);
-                    } catch (err) {
-                        console.error('记录配额使用失败:', err.message);
-                    }
-                }
-            });
-
+            // 配额已消耗，直接继续（无需在 finish 时再记录）
             next();
         } catch (error) {
             console.error('配额检查错误:', error.message);

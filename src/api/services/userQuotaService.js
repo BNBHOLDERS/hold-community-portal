@@ -32,6 +32,8 @@ class UserQuotaService {
         this.userQuota = new Map(); // 内存缓存 { userId: { daily: { ai_chat: 0, ... }, used: {...} } }
         this.anonymousQuota = new Map(); // 匿名用户配额 { key: { count } }
         this.pendingWrites = false; // 待写入标志
+        // 配额预留锁（防止并发扣除问题）
+        this.reservations = new Map(); // { requestId: { userId, apiType, timestamp } }
         this.loadFromFile();
         this.startCleanupTimer();
     }
@@ -144,6 +146,76 @@ class UserQuotaService {
         }
 
         return daily[apiType] < limit;
+    }
+
+    /**
+     * 原子化消耗配额（检查并扣除，防止竞态条件）
+     * @param {string} userId - 用户ID（匿名用户为null）
+     * @param {string} apiType - API类型
+     * @param {string} ipAddress - IP地址（用于匿名用户区分）
+     * @param {string} reservationId - 预留ID（可选）
+     * @returns {boolean} 是否成功消耗配额
+     */
+    async consumeQuota(userId, apiType, ipAddress = 'unknown', reservationId = null) {
+        await this.resetIfNewDay(userId);
+
+        // 注册用户
+        if (userId) {
+            let userQuota = this.userQuota.get(userId);
+            if (!userQuota) {
+                userQuota = { tier: 'authenticated', daily: this.initDailyQuota(), total: {} };
+                this.userQuota.set(userId, userQuota);
+            }
+
+            if (!userQuota.daily) {
+                userQuota.daily = this.initDailyQuota();
+            }
+
+            const tier = this.getUserTier(userQuota);
+            const limit = QUOTA_CONFIG[tier]?.[apiType] || QUOTA_CONFIG.free[apiType];
+            const current = userQuota.daily[apiType] || 0;
+
+            // 原子检查并增加
+            if (current < limit) {
+                userQuota.daily[apiType] = current + 1;
+                userQuota.total[apiType] = (userQuota.total[apiType] || 0) + 1;
+
+                // 标记需要保存
+                this.pendingWrites = true;
+
+                // 首次使用立即保存
+                if (current === 0) {
+                    await this.saveToFile();
+                }
+
+                return true;
+            }
+            return false;
+        }
+
+        // 匿名用户 - 原子操作
+        const key = `anonymous:${ipAddress}:${apiType}`;
+        const today = new Date().toISOString().split('T')[0];
+        const fullKey = `${key}:${today}`;
+
+        if (!this.anonymousQuota) {
+            this.anonymousQuota = new Map();
+        }
+
+        let record = this.anonymousQuota.get(fullKey);
+        if (!record) {
+            record = { count: 0 };
+            this.anonymousQuota.set(fullKey, record);
+        }
+
+        const limit = QUOTA_CONFIG.free[apiType] || 10;
+        const current = record.count || 0;
+
+        if (current < limit) {
+            record.count = current + 1;
+            return true;
+        }
+        return false;
     }
 
     /**

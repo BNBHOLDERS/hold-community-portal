@@ -5,6 +5,32 @@
 // 聊天历史记录
 let chatHistory = [];
 
+// 本地 HTML 转义函数（不依赖外部模块）
+function localEscapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') return '';
+    return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// 安全的 escapeHtml 包装器
+function safeEscapeHtml(unsafe) {
+    // 优先使用全局 escapeHtml，否则使用本地函数
+    if (typeof window.UI?.escapeHtml === 'function') {
+        try {
+            const escaped = window.UI.escapeHtml(unsafe);
+            // 确保返回的是字符串
+            return typeof escaped === 'string' ? escaped : localEscapeHtml(unsafe);
+        } catch {
+            return localEscapeHtml(unsafe);
+        }
+    }
+    return localEscapeHtml(unsafe);
+}
+
 // ========== AI 工具模态框 ==========
 function showToolModal(title, content) {
     const modal = document.getElementById('toolModal');
@@ -598,7 +624,7 @@ async function sendAIMessage(btn) {
     messagesContainer.innerHTML += `
         <div class="chat-message flex justify-end mb-4">
             <div class="bg-[#F3BA2F] text-white px-4 py-2 rounded-2xl rounded-br-sm max-w-[80%]">
-                ${window.UI?.escapeHtml(message) || message}
+                ${safeEscapeHtml(message)}
             </div>
         </div>
     `;
@@ -632,7 +658,7 @@ async function sendAIMessage(btn) {
             messagesContainer.innerHTML += `
                 <div class="chat-message flex justify-start mb-4">
                     <div class="bg-gray-100 px-4 py-2 rounded-2xl rounded-bl-sm max-w-[80%]">
-                        ${window.UI?.escapeHtml(data.data.reply)}
+                        ${safeEscapeHtml(data.data.reply)}
                     </div>
                 </div>
             `;

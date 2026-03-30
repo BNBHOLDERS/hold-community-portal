@@ -1,6 +1,6 @@
 /**
  * 价格提醒控制器
- * 用户订阅价格提醒，触发时发送通知
+ * 用户订阅价格提醒，触���时发送通知
  */
 
 const emailService = require('../services/emailService');
@@ -81,14 +81,22 @@ async function getUserAlerts(req, res) {
 }
 
 /**
- * 删除提醒
+ * 删除提醒（需要所有权验证）
  */
 async function deleteAlert(req, res) {
   try {
     const { id } = req.params;
+    const { email } = req.query;
 
     if (!alerts.has(id)) {
       return res.status(404).json({ error: '提醒不存在' });
+    }
+
+    const alert = alerts.get(id);
+
+    // 验证所有权：必须提供邮箱且匹配
+    if (!email || alert.email !== email) {
+      return res.status(403).json({ error: '无权限删除此提醒' });
     }
 
     alerts.delete(id);

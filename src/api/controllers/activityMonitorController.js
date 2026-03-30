@@ -9,10 +9,17 @@ const activityMonitor = require('../services/activityMonitorService');
  */
 async function getMonitors(req, res) {
     try {
+        const userId = req.user?.id;
         const monitors = activityMonitor.getAllMonitors();
+
+        // 如果用户已登录，只返回属于该用户的监控
+        const filtered = userId
+            ? monitors.filter(m => m.userId === userId)
+            : monitors;
+
         res.json({
             success: true,
-            data: monitors,
+            data: filtered,
             stats: activityMonitor.getStats()
         });
     } catch (error) {
@@ -49,11 +56,23 @@ async function createMonitor(req, res) {
 }
 
 /**
- * 删除监控
+ * 删除监控（需要所有权验证）
  */
 async function deleteMonitor(req, res) {
     try {
         const { id } = req.params;
+        const userId = req.user?.id;
+
+        const monitor = activityMonitor.getMonitor(id);
+
+        if (!monitor) {
+            return res.status(404).json({ error: '监控不存在' });
+        }
+
+        // 验证所有权
+        if (monitor.userId !== userId) {
+            return res.status(403).json({ error: '无权限删除此监控' });
+        }
 
         const deleted = activityMonitor.deleteMonitor(id);
 

@@ -167,6 +167,29 @@ hold-community-portal/
 
 ## 📝 更新日志 | Changelog
 
+### v1.5.2 (2026-03-29) - 深度安全修复版本
+**Critical 安全修复**
+- 配额系统原子化操作，修复TOCTOU竞态条件漏洞
+- 验证码暴力破解防护：错误不删除验证码，5次失败强制重新获取
+- 数据持久化服务添加路径遍历攻击防护（validateKey白名单）
+- AI聊天历史注入防护：验证role、限制长度、过滤非法内容
+- 所有权验证：价格提醒、监控器、巨鲸提醒删除操作需验证所有者
+
+**XSS防护加强**
+- pages.js: formatDocContent先转义再处理markdown
+- ai.js: AI响应内容使用safeEscapeHtml处理
+- components.js: showEmpty使用白名单机制验证动态操作
+- main.js: URL安全验证（safeOpenUrl），回复内容转义
+- utils.js: 新增escapeHtml和sanitizeHtml工具函数
+
+**服务稳定性**
+- server.js: 添加优雅关闭机制（SIGTERM/SIGINT信号处理）
+- server.js: 未捕获异常和未处理Promise拒绝的日志记录
+- featureController.js: 投票功能支持userId（登录用户）
+- activityMonitorController.js: 添加所有权验证
+- whaleTrackerController.js: 添加所有权验证
+- routes.js: 补充配额中间件到未保护的路由
+
 ### v1.5.1 (2026-03-29) - 安全修复版本
 **Critical 安全修复**
 - 修复配额检查异常时放行漏洞，出错时拒绝请求

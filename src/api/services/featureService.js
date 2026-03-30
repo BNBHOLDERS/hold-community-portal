@@ -180,24 +180,34 @@ class FeatureService {
 
   /**
    * 投票
+   * @param {string} id - 建议ID
+   * @param {string} ipAddress - IP地址（��于匿名用户）
+   * @param {string} userId - 用户ID（用于登录用户）
    */
-  vote(id, ipAddress) {
+  vote(id, ipAddress = 'unknown', userId = null) {
     const request = this.getById(id);
     if (!request) {
       throw new Error('建议不存在');
     }
 
-    // 获取该建议的已投票IP集合
-    const ips = votedIPs.get(id) || new Set();
+    // 获取该建议的已投票记录
+    const votedRecords = votedIPs.get(id) || new Set();
+
+    // 确定投票标识符（登录用户用 userId，匿名用户用 IP）
+    const voterId = userId || ipAddress;
+    const voteType = userId ? 'user' : 'ip';
+
+    // 生成唯一的投票标识
+    const voteKey = `${voteType}:${voterId}`;
 
     // 检查是否已投票
-    if (ips.has(ipAddress)) {
-      return { success: false, message: '已经投过票了', votes: request.votes };
+    if (votedRecords.has(voteKey)) {
+      return { success: false, message: userId ? '你已经投过票了' : '已经投过票了', votes: request.votes };
     }
 
     // 记录投票
-    ips.add(ipAddress);
-    votedIPs.set(id, ips);
+    votedRecords.add(voteKey);
+    votedIPs.set(id, votedRecords);
 
     // 增加投票数
     request.votes++;

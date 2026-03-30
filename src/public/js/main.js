@@ -3,6 +3,37 @@
  * 路由、页面切换、初始化
  */
 
+// ========== 工具函数 ==========
+
+/**
+ * 验证URL是否安全
+ * @param {string} url - 要验证的URL
+ * @returns {boolean} 是否为安全的HTTP(S) URL
+ */
+function isValidUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+        const parsed = new URL(url);
+        // 只允许 http 和 https 协议
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * 安全地打开URL
+ * @param {string} url - 要打开的URL
+ */
+function safeOpenUrl(url) {
+    if (isValidUrl(url)) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+        console.warn('Blocked unsafe URL:', url);
+        window.UI?.showToast('不安全的链接', 'error');
+    }
+}
+
 // ========== 路由配置 ==========
 const routes = {
     'home': { render: renderHome },
@@ -223,8 +254,13 @@ async function renderShare() {
             return;
         }
 
-        container.innerHTML = list.map((item, i) => `
-            <div class="glass-card rounded-xl p-4 cursor-pointer card-enter" style="animation-delay: ${i * 0.05}s" onclick="window.open('${window.UI.escapeHtml(item.url).replace(/'/g, "\\'")}', '_blank')">
+        container.innerHTML = list.map((item, i) => {
+            // 验证URL安全性
+            const safeUrl = isValidUrl(item.url) ? item.url : '#';
+            const escapedUrl = window.UI?.escapeHtml ? window.UI.escapeHtml(safeUrl).replace(/'/g, "\\'") : safeUrl.replace(/'/g, "\\'");
+
+            return `
+            <div class="glass-card rounded-xl p-4 cursor-pointer card-enter" style="animation-delay: ${i * 0.05}s" onclick="safeOpenUrl('${escapedUrl}')">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">
                         ${window.UI.getCategoryIcon(item.category)}
@@ -239,7 +275,8 @@ async function renderShare() {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     } catch (error) {
         window.UI.showError(container);
     }
@@ -549,17 +586,25 @@ async function viewDiscussion(id) {
 
         // 加载回复
         if (repliesContainer && item.replies && item.replies.length > 0) {
+            const escape = (text) => {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
+            const escapeFirstChar = (text) => escape((text || '匿')[0]);
+
             repliesContainer.innerHTML = item.replies.map(reply => `
                 <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white text-xs flex-shrink-0">
-                        ${(reply.author || '匿')[0]}
+                        ${escapeFirstChar(reply.author)}
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="font-medium text-sm">${reply.author || '匿名'}</span>
+                            <span class="font-medium text-sm">${escape(reply.author || '匿名')}</span>
                             <span class="text-xs text-gray-400">${window.AppConfig?.timeAgo(reply.createdAt)}</span>
                         </div>
-                        <p class="text-sm text-gray-600">${reply.content || ''}</p>
+                        <p class="text-sm text-gray-600">${escape(reply.content || '')}</p>
                     </div>
                 </div>
             `).join('');

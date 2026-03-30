@@ -87,17 +87,32 @@ async function voteRequest(req, res) {
   try {
     const { id } = req.params;
 
-    // 获取客户端 IP
+    // 获取用户ID（如果已登录）和客户端IP
+    const userId = req.user?.id || null;
     const ipAddress = req.ip ||
       req.headers['x-forwarded-for']?.split(',')[0] ||
       req.connection.remoteAddress ||
       '127.0.0.1';
 
-    const result = featureService.vote(id, ipAddress);
+    const result = featureService.vote(id, ipAddress, userId);
 
     if (result.success) {
       res.json({
         success: true,
+        data: { votes: result.votes },
+        message: '投票成功'
+      });
+    } else {
+      res.json({
+        success: false,
+        message: result.message
+      });
+    }
+  } catch (error) {
+    console.error('Vote Error:', error.message);
+    res.status(500).json({ error: '投票失败' });
+  }
+}
         votes: result.votes,
         message: '投票成功'
       });

@@ -16,6 +16,27 @@ const ALERTS_FILE = path.join(DATA_DIR, 'alerts.json');
 const MONITORS_FILE = path.join(DATA_DIR, 'monitors.json');
 const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 
+// 允许的文件名白名单（防止路径遍历）
+const ALLOWED_KEYS = /^[a-zA-Z0-9_-]+$/;
+
+/**
+ * 验证文件名安全性
+ * @param {string} key - 文件名
+ * @throws {Error} 如果文件名不安全
+ */
+function validateKey(key) {
+    if (!key || typeof key !== 'string') {
+        throw new Error('Invalid key: must be a non-empty string');
+    }
+    if (!ALLOWED_KEYS.test(key)) {
+        throw new Error(`Invalid key format: ${key}`);
+    }
+    // 防止路径遍历
+    if (key.includes('..') || key.includes('/') || key.includes('\\')) {
+        throw new Error('Path traversal detected');
+    }
+}
+
 // 写入锁（防止并发写入冲突）
 const writeLocks = new Map();
 
@@ -52,15 +73,30 @@ async function ensureDataDir() {
 
 /**
  * 读取 JSON 文件（异步）
+ * 数据损坏时保留备份副本
  */
 async function readJsonFile(filePath, defaultValue = {}) {
     try {
         await ensureDataDir();
         const data = await fs.readFile(filePath, 'utf8');
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        return parsed;
     } catch (error) {
         if (error.code !== 'ENOENT') {
-            console.error(`读取文件失败 ${filePath}:`, error.message);
+            // JSON 解析错误或读取错误
+            if (error instanceof SyntaxError) {
+                // 数据损坏，保留备份
+                const backupPath = `${filePath}.corrupted.${Date.now()}`;
+                try {
+                    await fs.copyFile(filePath, backupPath);
+                    console.error(`数据文件损坏，已备份到: ${backupPath}`);
+                } catch {
+                    console.error(`无法备份损坏文件: ${filePath}`);
+                }
+                console.error(`JSON解析错误 ${filePath}:`, error.message);
+            } else {
+                console.error(`读取文件失败 ${filePath}:`, error.message);
+            }
         }
         return defaultValue;
     }
@@ -245,6 +281,7 @@ class DataPersistenceService {
      * 通用保存方法
      */
     async save(key, data) {
+        validateKey(key);
         const filePath = path.join(DATA_DIR, `${key}.json`);
         return writeJsonFile(filePath, {
             data,
@@ -256,6 +293,7 @@ class DataPersistenceService {
      * 通用加载方法
      */
     async load(key, defaultValue = null) {
+        validateKey(key);
         const filePath = path.join(DATA_DIR, `${key}.json`);
         const content = await readJsonFile(filePath, { data: defaultValue });
         return content.data;

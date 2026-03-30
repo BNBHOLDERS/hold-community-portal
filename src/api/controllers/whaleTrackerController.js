@@ -150,11 +150,23 @@ async function getUserAlerts(req, res) {
 }
 
 /**
- * 删除提醒
+ * 删除提醒（需要所有权验证）
  */
 async function deleteAlert(req, res) {
     try {
         const { id } = req.params;
+        const userId = req.user?.id;
+
+        const alert = whaleTracker.getAlert(id);
+
+        if (!alert) {
+            return res.status(404).json({ error: '提醒不存在' });
+        }
+
+        // 验证所有权
+        if (alert.userId !== userId) {
+            return res.status(403).json({ error: '无权限删除此提醒' });
+        }
 
         const deleted = whaleTracker.deleteAlert(id);
 

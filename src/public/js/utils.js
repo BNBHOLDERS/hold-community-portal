@@ -163,16 +163,57 @@ function showSkeleton(container, count = 3) {
 
 function showEmpty(container, message = '暂无数据', icon = 'fa-inbox', action = null, actionText = '') {
     if (!container) return;
+
+    const escape = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
     let actionHtml = '';
     if (action && actionText) {
-        actionHtml = `<button onclick="${action}" class="mt-4 px-4 py-2 bg-[#F3BA2F] text-white rounded-lg text-sm hover:bg-[#FCD535] transition">${actionText}</button>`;
+        // 创建按钮ID用于后续事件绑定
+        const btnId = `empty-action-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        actionHtml = `<button id="${btnId}" class="mt-4 px-4 py-2 bg-[#F3BA2F] text-white rounded-lg text-sm hover:bg-[#FCD535] transition">${escape(actionText)}</button>`;
+
+        // 延迟绑定事件（在元素插入DOM后）
+        setTimeout(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                // 只允许预定义的安全函数
+                const safeActions = {
+                    'window.Auth.openAuthModal': true,
+                    'window.AI.rugCheck': true,
+                    'window.AI.holderAnalysis': true,
+                    'window.AI.tradeAssistant': true,
+                    'window.AI.safetyScore': true,
+                    'window.AI.newbieGuide': true,
+                    'window.AI.mindset': true,
+                    'window.openLoginModal': true
+                };
+
+                if (safeActions[action]) {
+                    btn.addEventListener('click', () => {
+                        try {
+                            eval(action);
+                        } catch (e) {
+                            console.error('Action error:', e);
+                        }
+                    });
+                } else {
+                    btn.remove();
+                    console.warn('Unsafe action blocked:', action);
+                }
+            }
+        }, 0);
     }
+
     container.innerHTML = `
         <div class="text-center text-gray-400 py-16">
             <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
                 <i class="fa ${icon} text-3xl text-gray-300"></i>
             </div>
-            <p class="text-gray-500">${message}</p>
+            <p class="text-gray-500">${escape(message)}</p>
             ${actionHtml}
         </div>
     `;
@@ -180,10 +221,17 @@ function showEmpty(container, message = '暂无数据', icon = 'fa-inbox', actio
 
 function showError(container, message = '加载失败') {
     if (!container) return;
+
+    const escape = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    };
+
     container.innerHTML = `
         <div class="text-center text-red-400 py-12">
             <i class="fa fa-exclamation-circle text-4xl mb-3 opacity-50"></i>
-            <p>${message}</p>
+            <p>${escape(message)}</p>
         </div>
     `;
 }
