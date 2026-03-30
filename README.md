@@ -12,7 +12,7 @@ _让一个不懂的人，什么都懂_
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-brightgreen)](https://nodejs.org)
 [![Binance Web3](https://img.shields.io/badge/Binance-Web3%20API-F3BA2F)](https://www.binance.com/en/web3)
 
-[🌐 加入社区 | Join Community](https://x.com/i/communities/2037817811884454394)
+[🌐 门户网站 | Portal](https://holdchain.ai/) · [加入社区 | Join Community](https://x.com/i/communities/2037817811884454394)
 
 **BSC 社区知识学习平台 | BSC Community Knowledge Learning Platform**
 
